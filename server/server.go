@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -34,7 +35,7 @@ type Handler struct {
 
 func (api *Handler) getRestaurantList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	fmt.Printf("%s: got / request. \n",
+	fmt.Printf("%s: got /restaurants request. \n",
 		ctx.Value(keyServerAddr),
 	)
 
@@ -60,30 +61,77 @@ func (api *Handler) getRestaurantList(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (api *Handler) getUserList(w http.ResponseWriter, r *http.Request) {
+func (api *Handler) User(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	fmt.Printf("%s: got / request. \n",
+	fmt.Printf("%s: got /users request. \n",
 		ctx.Value(keyServerAddr),
 	)
 
-	users, err := api.userstore.GetUsers()
+	if r.Method == "GET" {
+		users, err := api.userstore.GetUsers()
 
-	if err != nil {
-		http.Error(w, `{"error":"db"}`, 500)
-		return
+		if err != nil {
+			http.Error(w, `{"error":"db"}`, 500)
+			return
+		}
+
+		body := map[string]interface{}{
+			"users": users,
+		}
+
+		encoder := json.NewEncoder(w)
+		err = encoder.Encode(&Result{Body: body})
+		if err != nil {
+			log.Printf("error while marshalling JSON: %s", err)
+			w.Write([]byte("{}"))
+			return
+		}
 	}
 
-	body := map[string]interface{}{
-		"users": users,
+	if r.Method == "POST" {
+		// username := r.FormValue("username")
+		// password := r.FormValue("password")
+		// birthday := r.FormValue("birthday")
+		// phoneNumber := r.FormValue("phone_number")
+		// email := r.FormValue("email")
+		// icon := r.FormValue("icon")
+
+		jsonbody, err := ioutil.ReadAll(r.Body) // check for errors
+
+		keyVal := make(map[string]string)
+		json.Unmarshal(jsonbody, &keyVal) // check for errors
+
+		username := keyVal["username"]
+		password := keyVal["password"]
+		birthday := keyVal["birthday"]
+		phoneNumber := keyVal["phone_number"]
+		email := keyVal["email"]
+		icon := keyVal["icon"]
+
+		in := &store.User{
+			Username:    username,
+			Password:    password,
+			Birthday:    birthday,
+			PhoneNumber: phoneNumber,
+			Email:       email,
+			Icon:        icon,
+		}
+		id, err := api.userstore.SignUpUser(in)
+		if err != nil {
+			http.Error(w, `{"error":"db"}`, 400)
+			return
+		}
+
+		body := map[string]interface{}{
+			"id": id,
+		}
+		json.NewEncoder(w).Encode(&Result{Body: body})
 	}
 
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(&Result{Body: body})
-	if err != nil {
-		log.Printf("error while marshalling JSON: %s", err)
-		w.Write([]byte("{}"))
-		return
-	}
+}
+
+func (api *Handler) Add(w http.ResponseWriter, r *http.Request) {
+
 }
 
 func getRestaurantById(w http.ResponseWriter, r *http.Request) {
@@ -119,7 +167,7 @@ func main() {
 		userstore:       store.NewUserStore(),
 	}
 	mux.HandleFunc("/restaurants", api.getRestaurantList)
-	mux.HandleFunc("/users", api.getUserList)
+	mux.HandleFunc("/users", api.User)
 	mux.HandleFunc("/hello", getHello)
 	ctx := context.Background()
 

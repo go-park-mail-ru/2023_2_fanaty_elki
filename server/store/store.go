@@ -1,11 +1,12 @@
 package store
 
 import (
+	"log"
 	"sync"
 )
 
 type Restaurant struct {
-	ID            int
+	ID            uint
 	Name          string
 	Rating        float32
 	CommentsCount int
@@ -16,7 +17,7 @@ type Restaurant struct {
 }
 
 type User struct {
-	ID          int
+	ID          uint
 	Username    string
 	Password    string
 	Birthday    string
@@ -31,15 +32,16 @@ type RestaurantStore struct {
 }
 
 type UserStore struct {
-	users []*User
-	mu    sync.RWMutex
+	users  []*User
+	mu     sync.RWMutex
+	nextID uint
 }
 
 var Restaurants = []*Restaurant{{ID: 1, Name: "Burger King", Rating: 3.7, CommentsCount: 60, Icon: "defpath", DeliveryTime: 35, DeliveryPrice: 600, Category: "Fastfood"},
 	{ID: 2, Name: "MacBurger", Rating: 3.8, CommentsCount: 69, Icon: "defpath", DeliveryTime: 35, DeliveryPrice: 600, Category: "Fastfood"},
 	{ID: 3, Name: "Vcusno i tochka", Rating: 0.0, CommentsCount: 90, Icon: "defpath", DeliveryTime: 35, DeliveryPrice: 600, Category: "Fastfood"}}
 
-var Users = []*User{{ID: 1, Username: "lilo", Password: "lolo1", Birthday: "21-04-2002", PhoneNumber: "89178885643", Email: "llo@mail.ru", Icon: "defpath"}}
+var Users = []*User{}
 
 func NewRestaurantStore() *RestaurantStore {
 	return &RestaurantStore{
@@ -69,4 +71,17 @@ func (us *UserStore) GetUsers() ([]*User, error) {
 	defer us.mu.RUnlock()
 
 	return us.users, nil
+}
+
+func (us *UserStore) SignUpUser(in *User) (uint, error) {
+	log.Println("Signup called")
+
+	us.mu.Lock()
+	us.nextID++
+	in.ID = us.nextID
+	log.Println("nextID", us.nextID)
+	us.users = append(us.users, in)
+	us.mu.Unlock()
+
+	return in.ID, nil
 }
