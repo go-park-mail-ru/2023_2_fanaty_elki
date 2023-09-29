@@ -13,7 +13,7 @@ import (
 	"net/http"
 	"time"
 
-	"./store"
+	"server/store"
 )
 
 const keyServerAddr = "serverAddr"
