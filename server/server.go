@@ -171,6 +171,25 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
+
+	session, err := r.Cookie("session_id")
+	if err == http.ErrNoCookie {
+		http.Error(w, `no sess`, 401)
+		return
+	}
+
+	if _, ok := api.sessions[session.Value]; !ok {
+		http.Error(w, `no sess`, 401)
+		return
+	}
+
+	delete(api.sessions, session.Value)
+
+	session.Expires = time.Now().AddDate(0, 0, -1)
+	http.SetCookie(w, session)
+}
+
 func getRestaurantById(w http.ResponseWriter, r *http.Request) {
 
 	hasid := r.URL.Query().Has("id")
@@ -207,6 +226,7 @@ func main() {
 	mux.HandleFunc("/restaurants", api.getRestaurantList)
 	mux.HandleFunc("/users", api.User)
 	mux.HandleFunc("/login", api.Login)
+	mux.HandleFunc("/logout", api.Logout)
 	mux.HandleFunc("/hello", getHello)
 	ctx := context.Background()
 
