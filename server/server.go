@@ -218,7 +218,10 @@ func main() {
 			return ctx
 		},
 	}
+
+	fmt.Println("Server start")
 	err := server.ListenAndServe()
+	
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
 	} else if err != nil {
