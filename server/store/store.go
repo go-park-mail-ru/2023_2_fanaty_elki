@@ -31,18 +31,27 @@ type RestaurantStore struct {
 }
 
 type UserStore struct {
-	user []*User
-	mu   sync.RWMutex
+	users []*User
+	mu    sync.RWMutex
 }
 
 var Restaurants = []*Restaurant{{ID: 1, Name: "Burger King", Rating: 3.7, CommentsCount: 60, Icon: "defpath", DeliveryTime: 35, DeliveryPrice: 600, Category: "Fastfood"},
 	{ID: 2, Name: "MacBurger", Rating: 3.8, CommentsCount: 69, Icon: "defpath", DeliveryTime: 35, DeliveryPrice: 600, Category: "Fastfood"},
 	{ID: 3, Name: "Vcusno i tochka", Rating: 0.0, CommentsCount: 90, Icon: "defpath", DeliveryTime: 35, DeliveryPrice: 600, Category: "Fastfood"}}
 
+var Users = []*User{{ID: 1, Username: "lilo", Password: "lolo1", Birthday: "21-04-2002", PhoneNumber: "89178885643", Email: "llo@mail.ru", Icon: "defpath"}}
+
 func NewRestaurantStore() *RestaurantStore {
 	return &RestaurantStore{
 		mu:          sync.RWMutex{},
 		restourants: Restaurants,
+	}
+}
+
+func NewUserStore() *UserStore {
+	return &UserStore{
+		mu:    sync.RWMutex{},
+		users: Users,
 	}
 }
 
@@ -53,4 +62,11 @@ func (rs *RestaurantStore) GetRestaurants() ([]*Restaurant, error) {
 	defer rs.mu.RUnlock()
 
 	return rs.restourants, nil
+}
+
+func (us *UserStore) GetUsers() ([]*User, error) {
+	us.mu.RLock()
+	defer us.mu.RUnlock()
+
+	return us.users, nil
 }

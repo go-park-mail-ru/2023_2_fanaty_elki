@@ -27,22 +27,58 @@ type Result struct {
 	Err  string
 }
 
-type RestaurantHandler struct {
-	store *store.RestaurantStore
+type Handler struct {
+	restaurantstore *store.RestaurantStore
+	userstore       *store.UserStore
 }
 
-func getRoot(w http.ResponseWriter, r *http.Request) {
+func (api *Handler) getRestaurantList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	fmt.Printf("%s: got / request. \n",
 		ctx.Value(keyServerAddr),
 	)
 
-	store := store.NewRestaurantStore()
+	//store := store.NewRestaurantStore()
 
-	rests, err := store.GetRestaurants()
+	rests, err := api.restaurantstore.GetRestaurants()
+
+	if err != nil {
+		http.Error(w, `{"error":"db"}`, 500)
+		return
+	}
+
+	body := map[string]interface{}{
+		"restaurants": rests,
+	}
 
 	encoder := json.NewEncoder(w)
-	err = encoder.Encode(rests)
+	err = encoder.Encode(&Result{Body: body})
+	if err != nil {
+		log.Printf("error while marshalling JSON: %s", err)
+		w.Write([]byte("{}"))
+		return
+	}
+}
+
+func (api *Handler) getUserList(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	fmt.Printf("%s: got / request. \n",
+		ctx.Value(keyServerAddr),
+	)
+
+	users, err := api.userstore.GetUsers()
+
+	if err != nil {
+		http.Error(w, `{"error":"db"}`, 500)
+		return
+	}
+
+	body := map[string]interface{}{
+		"users": users,
+	}
+
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(&Result{Body: body})
 	if err != nil {
 		log.Printf("error while marshalling JSON: %s", err)
 		w.Write([]byte("{}"))
@@ -78,7 +114,12 @@ func getHello(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/restaurants", getRoot)
+	api := &Handler{
+		restaurantstore: store.NewRestaurantStore(),
+		userstore:       store.NewUserStore(),
+	}
+	mux.HandleFunc("/restaurants", api.getRestaurantList)
+	mux.HandleFunc("/users", api.getUserList)
 	mux.HandleFunc("/hello", getHello)
 	ctx := context.Background()
 
