@@ -1,6 +1,7 @@
 package store
 
 import (
+	"errors"
 	"log"
 	"sync"
 )
@@ -71,6 +72,16 @@ func (us *UserStore) GetUsers() ([]*User, error) {
 	defer us.mu.RUnlock()
 
 	return us.users, nil
+}
+
+func (us *UserStore) FindUser(username string) (*User, error) {
+	for _, u := range us.users {
+		if u.Username == username {
+			return u, nil
+		}
+	}
+	return nil, errors.New("No such user")
+
 }
 
 func (us *UserStore) SignUpUser(in *User) (uint, error) {

@@ -8,8 +8,10 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net"
 	"net/http"
+	"time"
 
 	"./store"
 )
@@ -31,6 +33,19 @@ type Result struct {
 type Handler struct {
 	restaurantstore *store.RestaurantStore
 	userstore       *store.UserStore
+	sessions        map[string]uint
+}
+
+var (
+	letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+)
+
+func RandStringRunes(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
 }
 
 func (api *Handler) getRestaurantList(w http.ResponseWriter, r *http.Request) {
@@ -89,12 +104,6 @@ func (api *Handler) User(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "POST" {
-		// username := r.FormValue("username")
-		// password := r.FormValue("password")
-		// birthday := r.FormValue("birthday")
-		// phoneNumber := r.FormValue("phone_number")
-		// email := r.FormValue("email")
-		// icon := r.FormValue("icon")
 
 		jsonbody, err := ioutil.ReadAll(r.Body) // check for errors
 
@@ -130,7 +139,35 @@ func (api *Handler) User(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (api *Handler) Add(w http.ResponseWriter, r *http.Request) {
+func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
+
+	jsonbody, err := ioutil.ReadAll(r.Body) // check for errors
+
+	keyVal := make(map[string]string)
+	json.Unmarshal(jsonbody, &keyVal) // check for errors
+
+	user, err := api.userstore.FindUser(keyVal["username"])
+	if err != nil {
+		http.Error(w, `no user`, 404)
+		return
+	}
+
+	if user.Password != keyVal["password"] {
+		http.Error(w, `bad pass`, 400)
+		return
+	}
+
+	SID := RandStringRunes(32)
+
+	api.sessions[SID] = user.ID
+
+	cookie := &http.Cookie{
+		Name:    "session_id",
+		Value:   SID,
+		Expires: time.Now().Add(10 * time.Hour),
+	}
+	http.SetCookie(w, cookie)
+	w.Write([]byte(SID))
 
 }
 
@@ -165,9 +202,11 @@ func main() {
 	api := &Handler{
 		restaurantstore: store.NewRestaurantStore(),
 		userstore:       store.NewUserStore(),
+		sessions:        make(map[string]uint, 10),
 	}
 	mux.HandleFunc("/restaurants", api.getRestaurantList)
 	mux.HandleFunc("/users", api.User)
+	mux.HandleFunc("/login", api.Login)
 	mux.HandleFunc("/hello", getHello)
 	ctx := context.Background()
 
