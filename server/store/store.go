@@ -59,7 +59,6 @@ func NewUserStore() *UserStore {
 }
 
 func (rs *RestaurantStore) GetRestaurants() ([]*Restaurant, error) {
-	//log.Println("GetBooks called")
 
 	rs.mu.RLock()
 	defer rs.mu.RUnlock()

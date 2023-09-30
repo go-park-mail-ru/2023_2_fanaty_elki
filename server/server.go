@@ -13,17 +13,10 @@ import (
 	"net/http"
 	"time"
 
-	"./store"
+	"backend/server/store"
 )
 
 const keyServerAddr = "serverAddr"
-
-type Restaurant struct {
-	ID            int
-	Name          string
-	Rating        float32
-	CommentsCount int
-}
 
 type Result struct {
 	Body interface{}
@@ -53,8 +46,6 @@ func (api *Handler) getRestaurantList(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("%s: got /restaurants request. \n",
 		ctx.Value(keyServerAddr),
 	)
-
-	//store := store.NewRestaurantStore()
 
 	rests, err := api.restaurantstore.GetRestaurants()
 
