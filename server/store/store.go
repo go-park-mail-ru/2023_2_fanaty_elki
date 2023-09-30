@@ -80,6 +80,26 @@ func (us *UserStore) FindUser(username string) (*User, error) {
 		}
 	}
 	return nil, errors.New("No such user")
+}
+
+func (us *UserStore) FindUserBy(field string, value string) (*User, error) {
+	for _, u := range us.users {
+		switch field {
+		case "username":
+			if u.Username == value {
+				return u, nil
+			}
+		case "email":
+			if u.Email == value {
+				return u, nil
+			}
+		case "phone_number":
+			if u.PhoneNumber == value {
+				return u, nil
+			}
+		}
+	}
+	return nil, errors.New("No such user")
 
 }
 

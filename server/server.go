@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -62,7 +61,7 @@ func (api *Handler) getRestaurantList(w http.ResponseWriter, r *http.Request) {
 	err = encoder.Encode(&Result{Body: body})
 	if err != nil {
 		log.Printf("error while marshalling JSON: %s", err)
-		w.Write([]byte("{}"))
+		http.Error(w, `{"error":"error while marshalling JSON"}`, 500)
 		return
 	}
 }
@@ -96,10 +95,24 @@ func (api *Handler) User(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "POST" {
 
-		jsonbody, err := ioutil.ReadAll(r.Body) // check for errors
+		jsonbody, err := ioutil.ReadAll(r.Body)
+
+		if err != nil {
+			//http.Error(w, `{"error":"problems with reading data"}`, 500)
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(&Result{Err: "problems with reading data"})
+			return
+		}
 
 		keyVal := make(map[string]string)
-		json.Unmarshal(jsonbody, &keyVal) // check for errors
+		err = json.Unmarshal(jsonbody, &keyVal)
+
+		if err != nil {
+			//http.Error(w, `{"error":"problems with unmarshaling json"}`, 500)
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(&Result{Err: "problems with unmarshaling json"})
+			return
+		}
 
 		username := keyVal["username"]
 		password := keyVal["password"]
@@ -107,6 +120,27 @@ func (api *Handler) User(w http.ResponseWriter, r *http.Request) {
 		phoneNumber := keyVal["phone_number"]
 		email := keyVal["email"]
 		icon := keyVal["icon"]
+
+		user, err := api.userstore.FindUserBy("username", keyVal["username"])
+		if user != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(&Result{Err: "username already exists"})
+			return
+		}
+
+		user, err = api.userstore.FindUserBy("phone_number", keyVal["phone_number"])
+		if user != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(&Result{Err: "phone number already exists"})
+			return
+		}
+
+		user, err = api.userstore.FindUserBy("email", keyVal["email"])
+		if user != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(&Result{Err: "email already exists"})
+			return
+		}
 
 		in := &store.User{
 			Username:    username,
@@ -159,7 +193,6 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, cookie)
 	w.Write([]byte(SID))
-
 }
 
 func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
@@ -181,30 +214,25 @@ func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, session)
 }
 
-func getRestaurantById(w http.ResponseWriter, r *http.Request) {
+func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 
-	hasid := r.URL.Query().Has("id")
-	id := r.URL.Query().Get("id")
-	if hasid {
-		io.WriteString(w, "id = "+id)
-	} else {
-		io.WriteString(w, "no id")
-	}
-
-}
-
-func getHello(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	fmt.Printf("%s: got /hello request\n", ctx.Value(keyServerAddr))
-
-	myName := r.PostFormValue("myName")
-	if myName == "" {
-		w.Header().Set("x-missing-field", "myName")
-		w.WriteHeader(http.StatusBadRequest)
+	session, err := r.Cookie("session_id")
+	if err == http.ErrNoCookie {
+		http.Error(w, `no sess`, 401)
 		return
 	}
 
-	io.WriteString(w, fmt.Sprintf("Hello, %s!\n", myName))
+	id, ok := api.sessions[session.Value]
+	if !ok {
+		http.Error(w, `no sess`, 401)
+		return
+	}
+
+	http.SetCookie(w, session)
+	body := map[string]interface{}{
+		"id": id,
+	}
+	json.NewEncoder(w).Encode(&Result{Body: body})
 }
 
 func main() {
@@ -218,7 +246,7 @@ func main() {
 	mux.HandleFunc("/users", api.User)
 	mux.HandleFunc("/login", api.Login)
 	mux.HandleFunc("/logout", api.Logout)
-	mux.HandleFunc("/hello", getHello)
+	mux.HandleFunc("/auth", api.Auth)
 	ctx := context.Background()
 
 	server := &http.Server{
