@@ -13,7 +13,7 @@ import (
 	"net/http"
 	"time"
 
-	"backend/server/store"
+	"server/store"
 )
 
 const keyServerAddr = "serverAddr"
@@ -229,7 +229,10 @@ func main() {
 			return ctx
 		},
 	}
+
+	fmt.Println("Server start")
 	err := server.ListenAndServe()
+
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
 	} else if err != nil {
