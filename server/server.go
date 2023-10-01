@@ -122,6 +122,7 @@ func (api *Handler) User(w http.ResponseWriter, r *http.Request) {
 		icon := keyVal["icon"]
 
 		user, err := api.userstore.FindUserBy("username", keyVal["username"])
+
 		if user != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(&Result{Err: "username already exists"})
@@ -167,6 +168,12 @@ func (api *Handler) User(w http.ResponseWriter, r *http.Request) {
 func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	jsonbody, err := ioutil.ReadAll(r.Body) // check for errors
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(&Result{Err: "problems with reading data"})
+		return
+	}
 
 	keyVal := make(map[string]string)
 	json.Unmarshal(jsonbody, &keyVal) // check for errors
@@ -263,6 +270,7 @@ func main() {
 
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
+		
 	} else if err != nil {
 		fmt.Printf("error listening for server: %s\n", err)
 	}
