@@ -1,7 +1,6 @@
 package store
 
 import (
-	"errors"
 	"log"
 	"sync"
 )
@@ -24,7 +23,6 @@ type User struct {
 	Birthday    string
 	PhoneNumber string
 	Email       string
-	Icon        string
 }
 
 type RestaurantStore struct {
@@ -73,25 +71,24 @@ func (us *UserStore) GetUsers() ([]*User, error) {
 	return us.users, nil
 }
 
-func (us *UserStore) FindUserBy(field string, value string) (*User, error) {
+func (us *UserStore) FindUserBy(field string, value string) *User {
 	for _, u := range us.users {
 		switch field {
 		case "username":
 			if u.Username == value {
-				return u, nil
+				return u
 			}
 		case "email":
 			if u.Email == value {
-				return u, nil
+				return u
 			}
 		case "phone_number":
 			if u.PhoneNumber == value {
-				return u, nil
+				return u
 			}
 		}
 	}
-	return nil, errors.New("No such user")
-
+	return nil
 }
 
 func (us *UserStore) SignUpUser(in *User) (uint, error) {

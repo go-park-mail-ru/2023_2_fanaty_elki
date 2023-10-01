@@ -142,21 +142,21 @@ func (api *Handler) User(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		user, err := api.userstore.FindUserBy("username", keyVal["username"])
+		user := api.userstore.FindUserBy("username", keyVal["username"])
 		if user != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(&Result{Err: "username already exists"})
 			return
 		}
 
-		user, err = api.userstore.FindUserBy("phone_number", keyVal["phone_number"])
+		user = api.userstore.FindUserBy("phone_number", keyVal["phone_number"])
 		if user != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(&Result{Err: "phone number already exists"})
 			return
 		}
 
-		user, err = api.userstore.FindUserBy("email", keyVal["email"])
+		user = api.userstore.FindUserBy("email", keyVal["email"])
 		if user != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(&Result{Err: "email already exists"})
@@ -205,8 +205,8 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := api.userstore.FindUserBy("username", keyVal["username"])
-	if err != nil {
+	user := api.userstore.FindUserBy("username", keyVal["username"])
+	if user == nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(&Result{Err: "user not found"})
 		return
