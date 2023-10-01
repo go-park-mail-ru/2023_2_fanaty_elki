@@ -98,7 +98,6 @@ func (api *Handler) User(w http.ResponseWriter, r *http.Request) {
 		jsonbody, err := ioutil.ReadAll(r.Body)
 
 		if err != nil {
-			//http.Error(w, `{"error":"problems with reading data"}`, 500)
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(&Result{Err: "problems with reading data"})
 			return
@@ -108,7 +107,6 @@ func (api *Handler) User(w http.ResponseWriter, r *http.Request) {
 		err = json.Unmarshal(jsonbody, &keyVal)
 
 		if err != nil {
-			//http.Error(w, `{"error":"problems with unmarshaling json"}`, 500)
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(&Result{Err: "problems with unmarshaling json"})
 			return
