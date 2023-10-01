@@ -11,7 +11,6 @@ import (
 	"net"
 	"net/http"
 	"time"
-
 	"server/store"
 )
 
@@ -76,7 +75,8 @@ func (api *Handler) User(w http.ResponseWriter, r *http.Request) {
 		users, err := api.userstore.GetUsers()
 
 		if err != nil {
-			http.Error(w, `{"error":"db"}`, 500)
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(&Result{Err: "problems with reading data"})
 			return
 		}
 
@@ -98,7 +98,6 @@ func (api *Handler) User(w http.ResponseWriter, r *http.Request) {
 		jsonbody, err := ioutil.ReadAll(r.Body)
 
 		if err != nil {
-			//http.Error(w, `{"error":"problems with reading data"}`, 500)
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(&Result{Err: "problems with reading data"})
 			return
@@ -153,7 +152,8 @@ func (api *Handler) User(w http.ResponseWriter, r *http.Request) {
 		}
 		id, err := api.userstore.SignUpUser(in)
 		if err != nil {
-			http.Error(w, `{"error":"db"}`, 400)
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(&Result{Err: "error while adding user"})
 			return
 		}
 
@@ -180,12 +180,14 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	user, err := api.userstore.FindUser(keyVal["username"])
 	if err != nil {
-		http.Error(w, `no user`, 404)
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(&Result{Err: "user not found"})
 		return
 	}
 
 	if user.Password != keyVal["password"] {
-		http.Error(w, `bad pass`, 400)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(&Result{Err: "incorrect password"})
 		return
 	}
 
@@ -206,12 +208,14 @@ func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	session, err := r.Cookie("session_id")
 	if err == http.ErrNoCookie {
-		http.Error(w, `no sess`, 401)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(&Result{Err: "problems with cookies"})
 		return
 	}
-
+	// Здесь не уверен
 	if _, ok := api.sessions[session.Value]; !ok {
-		http.Error(w, `no sess`, 401)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(&Result{Err: "problems with cookies"})
 		return
 	}
 
@@ -225,13 +229,15 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 
 	session, err := r.Cookie("session_id")
 	if err == http.ErrNoCookie {
-		http.Error(w, `no sess`, 401)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(&Result{Err: "problems with authorizing"})
 		return
 	}
 
 	id, ok := api.sessions[session.Value]
 	if !ok {
-		http.Error(w, `no sess`, 401)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(&Result{Err: "problems with authorizing"})
 		return
 	}
 
