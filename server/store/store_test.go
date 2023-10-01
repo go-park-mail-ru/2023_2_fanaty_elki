@@ -7,7 +7,11 @@ import (
 func TestCheckNewRestaurantStoreSuccess() {
 
 	res := RestaurantStore {
-		
+
 	} 
 
+}
+
+func CheckGetRestaurantsSuccess() {
+	
 }
