@@ -1,17 +1,17 @@
 package main
 
 import (
+	"backend/server/store"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"net"
 	"net/http"
+	"regexp"
 	"time"
-	"server/store"
 )
 
 const keyServerAddr = "serverAddr"
@@ -48,7 +48,8 @@ func (api *Handler) getRestaurantList(w http.ResponseWriter, r *http.Request) {
 	rests, err := api.restaurantstore.GetRestaurants()
 
 	if err != nil {
-		http.Error(w, `{"error":"db"}`, 500)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(&Result{Err: "data base error"})
 		return
 	}
 
@@ -59,8 +60,8 @@ func (api *Handler) getRestaurantList(w http.ResponseWriter, r *http.Request) {
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(&Result{Body: body})
 	if err != nil {
-		log.Printf("error while marshalling JSON: %s", err)
-		http.Error(w, `{"error":"error while marshalling JSON"}`, 500)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(&Result{Err: "error while marshalling JSON"})
 		return
 	}
 }
@@ -70,28 +71,6 @@ func (api *Handler) User(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("%s: got /users request. \n",
 		ctx.Value(keyServerAddr),
 	)
-
-	if r.Method == "GET" {
-		users, err := api.userstore.GetUsers()
-
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(&Result{Err: "problems with reading data"})
-			return
-		}
-
-		body := map[string]interface{}{
-			"users": users,
-		}
-
-		encoder := json.NewEncoder(w)
-		err = encoder.Encode(&Result{Body: body})
-		if err != nil {
-			log.Printf("error while marshalling JSON: %s", err)
-			w.Write([]byte("{}"))
-			return
-		}
-	}
 
 	if r.Method == "POST" {
 
@@ -117,10 +96,53 @@ func (api *Handler) User(w http.ResponseWriter, r *http.Request) {
 		birthday := keyVal["birthday"]
 		phoneNumber := keyVal["phone_number"]
 		email := keyVal["email"]
-		icon := keyVal["icon"]
+
+		if len(username) < 3 {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(&Result{Err: "username is too short"})
+			return
+		}
+
+		if len(username) > 30 {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(&Result{Err: "username is too long"})
+			return
+		}
+
+		if len(password) < 3 {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(&Result{Err: "password is too short"})
+			return
+		}
+
+		if len(password) > 20 {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(&Result{Err: "password is too long"})
+			return
+		}
+
+		re := regexp.MustCompile(`\d{2}-\d{2}-\d{4}`)
+		if birthday != "" && !re.MatchString(birthday) {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(&Result{Err: "incorrect birthday"})
+			return
+		}
+
+		re = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+		if !re.MatchString(email) {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(&Result{Err: "incorrect email"})
+			return
+		}
+
+		re = regexp.MustCompile(`^[0-9\-\+]{9,15}$`)
+		if !re.MatchString(phoneNumber) {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(&Result{Err: "incorrect phone"})
+			return
+		}
 
 		user, err := api.userstore.FindUserBy("username", keyVal["username"])
-
 		if user != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(&Result{Err: "username already exists"})
@@ -147,8 +169,8 @@ func (api *Handler) User(w http.ResponseWriter, r *http.Request) {
 			Birthday:    birthday,
 			PhoneNumber: phoneNumber,
 			Email:       email,
-			Icon:        icon,
 		}
+
 		id, err := api.userstore.SignUpUser(in)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -166,7 +188,7 @@ func (api *Handler) User(w http.ResponseWriter, r *http.Request) {
 
 func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
-	jsonbody, err := ioutil.ReadAll(r.Body) // check for errors
+	jsonbody, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -175,9 +197,15 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	keyVal := make(map[string]string)
-	json.Unmarshal(jsonbody, &keyVal) // check for errors
+	err = json.Unmarshal(jsonbody, &keyVal)
 
-	user, err := api.userstore.FindUser(keyVal["username"])
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(&Result{Err: "problems with unmarshaling json"})
+		return
+	}
+
+	user, err := api.userstore.FindUserBy("username", keyVal["username"])
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(&Result{Err: "user not found"})
@@ -195,12 +223,17 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	api.sessions[SID] = user.ID
 
 	cookie := &http.Cookie{
-		Name:    "session_id",
-		Value:   SID,
-		Expires: time.Now().Add(10 * time.Hour),
+		Name:     "session_id",
+		Value:    SID,
+		Expires:  time.Now().Add(10 * time.Hour),
+		HttpOnly: true,
 	}
 	http.SetCookie(w, cookie)
-	w.Write([]byte(SID))
+	body := map[string]interface{}{
+		"cookie": cookie.Value,
+	}
+	json.NewEncoder(w).Encode(&Result{Body: body})
+
 }
 
 func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
@@ -208,13 +241,12 @@ func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 	session, err := r.Cookie("session_id")
 	if err == http.ErrNoCookie {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(&Result{Err: "problems with cookies"})
+		json.NewEncoder(w).Encode(&Result{Err: "unauthorized"})
 		return
 	}
-	// Здесь не уверен
 	if _, ok := api.sessions[session.Value]; !ok {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(&Result{Err: "problems with cookies"})
+		json.NewEncoder(w).Encode(&Result{Err: "unauthorized"})
 		return
 	}
 
@@ -229,14 +261,14 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 	session, err := r.Cookie("session_id")
 	if err == http.ErrNoCookie {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(&Result{Err: "problems with authorizing"})
+		json.NewEncoder(w).Encode(&Result{Err: "unauthorized"})
 		return
 	}
 
 	id, ok := api.sessions[session.Value]
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(&Result{Err: "problems with authorizing"})
+		json.NewEncoder(w).Encode(&Result{Err: "unauthorized"})
 		return
 	}
 
@@ -275,7 +307,7 @@ func main() {
 
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
-		
+
 	} else if err != nil {
 		fmt.Printf("error listening for server: %s\n", err)
 	}
