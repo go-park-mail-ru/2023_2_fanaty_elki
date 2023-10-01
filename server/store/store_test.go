@@ -1,13 +1,11 @@
 package store
 
-import (
-	"errors"
-)
-
 func TestCheckNewRestaurantStoreSuccess() {
 
-	res := RestaurantStore {
-		
-	} 
+	res := RestaurantStore{}
+
+}
+
+func TestCheckNewUserStoreSuccess() {
 
 }
