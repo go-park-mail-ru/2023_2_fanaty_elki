@@ -1,7 +1,7 @@
 package main
 
 import (
-	"backend/server/store"
+	"server/store"
 	"context"
 	"encoding/json"
 	"errors"
