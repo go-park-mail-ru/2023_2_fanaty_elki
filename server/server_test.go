@@ -27,7 +27,10 @@ func TestGetRestaurantsList(t *testing.T) {
 		api.GetRestaurantList(w, req)
 
 		resp := w.Result()
-		body, _ := ioutil.ReadAll(resp.Body)
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
 
 		require.Equal(t, 200, resp.StatusCode)
 		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
@@ -102,7 +105,10 @@ func TestSignUp(t *testing.T) {
 	}
 
 	t.Run("returns ok and id on correct data", func(t *testing.T) {
-		body, _ := json.Marshal(user1)
+		body, err := json.Marshal(user1)
+		if err != nil {
+			return
+		}
 		req := httptest.NewRequest("POST", "/users", bytes.NewReader(body))
 
 		w := httptest.NewRecorder()
@@ -110,7 +116,10 @@ func TestSignUp(t *testing.T) {
 		api.SignUp(w, req)
 
 		resp := w.Result()
-		body, _ = ioutil.ReadAll(resp.Body)
+		body, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
 
 		require.Equal(t, 200, resp.StatusCode)
 		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
@@ -118,7 +127,10 @@ func TestSignUp(t *testing.T) {
 	})
 
 	t.Run("returns ok and id on correct data without birthday", func(t *testing.T) {
-		body, _ := json.Marshal(user2)
+		body, err := json.Marshal(user2)
+		if err != nil {
+			return
+		}
 		req := httptest.NewRequest("POST", "/users", bytes.NewReader(body))
 
 		w := httptest.NewRecorder()
@@ -126,7 +138,10 @@ func TestSignUp(t *testing.T) {
 		api.SignUp(w, req)
 
 		resp := w.Result()
-		body, _ = ioutil.ReadAll(resp.Body)
+		body, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
 
 		require.Equal(t, 200, resp.StatusCode)
 		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
@@ -134,7 +149,10 @@ func TestSignUp(t *testing.T) {
 	})
 
 	t.Run("returns 400 error when user already exists", func(t *testing.T) {
-		body, _ := json.Marshal(user3)
+		body, err := json.Marshal(user3)
+		if err != nil {
+			return
+		}
 		req := httptest.NewRequest("POST", "/users", bytes.NewReader(body))
 
 		w := httptest.NewRecorder()
@@ -142,7 +160,10 @@ func TestSignUp(t *testing.T) {
 		api.SignUp(w, req)
 
 		resp := w.Result()
-		body, _ = ioutil.ReadAll(resp.Body)
+		body, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
 
 		require.Equal(t, 400, resp.StatusCode)
 		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
@@ -150,7 +171,10 @@ func TestSignUp(t *testing.T) {
 	})
 
 	t.Run("returns 400 error when email already exists", func(t *testing.T) {
-		body, _ := json.Marshal(user5)
+		body, err := json.Marshal(user5)
+		if err != nil {
+			return
+		}
 		req := httptest.NewRequest("POST", "/users", bytes.NewReader(body))
 
 		w := httptest.NewRecorder()
@@ -158,7 +182,10 @@ func TestSignUp(t *testing.T) {
 		api.SignUp(w, req)
 
 		resp := w.Result()
-		body, _ = ioutil.ReadAll(resp.Body)
+		body, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
 
 		require.Equal(t, 400, resp.StatusCode)
 		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
@@ -166,7 +193,10 @@ func TestSignUp(t *testing.T) {
 	})
 
 	t.Run("returns 400 error when username is too short", func(t *testing.T) {
-		body, _ := json.Marshal(user6)
+		body, err := json.Marshal(user6)
+		if err != nil {
+			return
+		}
 		req := httptest.NewRequest("POST", "/users", bytes.NewReader(body))
 
 		w := httptest.NewRecorder()
@@ -174,7 +204,10 @@ func TestSignUp(t *testing.T) {
 		api.SignUp(w, req)
 
 		resp := w.Result()
-		body, _ = ioutil.ReadAll(resp.Body)
+		body, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
 
 		require.Equal(t, 400, resp.StatusCode)
 		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
@@ -182,7 +215,10 @@ func TestSignUp(t *testing.T) {
 	})
 
 	t.Run("returns 400 error when username is too long", func(t *testing.T) {
-		body, _ := json.Marshal(user7)
+		body, err := json.Marshal(user7)
+		if err != nil {
+			return
+		}
 		req := httptest.NewRequest("POST", "/users", bytes.NewReader(body))
 
 		w := httptest.NewRecorder()
@@ -190,7 +226,10 @@ func TestSignUp(t *testing.T) {
 		api.SignUp(w, req)
 
 		resp := w.Result()
-		body, _ = ioutil.ReadAll(resp.Body)
+		body, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
 
 		require.Equal(t, 400, resp.StatusCode)
 		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
@@ -198,7 +237,10 @@ func TestSignUp(t *testing.T) {
 	})
 
 	t.Run("returns 400 error when password is too short", func(t *testing.T) {
-		body, _ := json.Marshal(user8)
+		body, err := json.Marshal(user8)
+		if err != nil {
+			return
+		}
 		req := httptest.NewRequest("POST", "/users", bytes.NewReader(body))
 
 		w := httptest.NewRecorder()
@@ -206,7 +248,10 @@ func TestSignUp(t *testing.T) {
 		api.SignUp(w, req)
 
 		resp := w.Result()
-		body, _ = ioutil.ReadAll(resp.Body)
+		body, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
 
 		require.Equal(t, 400, resp.StatusCode)
 		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
@@ -214,7 +259,10 @@ func TestSignUp(t *testing.T) {
 	})
 
 	t.Run("returns 400 error when password is too long", func(t *testing.T) {
-		body, _ := json.Marshal(user9)
+		body, err := json.Marshal(user9)
+		if err != nil {
+			return
+		}
 		req := httptest.NewRequest("POST", "/users", bytes.NewReader(body))
 
 		w := httptest.NewRecorder()
@@ -222,7 +270,10 @@ func TestSignUp(t *testing.T) {
 		api.SignUp(w, req)
 
 		resp := w.Result()
-		body, _ = ioutil.ReadAll(resp.Body)
+		body, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
 
 		require.Equal(t, 400, resp.StatusCode)
 		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
@@ -230,7 +281,10 @@ func TestSignUp(t *testing.T) {
 	})
 
 	t.Run("returns 400 error when email is incorrect", func(t *testing.T) {
-		body, _ := json.Marshal(user11)
+		body, err := json.Marshal(user11)
+		if err != nil {
+			return
+		}
 		req := httptest.NewRequest("POST", "/users", bytes.NewReader(body))
 
 		w := httptest.NewRecorder()
@@ -238,7 +292,10 @@ func TestSignUp(t *testing.T) {
 		api.SignUp(w, req)
 
 		resp := w.Result()
-		body, _ = ioutil.ReadAll(resp.Body)
+		body, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
 
 		require.Equal(t, 400, resp.StatusCode)
 		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
@@ -271,7 +328,10 @@ func TestLogin(t *testing.T) {
 	}
 
 	t.Run("returns ok when user is correct", func(t *testing.T) {
-		body, _ := json.Marshal(user12)
+		body, err := json.Marshal(user12)
+		if err != nil {
+			return
+		}
 		req := httptest.NewRequest("POST", "/login", bytes.NewReader(body))
 
 		w := httptest.NewRecorder()
@@ -279,7 +339,10 @@ func TestLogin(t *testing.T) {
 		api.Login(w, req)
 
 		resp := w.Result()
-		body, _ = ioutil.ReadAll(resp.Body)
+		body, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
 
 		Cookie = resp.Cookies()
 
@@ -289,7 +352,10 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("returns ok when user is correct for cookie", func(t *testing.T) {
-		body, _ := json.Marshal(user15)
+		body, err := json.Marshal(user15)
+		if err != nil {
+			return
+		}
 		req := httptest.NewRequest("POST", "/login", bytes.NewReader(body))
 
 		w := httptest.NewRecorder()
@@ -297,7 +363,10 @@ func TestLogin(t *testing.T) {
 		api.Login(w, req)
 
 		resp := w.Result()
-		body, _ = ioutil.ReadAll(resp.Body)
+		body, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
 
 		Cookie1 = resp.Cookies()
 
@@ -307,7 +376,10 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("returns 404 when user not found", func(t *testing.T) {
-		body, _ := json.Marshal(user13)
+		body, err := json.Marshal(user13)
+		if err != nil {
+			return
+		}
 		req := httptest.NewRequest("POST", "/login", bytes.NewReader(body))
 
 		w := httptest.NewRecorder()
@@ -315,7 +387,10 @@ func TestLogin(t *testing.T) {
 		api.Login(w, req)
 
 		resp := w.Result()
-		body, _ = ioutil.ReadAll(resp.Body)
+		body, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
 
 		require.Equal(t, 404, resp.StatusCode)
 		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
@@ -323,7 +398,10 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("returns 400 when incorrect password ", func(t *testing.T) {
-		body, _ := json.Marshal(user14)
+		body, err := json.Marshal(user14)
+		if err != nil {
+			return
+		}
 		req := httptest.NewRequest("POST", "/login", bytes.NewReader(body))
 
 		w := httptest.NewRecorder()
@@ -331,7 +409,10 @@ func TestLogin(t *testing.T) {
 		api.Login(w, req)
 
 		resp := w.Result()
-		body, _ = ioutil.ReadAll(resp.Body)
+		body, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
 
 		require.Equal(t, 400, resp.StatusCode)
 		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
@@ -381,7 +462,10 @@ func TestAuth(t *testing.T) {
 		api.Auth(w, req)
 
 		resp := w.Result()
-		body, _ := ioutil.ReadAll(resp.Body)
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
 
 		require.Equal(t, 401, resp.StatusCode)
 		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
@@ -398,7 +482,10 @@ func TestAuth(t *testing.T) {
 		api.Auth(w, req)
 
 		resp := w.Result()
-		body, _ := ioutil.ReadAll(resp.Body)
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
 
 		require.Equal(t, 200, resp.StatusCode)
 		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
