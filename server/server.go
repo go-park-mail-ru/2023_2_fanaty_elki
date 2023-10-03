@@ -19,7 +19,7 @@ import (
 // @license.name Apache 2.0
 // @host http://84.23.53.216:8001/
 const keyServerAddr = "serverAddr"
-const allowedOrigin = "http://127.0.0.1:4000"
+const allowedOrigin = "http://84.23.53.216:80"
 
 type Result struct {
 	Body interface{}
