@@ -6,23 +6,23 @@ import (
 )
 
 type Restaurant struct {
-	ID            uint
-	Name          string
-	Rating        float32
-	CommentsCount int
-	Icon          string
-	DeliveryTime  int
-	DeliveryPrice int
-	Category      string
+	ID            uint 		`json:"ID"`
+	Name          string 	`json:"Name"`
+	Rating        float32 	`json:"Rating"`
+	CommentsCount int 		`json:"CommentsCount"`
+	Icon          string 	`json:"Icon"`
+	DeliveryTime  int 		`json:"DeliveryTime"`
+	DeliveryPrice int 		`json:"DeliveryPrice"`
+	Category      string 	`json:"Category"`
 }
 
 type User struct {
-	ID          uint
-	Username    string
-	Password    string
-	Birthday    string
-	PhoneNumber string
-	Email       string
+	ID          uint 		`json:"ID"`
+	Username    string 		`json:"Username"`
+	Password    string 		`json:"Password"`
+	Birthday    string 		`json:"Birthday"`
+	PhoneNumber string 		`json:"PhoneNumber"`
+	Email       string 		`json:"Email"`
 }
 
 type RestaurantStore struct {
@@ -33,7 +33,7 @@ type RestaurantStore struct {
 type UserStore struct {
 	users  []*User
 	mu     sync.RWMutex
-	nextID uint
+	nextID uint				
 }
 
 var Restaurants = []*Restaurant{
