@@ -23,7 +23,10 @@ const allowedOrigin = "http://84.23.53.216"
 
 type Result struct {
 	Body interface{}
-	Err  string
+}
+
+type Error struct {
+	Err string
 }
 
 type Handler struct {
@@ -67,7 +70,7 @@ func (api *Handler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(&Result{Err: "data base error"})
+		err = json.NewEncoder(w).Encode(&Error{Err: "data base error"})
 		return
 	}
 	body := map[string]interface{}{
@@ -77,7 +80,7 @@ func (api *Handler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
 	err = encoder.Encode(&Result{Body: body})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(&Result{Err: "error while marshalling JSON"})
+		err = json.NewEncoder(w).Encode(&Error{Err: "error while marshalling JSON"})
 		return
 	}
 }
@@ -109,7 +112,7 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(&Result{Err: "problems with reading data"})
+			err = json.NewEncoder(w).Encode(&Error{Err: "problems with reading data"})
 			return
 		}
 
@@ -118,7 +121,7 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(&Result{Err: "problems with unmarshaling json"})
+			err = json.NewEncoder(w).Encode(&Error{Err: "problems with unmarshaling json"})
 			return
 		}
 
@@ -129,53 +132,77 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 		if len(username) < 3 {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(&Result{Err: "username is too short"})
+			err = json.NewEncoder(w).Encode(&Error{Err: "username is too short"})
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 			return
 		}
 
 		if len(username) > 30 {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(&Result{Err: "username is too long"})
+			err = json.NewEncoder(w).Encode(&Error{Err: "username is too long"})
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 			return
 		}
 
 		if len(password) < 3 {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(&Result{Err: "password is too short"})
+			err = json.NewEncoder(w).Encode(&Error{Err: "password is too short"})
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 			return
 		}
 
 		if len(password) > 20 {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(&Result{Err: "password is too long"})
+			err = json.NewEncoder(w).Encode(&Error{Err: "password is too long"})
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 			return
 		}
 
 		re := regexp.MustCompile(`\d{2}-\d{2}-\d{4}`)
 		if birthday != "" && !re.MatchString(birthday) {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(&Result{Err: "incorrect birthday"})
+			err = json.NewEncoder(w).Encode(&Error{Err: "incorrect birthday"})
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 			return
 		}
 
 		re = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 		if !re.MatchString(email) {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(&Result{Err: "incorrect email"})
+			err = json.NewEncoder(w).Encode(&Error{Err: "incorrect email"})
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 			return
 		}
 
 		user := api.userstore.FindUserBy("username", keyVal["username"])
 		if user != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(&Result{Err: "username already exists"})
+			err = json.NewEncoder(w).Encode(&Error{Err: "username already exists"})
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 			return
 		}
 
 		user = api.userstore.FindUserBy("email", keyVal["email"])
 		if user != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(&Result{Err: "email already exists"})
+			err = json.NewEncoder(w).Encode(&Error{Err: "email already exists"})
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 			return
 		}
 
@@ -189,14 +216,20 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		id, err := api.userstore.SignUpUser(in)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(&Result{Err: "error while adding user"})
+			err = json.NewEncoder(w).Encode(&Error{Err: "error while adding user"})
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 			return
 		}
 
 		body := map[string]interface{}{
 			"id": id,
 		}
-		json.NewEncoder(w).Encode(&Result{Body: body})
+		err = json.NewEncoder(w).Encode(&Result{Body: body})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}
 
 }
@@ -223,7 +256,7 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(&Result{Err: "problems with reading data"})
+		err = json.NewEncoder(w).Encode(&Error{Err: "problems with reading data"})
 		return
 	}
 
@@ -232,20 +265,26 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(&Result{Err: "problems with unmarshaling json"})
+		err = json.NewEncoder(w).Encode(&Error{Err: "problems with unmarshaling json"})
 		return
 	}
 
 	user := api.userstore.FindUserBy("username", keyVal["username"])
 	if user == nil {
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(&Result{Err: "user not found"})
+		err = json.NewEncoder(w).Encode(&Error{Err: "user not found"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 
 	if user.Password != keyVal["password"] {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(&Result{Err: "incorrect password"})
+		err = json.NewEncoder(w).Encode(&Error{Err: "incorrect password"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -265,7 +304,10 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		"username": user.Username,
 	}
 
-	json.NewEncoder(w).Encode(&Result{Body: body})
+	err = json.NewEncoder(w).Encode(&Result{Body: body})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 
 }
 
@@ -288,12 +330,18 @@ func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	if err == http.ErrNoCookie {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(&Result{Err: "unauthorized"})
+		err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 	if _, ok := api.sessions[session.Value]; !ok {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(&Result{Err: "unauthorized"})
+		err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -322,14 +370,20 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	if err == http.ErrNoCookie {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(&Result{Err: "unauthorized"})
+		err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 
 	id, ok := api.sessions[session.Value]
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(&Result{Err: "unauthorized"})
+		err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -338,7 +392,10 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 	body := map[string]interface{}{
 		"username": user.Username,
 	}
-	json.NewEncoder(w).Encode(&Result{Body: body})
+	err = json.NewEncoder(w).Encode(&Result{Body: body})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 const PORT = ":3333"
@@ -375,5 +432,4 @@ func main() {
 	} else if err != nil {
 		fmt.Printf("error listening for server: %s\n", err)
 	}
-
 }

@@ -1,7 +1,6 @@
 package store
 
 import (
-	"log"
 	"sync"
 )
 
@@ -157,12 +156,10 @@ func (us *UserStore) GetUserById(id uint) *User {
 }
 
 func (us *UserStore) SignUpUser(in *User) (uint, error) {
-	log.Println("Signup called")
 
 	us.mu.Lock()
 	us.nextID++
 	in.ID = us.nextID
-	log.Println("nextID", us.nextID)
 	us.users = append(us.users, in)
 	us.mu.Unlock()
 
