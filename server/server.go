@@ -9,8 +9,8 @@ import (
 	"math/rand"
 	"net"
 	"net/http"
-	"regexp"
 	"server/store"
+	// "regexp"
 	"time"
 )
 
@@ -19,6 +19,7 @@ import (
 // @license.name Apache 2.0
 // @host http://84.23.53.216:8001/
 const keyServerAddr = "serverAddr"
+const allowedOrigin = "http://127.0.0.1:4000"
 
 type Result struct {
 	Body interface{}
@@ -49,6 +50,8 @@ func (api *Handler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
 		ctx.Value(keyServerAddr),
 	)
 
+	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
+	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	rests, err := api.restaurantstore.GetRestaurants()
@@ -83,6 +86,8 @@ func (api *Handler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
 // @Router   /users [post]
 func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+
+	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	fmt.Printf("%s: got /users request. \n",
 		ctx.Value(keyServerAddr),
 	)
@@ -138,26 +143,26 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		re := regexp.MustCompile(`\d{2}-\d{2}-\d{4}`)
-		if birthday != "" && !re.MatchString(birthday) {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(&Result{Err: "incorrect birthday"})
-			return
-		}
+		// re := regexp.MustCompile(`\d{2}-\d{2}-\d{4}`)
+		// if birthday != "" && !re.MatchString(birthday) {
+		// 	w.WriteHeader(http.StatusBadRequest)
+		// 	json.NewEncoder(w).Encode(&Result{Err: "incorrect birthday"})
+		// 	return
+		// }
 
-		re = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-		if !re.MatchString(email) {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(&Result{Err: "incorrect email"})
-			return
-		}
+		// re = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+		// if !re.MatchString(email) {
+		// 	w.WriteHeader(http.StatusBadRequest)
+		// 	json.NewEncoder(w).Encode(&Result{Err: "incorrect email"})
+		// 	return
+		// }
 
-		re = regexp.MustCompile(`^[0-9\-\+]{9,15}$`)
-		if !re.MatchString(phoneNumber) {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(&Result{Err: "incorrect phone"})
-			return
-		}
+		// re = regexp.MustCompile(`^[0-9\-\+]{9,15}$`)
+		// if !re.MatchString(phoneNumber) {
+		// 	w.WriteHeader(http.StatusBadRequest)
+		// 	json.NewEncoder(w).Encode(&Result{Err: "incorrect phone"})
+		// 	return
+		// }
 
 		user := api.userstore.FindUserBy("username", keyVal["username"])
 		if user != nil {
@@ -166,19 +171,19 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		user = api.userstore.FindUserBy("phone_number", keyVal["phone_number"])
-		if user != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(&Result{Err: "phone number already exists"})
-			return
-		}
+		// user = api.userstore.FindUserBy("phone_number", keyVal["phone_number"])
+		// if user != nil {
+		// 	w.WriteHeader(http.StatusBadRequest)
+		// 	json.NewEncoder(w).Encode(&Result{Err: "phone number already exists"})
+		// 	return
+		// }
 
-		user = api.userstore.FindUserBy("email", keyVal["email"])
-		if user != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(&Result{Err: "email already exists"})
-			return
-		}
+		// user = api.userstore.FindUserBy("email", keyVal["email"])
+		// if user != nil {
+		// 	w.WriteHeader(http.StatusBadRequest)
+		// 	json.NewEncoder(w).Encode(&Result{Err: "email already exists"})
+		// 	return
+		// }
 
 		in := &store.User{
 			Username:    username,
@@ -219,6 +224,8 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 
+	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
+	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	if err != nil {
@@ -262,7 +269,9 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, cookie)
 	body := map[string]interface{}{
 		"cookie": cookie.Value,
+		"username": user.Username,
 	}
+
 	json.NewEncoder(w).Encode(&Result{Body: body})
 
 }
@@ -280,6 +289,8 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 // @Router   /logout [post]
 func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 
+	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
+	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	session, err := r.Cookie("session_id")
 	w.Header().Set("content-type", "application/json")
 	if err == http.ErrNoCookie {
@@ -310,7 +321,10 @@ func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} error "unauthorized"
 // @Router   /login [post]
 func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.Method)
 
+	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
+	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	session, err := r.Cookie("session_id")
 	w.Header().Set("content-type", "application/json")
 	if err == http.ErrNoCookie {
@@ -326,11 +340,16 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user := api.userstore.GetUserById(id-1);
 	http.SetCookie(w, session)
 	body := map[string]interface{}{
-		"id": id,
+		"username": user.Username,
 	}
 	json.NewEncoder(w).Encode(&Result{Body: body})
+}
+
+func (api *Handler) Main(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r)
 }
 
 const PORT = ":3333"
@@ -347,6 +366,7 @@ func main() {
 	mux.HandleFunc("/login", api.Login)
 	mux.HandleFunc("/logout", api.Logout)
 	mux.HandleFunc("/auth", api.Auth)
+	mux.HandleFunc("/", api.Main)
 	ctx := context.Background()
 
 	server := &http.Server{
