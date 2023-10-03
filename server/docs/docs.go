@@ -19,7 +19,7 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/auth": {
-            "post": {
+            "get": {
                 "description": "checking auth",
                 "consumes": [
                     "application/json"
@@ -28,7 +28,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Authorization"
+                    "users"
                 ],
                 "summary": "checking auth",
                 "parameters": [
@@ -56,7 +56,7 @@ const docTemplate = `{
         },
         "/login": {
             "post": {
-                "description": "Login user",
+                "description": "Log in user",
                 "consumes": [
                     "application/json"
                 ],
@@ -64,12 +64,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Authorization"
+                    "users"
                 ],
-                "summary": "Login user",
+                "summary": "Log in user",
                 "parameters": [
                     {
-                        "description": "Logining user",
+                        "description": "user object for login",
                         "name": "user",
                         "in": "body",
                         "required": true,
@@ -101,7 +101,7 @@ const docTemplate = `{
             }
         },
         "/logout": {
-            "post": {
+            "get": {
                 "description": "Log out user",
                 "consumes": [
                     "application/json"
@@ -110,7 +110,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Authorization"
+                    "users"
                 ],
                 "summary": "Log out user",
                 "parameters": [
@@ -123,8 +123,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "success log out"
+                    "200": {
+                        "description": "void\" \"success log out"
                     },
                     "400": {
                         "description": "bad request",
@@ -141,7 +141,7 @@ const docTemplate = `{
             "get": {
                 "description": "giving array of restaurants",
                 "consumes": [
-                    "application/json"
+                    "*/*"
                 ],
                 "produces": [
                     "application/json"
@@ -168,7 +168,7 @@ const docTemplate = `{
             }
         },
         "/users": {
-            "get": {
+            "post": {
                 "description": "Signing up a user",
                 "consumes": [
                     "application/json"
@@ -177,7 +177,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "users"
                 ],
                 "summary": "Signing up a user",
                 "parameters": [
@@ -214,28 +214,28 @@ const docTemplate = `{
         "store.Restaurant": {
             "type": "object",
             "properties": {
-                "category": {
+                "Category": {
                     "type": "string"
                 },
-                "commentsCount": {
+                "CommentsCount": {
                     "type": "integer"
                 },
-                "deliveryPrice": {
+                "DeliveryPrice": {
                     "type": "integer"
                 },
-                "deliveryTime": {
+                "DeliveryTime": {
                     "type": "integer"
                 },
-                "icon": {
+                "ID": {
+                    "type": "integer"
+                },
+                "Icon": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
+                "Name": {
                     "type": "string"
                 },
-                "rating": {
+                "Rating": {
                     "type": "number"
                 }
             }
@@ -243,22 +243,22 @@ const docTemplate = `{
         "store.User": {
             "type": "object",
             "properties": {
-                "birthday": {
+                "Birthday": {
                     "type": "string"
                 },
-                "email": {
+                "Email": {
                     "type": "string"
                 },
-                "id": {
+                "ID": {
                     "type": "integer"
                 },
-                "password": {
+                "Password": {
                     "type": "string"
                 },
-                "phoneNumber": {
+                "PhoneNumber": {
                     "type": "string"
                 },
-                "username": {
+                "Username": {
                     "type": "string"
                 }
             }

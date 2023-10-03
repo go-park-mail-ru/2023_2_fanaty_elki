@@ -1,36 +1,36 @@
 definitions:
   store.Restaurant:
     properties:
-      category:
+      Category:
         type: string
-      commentsCount:
+      CommentsCount:
         type: integer
-      deliveryPrice:
+      DeliveryPrice:
         type: integer
-      deliveryTime:
+      DeliveryTime:
         type: integer
-      icon:
+      ID:
+        type: integer
+      Icon:
         type: string
-      id:
-        type: integer
-      name:
+      Name:
         type: string
-      rating:
+      Rating:
         type: number
     type: object
   store.User:
     properties:
-      birthday:
+      Birthday:
         type: string
-      email:
+      Email:
         type: string
-      id:
+      ID:
         type: integer
-      password:
+      Password:
         type: string
-      phoneNumber:
+      PhoneNumber:
         type: string
-      username:
+      Username:
         type: string
     type: object
 host: http://84.23.53.216:8001/
@@ -42,7 +42,7 @@ info:
   version: "1.0"
 paths:
   /auth:
-    post:
+    get:
       consumes:
       - application/json
       description: checking auth
@@ -64,14 +64,14 @@ paths:
           schema: {}
       summary: checking auth
       tags:
-      - Authorization
+      - users
   /login:
     post:
       consumes:
       - application/json
-      description: Login user
+      description: Log in user
       parameters:
-      - description: Logining user
+      - description: user object for login
         in: body
         name: user
         required: true
@@ -93,11 +93,11 @@ paths:
         "500":
           description: internal server error
           schema: {}
-      summary: Login user
+      summary: Log in user
       tags:
-      - Authorization
+      - users
   /logout:
-    post:
+    get:
       consumes:
       - application/json
       description: Log out user
@@ -110,8 +110,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: success log out
+        "200":
+          description: void" "success log out
         "400":
           description: bad request
           schema: {}
@@ -120,11 +120,11 @@ paths:
           schema: {}
       summary: Log out user
       tags:
-      - Authorization
+      - users
   /restaurants:
     get:
       consumes:
-      - application/json
+      - '*/*'
       description: giving array of restaurants
       produces:
       - application/json
@@ -142,7 +142,7 @@ paths:
       tags:
       - Restaurants
   /users:
-    get:
+    post:
       consumes:
       - application/json
       description: Signing up a user
@@ -168,5 +168,5 @@ paths:
           schema: {}
       summary: Signing up a user
       tags:
-      - User
+      - users
 swagger: "2.0"

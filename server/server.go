@@ -10,7 +10,7 @@ import (
 	"net"
 	"net/http"
 	"server/store"
-	// "regexp"
+	"regexp"
 	"time"
 )
 
@@ -48,7 +48,7 @@ func randStringRunes(n int) string {
 // @Summary      giving restaurats
 // @Description  giving array of restaurants
 // @Tags        Restaurants
-// @Accept     application/json
+// @Accept     */*
 // @Produce  application/json
 // @Success  200 {object}  []store.Restaurant "success returning array of restaurants"
 // @Failure 500 {object} error "internal server error"
@@ -85,14 +85,14 @@ func (api *Handler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
 // SignUp godoc
 // @Summary      Signing up a user
 // @Description  Signing up a user
-// @Tags        User
+// @Tags        users
 // @Accept     application/json
 // @Produce  application/json
 // @Param 	user	 body	 store.User	 true	 "User object for signing up"
 // @Success  200 {object}  integer "success create User return id"
 // @Failure 400 {object} error "bad request"
 // @Failure 500 {object} error "internal server error"
-// @Router   /users [get]
+// @Router   /users [post]
 func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -152,26 +152,26 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// re := regexp.MustCompile(`\d{2}-\d{2}-\d{4}`)
-		// if birthday != "" && !re.MatchString(birthday) {
-		// 	w.WriteHeader(http.StatusBadRequest)
-		// 	json.NewEncoder(w).Encode(&Result{Err: "incorrect birthday"})
-		// 	return
-		// }
+		re := regexp.MustCompile(`\d{2}-\d{2}-\d{4}`)
+		if birthday != "" && !re.MatchString(birthday) {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(&Result{Err: "incorrect birthday"})
+			return
+		}
 
-		// re = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-		// if !re.MatchString(email) {
-		// 	w.WriteHeader(http.StatusBadRequest)
-		// 	json.NewEncoder(w).Encode(&Result{Err: "incorrect email"})
-		// 	return
-		// }
+		re = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+		if !re.MatchString(email) {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(&Result{Err: "incorrect email"})
+			return
+		}
 
-		// re = regexp.MustCompile(`^[0-9\-\+]{9,15}$`)
-		// if !re.MatchString(phoneNumber) {
-		// 	w.WriteHeader(http.StatusBadRequest)
-		// 	json.NewEncoder(w).Encode(&Result{Err: "incorrect phone"})
-		// 	return
-		// }
+		re = regexp.MustCompile(`^[0-9\-\+]{9,15}$`)
+		if !re.MatchString(phoneNumber) {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(&Result{Err: "incorrect phone"})
+			return
+		}
 
 		user := api.userstore.FindUserBy("username", keyVal["username"])
 		if user != nil {
@@ -180,19 +180,19 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// user = api.userstore.FindUserBy("phone_number", keyVal["phone_number"])
-		// if user != nil {
-		// 	w.WriteHeader(http.StatusBadRequest)
-		// 	json.NewEncoder(w).Encode(&Result{Err: "phone number already exists"})
-		// 	return
-		// }
+		user = api.userstore.FindUserBy("phone_number", keyVal["phone_number"])
+		if user != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(&Result{Err: "phone number already exists"})
+			return
+		}
 
-		// user = api.userstore.FindUserBy("email", keyVal["email"])
-		// if user != nil {
-		// 	w.WriteHeader(http.StatusBadRequest)
-		// 	json.NewEncoder(w).Encode(&Result{Err: "email already exists"})
-		// 	return
-		// }
+		user = api.userstore.FindUserBy("email", keyVal["email"])
+		if user != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(&Result{Err: "email already exists"})
+			return
+		}
 
 		in := &store.User{
 			Username:    username,
@@ -218,12 +218,12 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 // Login godoc
-// @Summary      Login user
-// @Description  Login user
-// @Tags        Authorization
+// @Summary      Log in user
+// @Description  Log in user
+// @Tags        users
 // @Accept     application/json
 // @Produce  application/json
-// @Param    user body store.User true "Logining user"
+// @Param    user body store.User true "user object for login"
 // @Success  200 {object}  string "success login User return cookie"
 // @Failure 400 {object} error "bad request"
 // @Failure 404 {object} error "not found"
@@ -288,14 +288,14 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 // Logout godoc
 // @Summary      Log out user
 // @Description  Log out user
-// @Tags        Authorization
+// @Tags        users
 // @Accept     application/json
 // @Produce  application/json
 // @Param    cookie header string true "Log out user"
-// @Success  204 "success log out"
+// @Success 200 "void" "success log out"
 // @Failure 400 {object} error "bad request"
 // @Failure 401 {object} error "unauthorized"
-// @Router   /logout [post]
+// @Router   /logout [get]
 func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
@@ -322,13 +322,13 @@ func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 // Auth godoc
 // @Summary      checking auth
 // @Description  checking auth
-// @Tags        Authorization
+// @Tags        users
 // @Accept     application/json
 // @Produce  application/json
 // @Param    cookie header string true "Checking user authentication"
 // @Success  200 {object} integer "success authenticate return id"
 // @Failure 401 {object} error "unauthorized"
-// @Router   /auth [post]
+// @Router   /auth [get]
 func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.Method)
 
@@ -357,10 +357,6 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(&Result{Body: body})
 }
 
-func (api *Handler) Main(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r)
-}
-
 const PORT = ":3333"
 
 func main() {
@@ -375,7 +371,6 @@ func main() {
 	mux.HandleFunc("/login", api.Login)
 	mux.HandleFunc("/logout", api.Logout)
 	mux.HandleFunc("/auth", api.Auth)
-	mux.HandleFunc("/", api.Main)
 	ctx := context.Background()
 
 	server := &http.Server{
