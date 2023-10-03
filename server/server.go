@@ -14,6 +14,10 @@ import (
 	"time"
 )
 
+// @title Prinesi-Poday API
+// @version 1.0
+// @license.name Apache 2.0
+// @host http://84.23.53.216:8001/
 const keyServerAddr = "serverAddr"
 const allowedOrigin = "http://127.0.0.1:4000"
 
@@ -32,7 +36,7 @@ var (
 	letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 )
 
-func RandStringRunes(n int) string {
+func randStringRunes(n int) string {
 	b := make([]rune, n)
 	for i := range b {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
@@ -40,7 +44,7 @@ func RandStringRunes(n int) string {
 	return string(b)
 }
 
-func (api *Handler) getRestaurantList(w http.ResponseWriter, r *http.Request) {
+func (api *Handler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	fmt.Printf("%s: got /restaurants request. \n",
 		ctx.Value(keyServerAddr),
@@ -48,6 +52,7 @@ func (api *Handler) getRestaurantList(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("content-type", "application/json")
 
 	rests, err := api.restaurantstore.GetRestaurants()
 
@@ -56,11 +61,9 @@ func (api *Handler) getRestaurantList(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(&Result{Err: "data base error"})
 		return
 	}
-
 	body := map[string]interface{}{
 		"restaurants": rests,
 	}
-
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(&Result{Body: body})
 	if err != nil {
@@ -70,7 +73,18 @@ func (api *Handler) getRestaurantList(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (api *Handler) User(w http.ResponseWriter, r *http.Request) {
+// SignUp godoc
+// @Summary      Signing up a user
+// @Description  Signing up a user
+// @Tags        User
+// @Accept     application/json
+// @Produce  application/json
+// @Param 	user	 body	 store.User	 true	 "User object for signing up"
+// @Success  200 {object}  integer "success create User return id"
+// @Failure 400 {object} error "bad request"
+// @Failure 500 {object} error "internal server error"
+// @Router   /users [post]
+func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
@@ -81,6 +95,8 @@ func (api *Handler) User(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 
 		jsonbody, err := ioutil.ReadAll(r.Body)
+
+		w.Header().Set("content-type", "application/json")
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -192,12 +208,25 @@ func (api *Handler) User(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// Login godoc
+// @Summary      Login user
+// @Description  Login user
+// @Tags        Authorization
+// @Accept     application/json
+// @Produce  application/json
+// @Param    user body store.User true "Logining user"
+// @Success  200 {object}  string "success login User return cookie"
+// @Failure 400 {object} error "bad request"
+// @Failure 404 {object} error "not found"
+// @Failure 500 {object} error "internal server error"
+// @Router   /login [post]
 func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 
 	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("content-type", "application/json")
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -227,7 +256,7 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	SID := RandStringRunes(32)
+	SID := randStringRunes(32)
 
 	api.sessions[SID] = user.ID
 
@@ -247,11 +276,23 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// Logout godoc
+// @Summary      Log out user
+// @Description  Log out user
+// @Tags        Authorization
+// @Accept     application/json
+// @Produce  application/json
+// @Param    cookie header string true "Log out user"
+// @Success  204 "success log out"
+// @Failure 400 {object} error "bad request"
+// @Failure 401 {object} error "unauthorized"
+// @Router   /logout [post]
 func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	session, err := r.Cookie("session_id")
+	w.Header().Set("content-type", "application/json")
 	if err == http.ErrNoCookie {
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(&Result{Err: "unauthorized"})
@@ -269,12 +310,23 @@ func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, session)
 }
 
+// Auth godoc
+// @Summary      checking auth
+// @Description  checking auth
+// @Tags        Authorization
+// @Accept     application/json
+// @Produce  application/json
+// @Param    cookie header string true "Checking user authentication"
+// @Success  200 {object} integer "success authenticate return id"
+// @Failure 401 {object} error "unauthorized"
+// @Router   /login [post]
 func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.Method)
 
 	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	session, err := r.Cookie("session_id")
+	w.Header().Set("content-type", "application/json")
 	if err == http.ErrNoCookie {
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(&Result{Err: "unauthorized"})
@@ -300,6 +352,8 @@ func (api *Handler) Main(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r)
 }
 
+const PORT = ":3333"
+
 func main() {
 	mux := http.NewServeMux()
 	api := &Handler{
@@ -307,8 +361,8 @@ func main() {
 		userstore:       store.NewUserStore(),
 		sessions:        make(map[string]uint, 10),
 	}
-	mux.HandleFunc("/restaurants", api.getRestaurantList)
-	mux.HandleFunc("/users", api.User)
+	mux.HandleFunc("/restaurants", api.GetRestaurantList)
+	mux.HandleFunc("/users", api.SignUp)
 	mux.HandleFunc("/login", api.Login)
 	mux.HandleFunc("/logout", api.Logout)
 	mux.HandleFunc("/auth", api.Auth)
@@ -316,7 +370,7 @@ func main() {
 	ctx := context.Background()
 
 	server := &http.Server{
-		Addr:    ":3333",
+		Addr:    PORT,
 		Handler: mux,
 		BaseContext: func(l net.Listener) context.Context {
 			ctx = context.WithValue(ctx, keyServerAddr, l.Addr().String())
