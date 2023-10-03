@@ -9,8 +9,8 @@ import (
 	"math/rand"
 	"net"
 	"net/http"
-	"server/store"
 	"regexp"
+	"server/store"
 	"time"
 )
 
@@ -125,7 +125,6 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		username := keyVal["username"]
 		password := keyVal["password"]
 		birthday := keyVal["birthday"]
-		phoneNumber := keyVal["phone_number"]
 		email := keyVal["email"]
 
 		if len(username) < 3 {
@@ -166,24 +165,10 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		re = regexp.MustCompile(`^[0-9\-\+]{9,15}$`)
-		if !re.MatchString(phoneNumber) {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(&Result{Err: "incorrect phone"})
-			return
-		}
-
 		user := api.userstore.FindUserBy("username", keyVal["username"])
 		if user != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(&Result{Err: "username already exists"})
-			return
-		}
-
-		user = api.userstore.FindUserBy("phone_number", keyVal["phone_number"])
-		if user != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(&Result{Err: "phone number already exists"})
 			return
 		}
 
@@ -195,11 +180,10 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		}
 
 		in := &store.User{
-			Username:    username,
-			Password:    password,
-			Birthday:    birthday,
-			PhoneNumber: phoneNumber,
-			Email:       email,
+			Username: username,
+			Password: password,
+			Birthday: birthday,
+			Email:    email,
 		}
 
 		id, err := api.userstore.SignUpUser(in)
@@ -277,7 +261,7 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, cookie)
 	body := map[string]interface{}{
-		"cookie": cookie.Value,
+		"cookie":   cookie.Value,
 		"username": user.Username,
 	}
 
@@ -349,7 +333,7 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := api.userstore.GetUserById(id-1);
+	user := api.userstore.GetUserById(id - 1)
 	http.SetCookie(w, session)
 	body := map[string]interface{}{
 		"username": user.Username,

@@ -59,13 +59,6 @@ func TestSignUp(t *testing.T) {
 		"email":        "ani@mail.ru",
 	}
 
-	var user4 = map[string]interface{}{
-		"username":     "anita",
-		"password":     "abc",
-		"phone_number": "89165342397",
-		"email":        "ani@mail.ru",
-	}
-
 	var user5 = map[string]interface{}{
 		"username":     "anita",
 		"password":     "abc",
@@ -99,13 +92,6 @@ func TestSignUp(t *testing.T) {
 		"password":     "abmmmmmmmmmmmmmmmmmmmmmmmmmm",
 		"phone_number": "89165342390",
 		"email":        "ani@mail.ru",
-	}
-
-	var user10 = map[string]interface{}{
-		"username":     "lena",
-		"password":     "abm",
-		"phone_number": "89165342390**",
-		"email":        "lena@mail.ru",
 	}
 
 	var user11 = map[string]interface{}{
@@ -161,22 +147,6 @@ func TestSignUp(t *testing.T) {
 		require.Equal(t, 400, resp.StatusCode)
 		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
 		require.Contains(t, string(body), "username already exists")
-	})
-
-	t.Run("returns 400 error when phone already exists", func(t *testing.T) {
-		body, _ := json.Marshal(user4)
-		req := httptest.NewRequest("POST", "/users", bytes.NewReader(body))
-
-		w := httptest.NewRecorder()
-
-		api.SignUp(w, req)
-
-		resp := w.Result()
-		body, _ = ioutil.ReadAll(resp.Body)
-
-		require.Equal(t, 400, resp.StatusCode)
-		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
-		require.Contains(t, string(body), "phone number already exists")
 	})
 
 	t.Run("returns 400 error when email already exists", func(t *testing.T) {
@@ -257,22 +227,6 @@ func TestSignUp(t *testing.T) {
 		require.Equal(t, 400, resp.StatusCode)
 		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
 		require.Contains(t, string(body), "password is too long")
-	})
-
-	t.Run("returns 400 error when phone number is incorrect", func(t *testing.T) {
-		body, _ := json.Marshal(user10)
-		req := httptest.NewRequest("POST", "/users", bytes.NewReader(body))
-
-		w := httptest.NewRecorder()
-
-		api.SignUp(w, req)
-
-		resp := w.Result()
-		body, _ = ioutil.ReadAll(resp.Body)
-
-		require.Equal(t, 400, resp.StatusCode)
-		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
-		require.Contains(t, string(body), "incorrect phone")
 	})
 
 	t.Run("returns 400 error when email is incorrect", func(t *testing.T) {
@@ -448,6 +402,6 @@ func TestAuth(t *testing.T) {
 
 		require.Equal(t, 200, resp.StatusCode)
 		require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
-		require.Contains(t, string(body), "id")
+		require.Contains(t, string(body), "username")
 	})
 }
