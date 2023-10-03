@@ -19,7 +19,7 @@ import (
 // @license.name Apache 2.0
 // @host http://84.23.53.216:8001/
 const keyServerAddr = "serverAddr"
-const allowedOrigin = "http://84.23.53.216:80"
+const allowedOrigin = "http://84.23.53.216"
 
 type Result struct {
 	Body interface{}
@@ -44,6 +44,15 @@ func randStringRunes(n int) string {
 	return string(b)
 }
 
+// GetRestaurants godoc
+// @Summary      giving restaurats
+// @Description  giving array of restaurants
+// @Tags        Restaurants
+// @Accept     application/json
+// @Produce  application/json
+// @Success  200 {object}  []store.Restaurant "success returning array of restaurants"
+// @Failure 500 {object} error "internal server error"
+// @Router   /restaurants [get]
 func (api *Handler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	fmt.Printf("%s: got /restaurants request. \n",
@@ -83,7 +92,7 @@ func (api *Handler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
 // @Success  200 {object}  integer "success create User return id"
 // @Failure 400 {object} error "bad request"
 // @Failure 500 {object} error "internal server error"
-// @Router   /users [post]
+// @Router   /users [get]
 func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -319,7 +328,7 @@ func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 // @Param    cookie header string true "Checking user authentication"
 // @Success  200 {object} integer "success authenticate return id"
 // @Failure 401 {object} error "unauthorized"
-// @Router   /login [post]
+// @Router   /auth [post]
 func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.Method)
 

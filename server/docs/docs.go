@@ -18,7 +18,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/login": {
+        "/auth": {
             "post": {
                 "description": "checking auth",
                 "consumes": [
@@ -49,6 +49,52 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "unauthorized",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "description": "Login user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authorization"
+                ],
+                "summary": "Login user",
+                "parameters": [
+                    {
+                        "description": "Logining user",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/store.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success login User return cookie",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request",
+                        "schema": {}
+                    },
+                    "404": {
+                        "description": "not found",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "internal server error",
                         "schema": {}
                     }
                 }
@@ -91,8 +137,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/restaurants": {
+            "get": {
+                "description": "giving array of restaurants",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Restaurants"
+                ],
+                "summary": "giving restaurats",
+                "responses": {
+                    "200": {
+                        "description": "success returning array of restaurants",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store.Restaurant"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/users": {
-            "post": {
+            "get": {
                 "description": "Signing up a user",
                 "consumes": [
                     "application/json"
@@ -135,6 +211,35 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "store.Restaurant": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "commentsCount": {
+                    "type": "integer"
+                },
+                "deliveryPrice": {
+                    "type": "integer"
+                },
+                "deliveryTime": {
+                    "type": "integer"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "rating": {
+                    "type": "number"
+                }
+            }
+        },
         "store.User": {
             "type": "object",
             "properties": {

@@ -1,4 +1,23 @@
 definitions:
+  store.Restaurant:
+    properties:
+      category:
+        type: string
+      commentsCount:
+        type: integer
+      deliveryPrice:
+        type: integer
+      deliveryTime:
+        type: integer
+      icon:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      rating:
+        type: number
+    type: object
   store.User:
     properties:
       birthday:
@@ -22,7 +41,7 @@ info:
   title: Prinesi-Poday API
   version: "1.0"
 paths:
-  /login:
+  /auth:
     post:
       consumes:
       - application/json
@@ -44,6 +63,37 @@ paths:
           description: unauthorized
           schema: {}
       summary: checking auth
+      tags:
+      - Authorization
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Login user
+      parameters:
+      - description: Logining user
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/store.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success login User return cookie
+          schema:
+            type: string
+        "400":
+          description: bad request
+          schema: {}
+        "404":
+          description: not found
+          schema: {}
+        "500":
+          description: internal server error
+          schema: {}
+      summary: Login user
       tags:
       - Authorization
   /logout:
@@ -71,8 +121,28 @@ paths:
       summary: Log out user
       tags:
       - Authorization
+  /restaurants:
+    get:
+      consumes:
+      - application/json
+      description: giving array of restaurants
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success returning array of restaurants
+          schema:
+            items:
+              $ref: '#/definitions/store.Restaurant'
+            type: array
+        "500":
+          description: internal server error
+          schema: {}
+      summary: giving restaurats
+      tags:
+      - Restaurants
   /users:
-    post:
+    get:
       consumes:
       - application/json
       description: Signing up a user
