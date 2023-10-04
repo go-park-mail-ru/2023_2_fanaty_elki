@@ -1,13 +1,11 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
-	"net"
 	"net/http"
 	"regexp"
 	"server/store"
@@ -57,10 +55,6 @@ func randStringRunes(n int) string {
 // @Failure 500 {object} error "internal server error"
 // @Router   /restaurants [get]
 func (api *Handler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	fmt.Printf("%s: got /restaurants request. \n",
-		ctx.Value(keyServerAddr),
-	)
 
 	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
@@ -97,12 +91,6 @@ func (api *Handler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} error "internal server error"
 // @Router   /users [post]
 func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	fmt.Printf("%s: got /users request. \n",
-		ctx.Value(keyServerAddr),
-	)
 
 	if r.Method != "POST" {
 		return
@@ -375,7 +363,6 @@ func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} error "unauthorized"
 // @Router   /auth [get]
 func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.Method)
 
 	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
@@ -425,15 +412,10 @@ func main() {
 	mux.HandleFunc("/login", api.Login)
 	mux.HandleFunc("/logout", api.Logout)
 	mux.HandleFunc("/auth", api.Auth)
-	ctx := context.Background()
 
 	server := &http.Server{
 		Addr:    PORT,
 		Handler: mux,
-		BaseContext: func(l net.Listener) context.Context {
-			ctx = context.WithValue(ctx, keyServerAddr, l.Addr().String())
-			return ctx
-		},
 	}
 
 	fmt.Println("Server start")
