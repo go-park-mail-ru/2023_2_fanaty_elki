@@ -1,0 +1,172 @@
+definitions:
+  store.Restaurant:
+    properties:
+      Category:
+        type: string
+      CommentsCount:
+        type: integer
+      DeliveryPrice:
+        type: integer
+      DeliveryTime:
+        type: integer
+      ID:
+        type: integer
+      Icon:
+        type: string
+      Name:
+        type: string
+      Rating:
+        type: number
+    type: object
+  store.User:
+    properties:
+      Birthday:
+        type: string
+      Email:
+        type: string
+      ID:
+        type: integer
+      Password:
+        type: string
+      PhoneNumber:
+        type: string
+      Username:
+        type: string
+    type: object
+host: http://84.23.53.216:8001/
+info:
+  contact: {}
+  license:
+    name: Apache 2.0
+  title: Prinesi-Poday API
+  version: "1.0"
+paths:
+  /auth:
+    get:
+      consumes:
+      - application/json
+      description: checking auth
+      parameters:
+      - description: Checking user authentication
+        in: header
+        name: cookie
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success authenticate return id
+          schema:
+            type: integer
+        "401":
+          description: unauthorized
+          schema: {}
+      summary: checking auth
+      tags:
+      - users
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Log in user
+      parameters:
+      - description: user object for login
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/store.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success login User return cookie
+          schema:
+            type: string
+        "400":
+          description: bad request
+          schema: {}
+        "404":
+          description: not found
+          schema: {}
+        "500":
+          description: internal server error
+          schema: {}
+      summary: Log in user
+      tags:
+      - users
+  /logout:
+    get:
+      consumes:
+      - application/json
+      description: Log out user
+      parameters:
+      - description: Log out user
+        in: header
+        name: cookie
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: void" "success log out
+        "400":
+          description: bad request
+          schema: {}
+        "401":
+          description: unauthorized
+          schema: {}
+      summary: Log out user
+      tags:
+      - users
+  /restaurants:
+    get:
+      consumes:
+      - '*/*'
+      description: giving array of restaurants
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success returning array of restaurants
+          schema:
+            items:
+              $ref: '#/definitions/store.Restaurant'
+            type: array
+        "500":
+          description: internal server error
+          schema: {}
+      summary: giving restaurats
+      tags:
+      - Restaurants
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Signing up a user
+      parameters:
+      - description: User object for signing up
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/store.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success create User return id
+          schema:
+            type: integer
+        "400":
+          description: bad request
+          schema: {}
+        "500":
+          description: internal server error
+          schema: {}
+      summary: Signing up a user
+      tags:
+      - users
+swagger: "2.0"
