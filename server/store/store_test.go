@@ -156,8 +156,7 @@ func TestCheckSignUpUserSuccess(t *testing.T) {
 		nextID: 2}
 
 	t.Run("Get User Success", func(t *testing.T) {
-		result, err := res.SignUpUser(&user3)
+		result := res.SignUpUser(&user3)
 		require.Equal(t, uint(3), result)
-		require.NoError(t, err)
 	})
 }

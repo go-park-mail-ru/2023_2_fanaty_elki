@@ -209,15 +209,7 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		Email:    email,
 	}
 
-	id, err := api.userstore.SignUpUser(in)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&Error{Err: "error while adding user"})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		return
-	}
+	id := api.userstore.SignUpUser(in)
 
 	body := map[string]interface{}{
 		"id": id,
