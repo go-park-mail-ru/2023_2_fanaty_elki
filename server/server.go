@@ -1,13 +1,11 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
-	"net"
 	"net/http"
 	"regexp"
 	"server/store"
@@ -57,10 +55,6 @@ func randStringRunes(n int) string {
 // @Failure 500 {object} error "internal server error"
 // @Router   /restaurants [get]
 func (api *Handler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	fmt.Printf("%s: got /restaurants request. \n",
-		ctx.Value(keyServerAddr),
-	)
 
 	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
@@ -97,139 +91,132 @@ func (api *Handler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} error "internal server error"
 // @Router   /users [post]
 func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
 
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	fmt.Printf("%s: got /users request. \n",
-		ctx.Value(keyServerAddr),
-	)
+	if r.Method != "POST" {
+		return
+	}
 
-	if r.Method == "POST" {
+	jsonbody, err := ioutil.ReadAll(r.Body)
 
-		jsonbody, err := ioutil.ReadAll(r.Body)
+	w.Header().Set("content-type", "application/json")
 
-		w.Header().Set("content-type", "application/json")
-
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			err = json.NewEncoder(w).Encode(&Error{Err: "problems with reading data"})
-			return
-		}
-
-		keyVal := make(map[string]string)
-		err = json.Unmarshal(jsonbody, &keyVal)
-
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			err = json.NewEncoder(w).Encode(&Error{Err: "problems with unmarshaling json"})
-			return
-		}
-
-		username := keyVal["username"]
-		password := keyVal["password"]
-		birthday := keyVal["birthday"]
-		email := keyVal["email"]
-
-		if len(username) < 3 {
-			w.WriteHeader(http.StatusBadRequest)
-			err = json.NewEncoder(w).Encode(&Error{Err: "username is too short"})
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-			return
-		}
-
-		if len(username) > 30 {
-			w.WriteHeader(http.StatusBadRequest)
-			err = json.NewEncoder(w).Encode(&Error{Err: "username is too long"})
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-			return
-		}
-
-		if len(password) < 3 {
-			w.WriteHeader(http.StatusBadRequest)
-			err = json.NewEncoder(w).Encode(&Error{Err: "password is too short"})
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-			return
-		}
-
-		if len(password) > 20 {
-			w.WriteHeader(http.StatusBadRequest)
-			err = json.NewEncoder(w).Encode(&Error{Err: "password is too long"})
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-			return
-		}
-
-		re := regexp.MustCompile(`\d{2}-\d{2}-\d{4}`)
-		if birthday != "" && !re.MatchString(birthday) {
-			w.WriteHeader(http.StatusBadRequest)
-			err = json.NewEncoder(w).Encode(&Error{Err: "incorrect birthday"})
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-			return
-		}
-
-		re = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-		if !re.MatchString(email) {
-			w.WriteHeader(http.StatusBadRequest)
-			err = json.NewEncoder(w).Encode(&Error{Err: "incorrect email"})
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-			return
-		}
-
-		user := api.userstore.FindUserBy("username", keyVal["username"])
-		if user != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			err = json.NewEncoder(w).Encode(&Error{Err: "username already exists"})
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-			return
-		}
-
-		user = api.userstore.FindUserBy("email", keyVal["email"])
-		if user != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			err = json.NewEncoder(w).Encode(&Error{Err: "email already exists"})
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-			return
-		}
-
-		in := &store.User{
-			Username: username,
-			Password: password,
-			Birthday: birthday,
-			Email:    email,
-		}
-
-		id, err := api.userstore.SignUpUser(in)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			err = json.NewEncoder(w).Encode(&Error{Err: "error while adding user"})
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-			return
-		}
-
-		body := map[string]interface{}{
-			"id": id,
-		}
-		err = json.NewEncoder(w).Encode(&Result{Body: body})
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		err = json.NewEncoder(w).Encode(&Error{Err: "problems with reading data"})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
+		return
+	}
+
+	keyVal := make(map[string]string)
+	err = json.Unmarshal(jsonbody, &keyVal)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		err = json.NewEncoder(w).Encode(&Error{Err: "problems with unmarshaling json"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	username := keyVal["username"]
+	password := keyVal["password"]
+	birthday := keyVal["birthday"]
+	email := keyVal["email"]
+
+	if len(username) < 3 {
+		w.WriteHeader(http.StatusBadRequest)
+		err = json.NewEncoder(w).Encode(&Error{Err: "username is too short"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	if len(username) > 30 {
+		w.WriteHeader(http.StatusBadRequest)
+		err = json.NewEncoder(w).Encode(&Error{Err: "username is too long"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	if len(password) < 3 {
+		w.WriteHeader(http.StatusBadRequest)
+		err = json.NewEncoder(w).Encode(&Error{Err: "password is too short"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	if len(password) > 20 {
+		w.WriteHeader(http.StatusBadRequest)
+		err = json.NewEncoder(w).Encode(&Error{Err: "password is too long"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	re := regexp.MustCompile(`\d{2}-\d{2}-\d{4}`)
+	if birthday != "" && !re.MatchString(birthday) {
+		w.WriteHeader(http.StatusBadRequest)
+		err = json.NewEncoder(w).Encode(&Error{Err: "incorrect birthday"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	re = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	if !re.MatchString(email) {
+		w.WriteHeader(http.StatusBadRequest)
+		err = json.NewEncoder(w).Encode(&Error{Err: "incorrect email"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	user := api.userstore.FindUserBy("username", keyVal["username"])
+	if user != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		err = json.NewEncoder(w).Encode(&Error{Err: "username already exists"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	user = api.userstore.FindUserBy("email", keyVal["email"])
+	if user != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		err = json.NewEncoder(w).Encode(&Error{Err: "email already exists"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	in := &store.User{
+		Username: username,
+		Password: password,
+		Birthday: birthday,
+		Email:    email,
+	}
+
+	id := api.userstore.SignUpUser(in)
+
+	body := map[string]interface{}{
+		"id": id,
+	}
+	err = json.NewEncoder(w).Encode(&Result{Body: body})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 }
@@ -255,8 +242,11 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "problems with reading data"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -264,8 +254,11 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(jsonbody, &keyVal)
 
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "problems with unmarshaling json"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -362,7 +355,6 @@ func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} error "unauthorized"
 // @Router   /auth [get]
 func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.Method)
 
 	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
@@ -412,15 +404,10 @@ func main() {
 	mux.HandleFunc("/login", api.Login)
 	mux.HandleFunc("/logout", api.Logout)
 	mux.HandleFunc("/auth", api.Auth)
-	ctx := context.Background()
 
 	server := &http.Server{
 		Addr:    PORT,
 		Handler: mux,
-		BaseContext: func(l net.Listener) context.Context {
-			ctx = context.WithValue(ctx, keyServerAddr, l.Addr().String())
-			return ctx
-		},
 	}
 
 	fmt.Println("Server start")
