@@ -1,6 +1,9 @@
 package store
 
 import (
+	"database/sql"
+	"fmt"
+	"strings"
 	"sync"
 )
 
@@ -34,82 +37,14 @@ type UserStore struct {
 	nextID uint
 }
 
-var Restaurants = []*Restaurant{
-	{
-		ID:            1,
-		Name:          "Burger King",
-		Rating:        3.7,
-		CommentsCount: 60,
-		Icon:          "img/burger_king.jpg",
-		DeliveryTime:  15,
-		DeliveryPrice: 600,
-		Category:      "Fastfood",
-	},
-	{
-		ID:     2,
-		Name:   "MacBurger",
-		Rating: 3.8, CommentsCount: 69,
-		Icon:          "img/mac_burger.jpg",
-		DeliveryTime:  35,
-		DeliveryPrice: 500,
-		Category:      "Fastfood",
-	},
-	{
-		ID: 3, Name: "Вкусно и точка",
-		Rating: 3.2, CommentsCount: 90,
-		Icon:          "img/tasty_and..jpg",
-		DeliveryTime:  20,
-		DeliveryPrice: 100,
-		Category:      "Fastfood",
-	},
-	{
-		ID: 3, Name: "KFC",
-		Rating: 4.0, CommentsCount: 90,
-		Icon:          "img/kfc.jpg",
-		DeliveryTime:  40,
-		DeliveryPrice: 600,
-		Category:      "Fastfood",
-	},
-	{
-		ID: 3, Name: "Шоколадница",
-		Rating: 4.5, CommentsCount: 90,
-		Icon:          "img/chocolate.jpeg",
-		DeliveryTime:  30,
-		DeliveryPrice: 400,
-		Category:      "Fastfood",
-	},
-	{
-		ID: 3, Name: "Корчма Тарас Бульба",
-		Rating: 5.0, CommentsCount: 90,
-		Icon:          "img/bulba.jpg",
-		DeliveryTime:  30,
-		DeliveryPrice: 800,
-		Category:      "Fastfood",
-	},
-	{
-		ID: 3, Name: "Subway",
-		Rating: 3.0, CommentsCount: 90,
-		Icon:          "img/subway.jpeg",
-		DeliveryTime:  40,
-		DeliveryPrice: 600,
-		Category:      "Fastfood",
-	},
-	{
-		ID: 3, Name: "Sushiwok",
-		Rating: 4.5, CommentsCount: 90,
-		Icon:          "img/sushi_wok.png",
-		DeliveryTime:  10,
-		DeliveryPrice: 300,
-		Category:      "Fastfood",
-	},
-}
-
 var Users = []*User{}
+
+var DB *sql.DB
 
 func NewRestaurantStore() *RestaurantStore {
 	return &RestaurantStore{
-		mu:          sync.RWMutex{},
-		restourants: Restaurants,
+		mu: sync.RWMutex{},
+		//restourants: Restaurants{},
 	}
 }
 
@@ -125,43 +60,99 @@ func (rs *RestaurantStore) GetRestaurants() ([]*Restaurant, error) {
 	rs.mu.RLock()
 	defer rs.mu.RUnlock()
 
-	return rs.restourants, nil
-}
-
-func (us *UserStore) GetUsers() ([]*User, error) {
-	us.mu.RLock()
-	defer us.mu.RUnlock()
-
-	return us.users, nil
+	rows, err := DB.Query("SELECT * FROM restaurant")
+	if err != nil {
+		fmt.Println("error while connecting")
+	}
+	defer rows.Close()
+	var Restaurants = []*Restaurant{}
+	for rows.Next() {
+		restaurant := &Restaurant{}
+		err = rows.Scan(
+			&restaurant.ID,
+			&restaurant.Name,
+			&restaurant.Rating,
+			&restaurant.CommentsCount,
+			&restaurant.Category,
+			&restaurant.DeliveryPrice,
+			&restaurant.DeliveryTime,
+			&restaurant.Icon,
+		)
+		restaurant.Name = strings.TrimSpace(restaurant.Name)
+		restaurant.Icon = strings.TrimSpace(restaurant.Icon)
+		restaurant.Category = strings.TrimSpace(restaurant.Category)
+		if err != nil {
+			fmt.Println("error while scanning")
+		}
+		Restaurants = append(Restaurants, restaurant)
+	}
+	err = rows.Err()
+	if err != nil {
+		fmt.Println("error while scanning")
+	}
+	return Restaurants, nil
 }
 
 func (us *UserStore) FindUserBy(field string, value string) *User {
-	for _, u := range us.users {
-		switch field {
-		case "username":
-			if u.Username == value {
-				return u
+	us.mu.RLock()
+	defer us.mu.RUnlock()
+	user := &User{}
+	switch field {
+	case "username":
+		row := DB.QueryRow("SELECT id, username, password, birthday, email FROM users WHERE username = $1", value)
+		err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.Email)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return nil
 			}
-		case "email":
-			if u.Email == value {
-				return u
-			}
+			fmt.Println("error while scanning", err)
 		}
+		return user
+	case "email":
+		row := DB.QueryRow("SELECT id, username, password, birthday, email FROM users WHERE email = $1", value)
+		err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.Email)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return nil
+			}
+			fmt.Println("error while scanning", err)
+		}
+		return user
 	}
+
 	return nil
 }
 
 func (us *UserStore) GetUserById(id uint) *User {
-	return us.users[id]
+	us.mu.RLock()
+	defer us.mu.RUnlock()
+	user := &User{}
+	row := DB.QueryRow("SELECT id, username, password, birthday, email FROM users WHERE id = $1", id)
+	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.Email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil
+		}
+		fmt.Println("error while scanning", err)
+	}
+	return user
 }
 
 func (us *UserStore) SignUpUser(in *User) uint {
 
 	us.mu.Lock()
-	us.nextID++
-	in.ID = us.nextID
-	us.users = append(us.users, in)
+	insertUser := `INSERT INTO users (username, password, birthday, phone_number, email, icon) VALUES ($1, $2, $3, $4, $5, $6)`
+	_, err := DB.Exec(insertUser, in.Username, in.Password, in.Birthday, "+7916521", in.Email, "deficon")
+	if err != nil {
+		fmt.Println("error while inserting", err)
+	}
 	us.mu.Unlock()
+	var ID uint
+	row := DB.QueryRow("SELECT ID FROM users WHERE username = $1", in.Username)
+	err = row.Scan(&ID)
+	if err != nil {
+		fmt.Println("error while scanning", err)
+	}
 
-	return in.ID
+	return ID
 }

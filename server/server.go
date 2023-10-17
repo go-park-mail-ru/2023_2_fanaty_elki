@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +11,8 @@ import (
 	"regexp"
 	"server/store"
 	"time"
+
+	_ "github.com/lib/pq"
 )
 
 // @title Prinesi-Poday API
@@ -271,7 +274,6 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
 	if user.Password != keyVal["password"] {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "incorrect password"})
@@ -379,7 +381,7 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := api.userstore.GetUserById(id - 1)
+	user := api.userstore.GetUserById(id)
 	http.SetCookie(w, session)
 	body := map[string]interface{}{
 		"username": user.Username,
@@ -393,6 +395,31 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 const PORT = ":3333"
 
 func main() {
+	const (
+		host     = "localhost"
+		port     = 5432
+		user     = "uliana"
+		password = "uliana"
+		dbname   = "prinesy-poday"
+	)
+
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+	var err error
+	store.DB, err = sql.Open("postgres", psqlInfo)
+	if err != nil {
+		fmt.Println("error while opening")
+	}
+	defer store.DB.Close()
+
+	err = store.DB.Ping()
+	if err != nil {
+		fmt.Println("error while connecting", err)
+	}
+
+	fmt.Println("Successfully connected!")
+
 	mux := http.NewServeMux()
 	api := &Handler{
 		restaurantstore: store.NewRestaurantStore(),
@@ -411,7 +438,7 @@ func main() {
 	}
 
 	fmt.Println("Server start")
-	err := server.ListenAndServe()
+	err = server.ListenAndServe()
 
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
