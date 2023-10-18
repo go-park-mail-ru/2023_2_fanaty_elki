@@ -18,21 +18,31 @@ definitions:
       Rating:
         type: number
     type: object
+    example:
+      Category: "Italian"
+      CommentsCount: 10
+      DeliveryPrice: 5
+      DeliveryTime: 30
+      ID: 1
+      Icon: "italian-icon.png"
+      Name: "Italiano Ristorante"
+      Rating: 4.5
   store.User:
     properties:
-      Birthday:
-        type: string
       Email:
         type: string
       ID:
         type: integer
       Password:
         type: string
-      PhoneNumber:
-        type: string
       Username:
         type: string
     type: object
+    example:
+      Email: "user@example.com"
+      ID: 1
+      Password: "mypassword"
+      Username: "myusername"
 host: http://84.23.53.216:8001/
 info:
   contact: {}
@@ -47,7 +57,7 @@ paths:
       - application/json
       description: checking auth
       parameters:
-      - description: Checking user authentication
+      - description: cookie
         in: header
         name: cookie
         required: true
@@ -71,17 +81,25 @@ paths:
       - application/json
       description: Log in user
       parameters:
-      - description: user object for login
+      - description: login
         in: body
-        name: user
+        name: login
         required: true
         schema:
-          $ref: '#/definitions/store.User'
+          type: string
+        example: "user123"
+      - description: password
+        in: body
+        name: password
+        required: true
+        schema:
+          type: string
+        example: "mypassword"
       produces:
       - application/json
       responses:
         "200":
-          description: success login User return cookie
+          description: success log in User return cookie
           schema:
             type: string
         "400":
@@ -102,7 +120,7 @@ paths:
       - application/json
       description: Log out user
       parameters:
-      - description: Log out user
+      - description: cookie
         in: header
         name: cookie
         required: true
@@ -147,7 +165,7 @@ paths:
       - application/json
       description: Signing up a user
       parameters:
-      - description: User object for signing up
+      - description: User object
         in: body
         name: user
         required: true

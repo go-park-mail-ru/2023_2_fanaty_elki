@@ -85,7 +85,7 @@ func (api *Handler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
 // @Tags        users
 // @Accept     application/json
 // @Produce  application/json
-// @Param 	user	 body	 store.User	 true	 "User object for signing up"
+// @Param 	user	 body	 store.User	 true	 "User object"
 // @Success  200 {object}  integer "success create User return id"
 // @Failure 400 {object} error "bad request"
 // @Failure 500 {object} error "internal server error"
@@ -227,8 +227,9 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Tags        users
 // @Accept     application/json
 // @Produce  application/json
-// @Param    user body store.User true "user object for login"
-// @Success  200 {object}  string "success login User return cookie"
+// @Param 	login body string true "login"
+// @Param 	password body string true "password"
+// @Success  200 {object}  string "success log in User return cookie"
 // @Failure 400 {object} error "bad request"
 // @Failure 404 {object} error "not found"
 // @Failure 500 {object} error "internal server error"
@@ -310,7 +311,7 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 // @Tags        users
 // @Accept     application/json
 // @Produce  application/json
-// @Param    cookie header string true "Log out user"
+// @Param    cookie header string true "cookie"
 // @Success 200 "void" "success log out"
 // @Failure 400 {object} error "bad request"
 // @Failure 401 {object} error "unauthorized"
@@ -350,7 +351,7 @@ func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 // @Tags        users
 // @Accept     application/json
 // @Produce  application/json
-// @Param    cookie header string true "Checking user authentication"
+// @Param    cookie header string true "cookie"
 // @Success  200 {object} integer "success authenticate return id"
 // @Failure 401 {object} error "unauthorized"
 // @Router   /auth [get]

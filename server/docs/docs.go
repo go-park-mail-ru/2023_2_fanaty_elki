@@ -34,7 +34,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Checking user authentication",
+                        "description": "cookie",
                         "name": "cookie",
                         "in": "header",
                         "required": true
@@ -69,18 +69,27 @@ const docTemplate = `{
                 "summary": "Log in user",
                 "parameters": [
                     {
-                        "description": "user object for login",
-                        "name": "user",
+                        "description": "login",
+                        "name": "login",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/store.User"
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "password",
+                        "name": "password",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "success login User return cookie",
+                        "description": "success log in User return cookie",
                         "schema": {
                             "type": "string"
                         }
@@ -116,7 +125,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Log out user",
+                        "description": "cookie",
                         "name": "cookie",
                         "in": "header",
                         "required": true
@@ -182,7 +191,7 @@ const docTemplate = `{
                 "summary": "Signing up a user",
                 "parameters": [
                     {
-                        "description": "User object for signing up",
+                        "description": "User object",
                         "name": "user",
                         "in": "body",
                         "required": true,
@@ -253,9 +262,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "Password": {
-                    "type": "string"
-                },
-                "PhoneNumber": {
                     "type": "string"
                 },
                 "Username": {
