@@ -155,7 +155,7 @@ func (us *UserStore) GetUserById(id uint) *User {
 	return us.users[id]
 }
 
-func (us *UserStore) SignUpUser(in *User) (uint, error) {
+func (us *UserStore) SignUpUser(in *User) uint {
 
 	us.mu.Lock()
 	us.nextID++
@@ -163,5 +163,5 @@ func (us *UserStore) SignUpUser(in *User) (uint, error) {
 	us.users = append(us.users, in)
 	us.mu.Unlock()
 
-	return in.ID, nil
+	return in.ID
 }
