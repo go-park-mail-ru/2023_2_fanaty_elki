@@ -26,43 +26,70 @@ type User struct {
 	Email    string `json:"Email"`
 }
 
-type RestaurantStore struct {
-	restourants []*Restaurant
-	mu          sync.RWMutex
+type RestaurantRepo struct {
+	DB *sql.DB
+	mu sync.RWMutex
 }
 
-type UserStore struct {
-	users  []*User
-	mu     sync.RWMutex
-	nextID uint
+type UserRepo struct {
+	DB *sql.DB
+	mu sync.RWMutex
 }
 
 var Users = []*User{}
 
-var DB *sql.DB
+//var DB *sql.DB
 
-func NewRestaurantStore() *RestaurantStore {
-	return &RestaurantStore{
-		mu: sync.RWMutex{},
-		//restourants: Restaurants{},
-	}
-}
+func GetPostgres() *sql.DB {
+	const (
+		host     = "localhost"
+		port     = 5432
+		user     = "uliana"
+		password = "uliana"
+		dbname   = "prinesy-poday"
+	)
 
-func NewUserStore() *UserStore {
-	return &UserStore{
-		mu:    sync.RWMutex{},
-		users: Users,
-	}
-}
-
-func (rs *RestaurantStore) GetRestaurants() ([]*Restaurant, error) {
-
-	rs.mu.RLock()
-	defer rs.mu.RUnlock()
-
-	rows, err := DB.Query("SELECT * FROM restaurant")
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
-		fmt.Println("error while connecting")
+		fmt.Println("error while opening")
+	}
+	//defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		fmt.Println("error while connecting", err)
+	}
+
+	fmt.Println("Successfully connected!")
+	return db
+}
+
+func NewRestaurantRepo(db *sql.DB) *RestaurantRepo {
+	return &RestaurantRepo{
+		mu: sync.RWMutex{},
+		DB: db,
+	}
+}
+
+func NewUserRepo(db *sql.DB) *UserRepo {
+	return &UserRepo{
+		mu: sync.RWMutex{},
+		DB: db,
+	}
+}
+
+func (repo *RestaurantRepo) GetRestaurants() ([]*Restaurant, error) {
+
+	repo.mu.RLock()
+	defer repo.mu.RUnlock()
+
+	rows, err := repo.DB.Query("SELECT * FROM restaurant")
+	if err != nil {
+		fmt.Println("error while connecting", err)
+		return nil, err
 	}
 	defer rows.Close()
 	var Restaurants = []*Restaurant{}
@@ -93,13 +120,13 @@ func (rs *RestaurantStore) GetRestaurants() ([]*Restaurant, error) {
 	return Restaurants, nil
 }
 
-func (us *UserStore) FindUserBy(field string, value string) *User {
-	us.mu.RLock()
-	defer us.mu.RUnlock()
+func (repo *UserRepo) FindUserBy(field string, value string) *User {
+	repo.mu.RLock()
+	defer repo.mu.RUnlock()
 	user := &User{}
 	switch field {
 	case "username":
-		row := DB.QueryRow("SELECT id, username, password, birthday, email FROM users WHERE username = $1", value)
+		row := repo.DB.QueryRow("SELECT id, username, password, birthday, email FROM users WHERE username = $1", value)
 		err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.Email)
 		if err != nil {
 			if err == sql.ErrNoRows {
@@ -109,7 +136,7 @@ func (us *UserStore) FindUserBy(field string, value string) *User {
 		}
 		return user
 	case "email":
-		row := DB.QueryRow("SELECT id, username, password, birthday, email FROM users WHERE email = $1", value)
+		row := repo.DB.QueryRow("SELECT id, username, password, birthday, email FROM users WHERE email = $1", value)
 		err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.Email)
 		if err != nil {
 			if err == sql.ErrNoRows {
@@ -123,11 +150,11 @@ func (us *UserStore) FindUserBy(field string, value string) *User {
 	return nil
 }
 
-func (us *UserStore) GetUserById(id uint) *User {
-	us.mu.RLock()
-	defer us.mu.RUnlock()
+func (repo *UserRepo) GetUserById(id uint) *User {
+	repo.mu.RLock()
+	defer repo.mu.RUnlock()
 	user := &User{}
-	row := DB.QueryRow("SELECT id, username, password, birthday, email FROM users WHERE id = $1", id)
+	row := repo.DB.QueryRow("SELECT id, username, password, birthday, email FROM users WHERE id = $1", id)
 	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -138,17 +165,17 @@ func (us *UserStore) GetUserById(id uint) *User {
 	return user
 }
 
-func (us *UserStore) SignUpUser(in *User) uint {
+func (repo *UserRepo) SignUpUser(in *User) uint {
 
-	us.mu.Lock()
+	repo.mu.Lock()
 	insertUser := `INSERT INTO users (username, password, birthday, phone_number, email, icon) VALUES ($1, $2, $3, $4, $5, $6)`
-	_, err := DB.Exec(insertUser, in.Username, in.Password, in.Birthday, "+7916521", in.Email, "deficon")
+	_, err := repo.DB.Exec(insertUser, in.Username, in.Password, in.Birthday, "+7916521", in.Email, "deficon")
 	if err != nil {
 		fmt.Println("error while inserting", err)
 	}
-	us.mu.Unlock()
+	repo.mu.Unlock()
 	var ID uint
-	row := DB.QueryRow("SELECT ID FROM users WHERE username = $1", in.Username)
+	row := repo.DB.QueryRow("SELECT ID FROM users WHERE username = $1", in.Username)
 	err = row.Scan(&ID)
 	if err != nil {
 		fmt.Println("error while scanning", err)

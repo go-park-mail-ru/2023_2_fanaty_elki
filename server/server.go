@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -31,8 +30,8 @@ type Error struct {
 }
 
 type Handler struct {
-	restaurantstore *store.RestaurantStore
-	userstore       *store.UserStore
+	restaurantstore *store.RestaurantRepo
+	userstore       *store.UserRepo
 	sessions        map[string]uint
 }
 
@@ -395,35 +394,14 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 const PORT = ":3333"
 
 func main() {
-	const (
-		host     = "localhost"
-		port     = 5432
-		user     = "uliana"
-		password = "uliana"
-		dbname   = "prinesy-poday"
-	)
-
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
-	var err error
-	store.DB, err = sql.Open("postgres", psqlInfo)
-	if err != nil {
-		fmt.Println("error while opening")
-	}
-	defer store.DB.Close()
-
-	err = store.DB.Ping()
-	if err != nil {
-		fmt.Println("error while connecting", err)
-	}
-
-	fmt.Println("Successfully connected!")
 
 	mux := http.NewServeMux()
+
+	db := store.GetPostgres()
+	defer db.Close()
 	api := &Handler{
-		restaurantstore: store.NewRestaurantStore(),
-		userstore:       store.NewUserStore(),
+		restaurantstore: store.NewRestaurantRepo(db),
+		userstore:       store.NewUserRepo(db),
 		sessions:        make(map[string]uint, 10),
 	}
 	mux.HandleFunc("/restaurants", api.GetRestaurantList)
@@ -438,7 +416,7 @@ func main() {
 	}
 
 	fmt.Println("Server start")
-	err = server.ListenAndServe()
+	err := server.ListenAndServe()
 
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
