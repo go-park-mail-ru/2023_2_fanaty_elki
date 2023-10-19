@@ -42,30 +42,21 @@ type Handler struct {
 	sessManager     *store.SessionManager
 }
 
-// var (
-// 	letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-// )
-
-// func randStringRunes(n int) string {
-// 	b := make([]rune, n)
-// 	for i := range b {
-// 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
-// 	}
-// 	return string(b)
-// }
-
-func (api *Handler) checkSession(r *http.Request) *store.Session {
+func (api *Handler) checkSession(r *http.Request) (*store.Session, error) {
 	cookieSessionID, err := r.Cookie("session_id")
 	if err == http.ErrNoCookie {
-		return nil
+		return nil, nil
 	} else if err != nil {
-		return nil
+		return nil, err
 	}
 
-	sess := api.sessManager.Check(&store.SessionID{
+	sess, err := api.sessManager.Check(&store.SessionID{
 		ID: cookieSessionID.Value,
 	})
-	return sess
+	if err != nil {
+		return nil, err
+	}
+	return sess, nil
 }
 
 // GetRestaurants godoc
@@ -217,7 +208,11 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := api.userstore.FindUserBy("Username", keyVal["Username"])
+	user, err := api.userstore.FindUserBy("Username", keyVal["Username"])
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	if user != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "username already exists"})
@@ -227,7 +222,11 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user = api.userstore.FindUserBy("Email", keyVal["Email"])
+	user, err = api.userstore.FindUserBy("Email", keyVal["Email"])
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	if user != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "email already exists"})
@@ -237,7 +236,11 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user = api.userstore.FindUserBy("PhoneNumber", keyVal["PhoneNumber"])
+	user, err = api.userstore.FindUserBy("PhoneNumber", keyVal["PhoneNumber"])
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	if user != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "phone number already exists"})
@@ -246,12 +249,14 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+
 	var birthdayString sql.NullString
 	if birthday != "" {
 		birthdayString = sql.NullString{String: birthday, Valid: true}
 	} else {
 		birthdayString = sql.NullString{Valid: false}
 	}
+
 	var iconString sql.NullString
 	if icon != "" {
 		iconString = sql.NullString{String: icon, Valid: true}
@@ -268,7 +273,12 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		Icon:        iconString,
 	}
 
-	id := api.userstore.SignUpUser(in)
+	id, err := api.userstore.SignUpUser(in)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	body := map[string]interface{}{
 		"ID": id,
@@ -321,7 +331,11 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := api.userstore.FindUserBy("Username", keyVal["Username"])
+	user, err := api.userstore.FindUserBy("Username", keyVal["Username"])
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	if user == nil {
 		w.WriteHeader(http.StatusNotFound)
 		err = json.NewEncoder(w).Encode(&Error{Err: "user not found"})
@@ -339,9 +353,6 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//SID := randStringRunes(32)
-
-	//api.sessions[SID] = user.ID
 	sess, err := api.sessManager.Create(&store.Session{
 		UserID:    user.ID,
 		Useragent: r.UserAgent(),
@@ -387,17 +398,6 @@ func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 	session, err := r.Cookie("session_id")
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// }
-	// if session == nil {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 	}
-	// 	return
-	// }
 	if err == http.ErrNoCookie {
 		w.WriteHeader(http.StatusUnauthorized)
 		err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
@@ -412,17 +412,7 @@ func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 	api.sessManager.Delete(&store.SessionID{
 		ID: session.Value,
 	})
-	// if _, ok := api.sessions[session.Value]; !ok {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 	}
-	// 	return
-	// }
 
-	//delete(api.sessions, session.Value)
-	//api.sessManager.Delete(session)
 	session.Expires = time.Now().AddDate(0, 0, -1)
 	http.SetCookie(w, session)
 }
@@ -441,26 +431,8 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
-	//session, err := r.Cookie("session_id")
 	w.Header().Set("content-type", "application/json")
-	// if err == http.ErrNoCookie {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 	}
-	// 	return
-	// }
 
-	// id, ok := api.sessions[session.Value]
-	// if !ok {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 	}
-	// 	return
-	// }
 	sess, err := r.Cookie("session_id")
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -470,7 +442,11 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	session := api.checkSession(r)
+	session, err := api.checkSession(r)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	if session == nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		err := json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
@@ -480,7 +456,11 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := api.userstore.GetUserById(session.UserID)
+	user, err := api.userstore.GetUserById(session.UserID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	http.SetCookie(w, sess)
 	body := map[string]interface{}{
 		"Username": user.Username,
@@ -504,7 +484,11 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	db := store.GetPostgres()
+	db, err := store.GetPostgres()
+	if err != nil {
+		log.Fatalf("cant connect to postgres")
+		return
+	}
 	defer db.Close()
 	api := &Handler{
 		restaurantstore: store.NewRestaurantRepo(db),

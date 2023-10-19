@@ -3,7 +3,6 @@ package store
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"math/rand"
 
 	"github.com/gomodule/redigo/redis"
@@ -56,26 +55,25 @@ func (sm *SessionManager) Create(in *Session) (*SessionID, error) {
 	return &id, nil
 }
 
-func (sm *SessionManager) Check(in *SessionID) *Session {
+func (sm *SessionManager) Check(in *SessionID) (*Session, error) {
 	mkey := "sessions:" + in.ID
 	data, err := redis.Bytes(sm.redisConn.Do("GET", mkey))
 	if err != nil {
-		log.Println("cant get data:", err)
-		return nil
+		return nil, err
 	}
 	sess := &Session{}
 	err = json.Unmarshal(data, sess)
 	if err != nil {
-		log.Println("cant unpack session data:", err)
-		return nil
+		return nil, err
 	}
-	return sess
+	return sess, nil
 }
 
-func (sm *SessionManager) Delete(in *SessionID) {
+func (sm *SessionManager) Delete(in *SessionID) error {
 	mkey := "sessions:" + in.ID
 	_, err := redis.Int(sm.redisConn.Do("DEL", mkey))
 	if err != nil {
-		log.Println("redis error:", err)
+		return err
 	}
+	return nil
 }

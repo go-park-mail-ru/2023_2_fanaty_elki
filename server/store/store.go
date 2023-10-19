@@ -42,7 +42,7 @@ var Users = []*User{}
 
 //var DB *sql.DB
 
-func GetPostgres() *sql.DB {
+func GetPostgres() (*sql.DB, error) {
 	const (
 		host     = "localhost"
 		port     = 5432
@@ -56,17 +56,16 @@ func GetPostgres() *sql.DB {
 		host, port, user, password, dbname)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
-		fmt.Println("error while opening")
+		return nil, err
 	}
-	//defer db.Close()
 
 	err = db.Ping()
 	if err != nil {
-		fmt.Println("error while connecting", err)
+		return nil, err
 	}
 
 	fmt.Println("Successfully connected!")
-	return db
+	return db, nil
 }
 
 func NewRestaurantRepo(db *sql.DB) *RestaurantRepo {
@@ -90,7 +89,6 @@ func (repo *RestaurantRepo) GetRestaurants() ([]*Restaurant, error) {
 
 	rows, err := repo.DB.Query("SELECT id, name, rating, comments_count, category, delivery_price, delivery_time, icon FROM restaurant")
 	if err != nil {
-		fmt.Println("error while connecting", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -111,18 +109,22 @@ func (repo *RestaurantRepo) GetRestaurants() ([]*Restaurant, error) {
 		restaurant.Icon = strings.TrimSpace(restaurant.Icon)
 		restaurant.Category = strings.TrimSpace(restaurant.Category)
 		if err != nil {
-			fmt.Println("error while scanning")
+			return nil, err
 		}
 		Restaurants = append(Restaurants, restaurant)
 	}
 	err = rows.Err()
 	if err != nil {
-		fmt.Println("error while scanning")
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, err
+		}
 	}
 	return Restaurants, nil
 }
 
-func (repo *UserRepo) FindUserBy(field string, value string) *User {
+func (repo *UserRepo) FindUserBy(field string, value string) (*User, error) {
 	repo.mu.RLock()
 	defer repo.mu.RUnlock()
 	user := &User{}
@@ -132,37 +134,37 @@ func (repo *UserRepo) FindUserBy(field string, value string) *User {
 		err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.PhoneNumber, &user.Email, &user.Icon)
 		if err != nil {
 			if err == sql.ErrNoRows {
-				return nil
+				return nil, nil
 			}
-			fmt.Println("error while scanning", err)
+			return nil, err
 		}
-		return user
+		return user, nil
 	case "Email":
 		row := repo.DB.QueryRow("SELECT id, username, password, birthday, phone_number, email, icon FROM users WHERE email = $1", value)
 		err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.PhoneNumber, &user.Email, &user.Icon)
 		if err != nil {
 			if err == sql.ErrNoRows {
-				return nil
+				return nil, nil
 			}
-			fmt.Println("error while scanning", err)
+			return nil, err
 		}
-		return user
+		return user, nil
 	case "PhoneNumber":
 		row := repo.DB.QueryRow("SELECT id, username, password, birthday, phone_number, email, icon FROM users WHERE phone_number = $1", value)
 		err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.PhoneNumber, &user.Email, &user.Icon)
 		if err != nil {
 			if err == sql.ErrNoRows {
-				return nil
+				return nil, nil
 			}
-			fmt.Println("error while scanning", err)
+			return nil, err
 		}
-		return user
+		return user, nil
 	}
 
-	return nil
+	return nil, nil
 }
 
-func (repo *UserRepo) GetUserById(id uint) *User {
+func (repo *UserRepo) GetUserById(id uint) (*User, error) {
 	repo.mu.RLock()
 	defer repo.mu.RUnlock()
 	user := &User{}
@@ -170,28 +172,28 @@ func (repo *UserRepo) GetUserById(id uint) *User {
 	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil
+			return nil, nil
 		}
-		fmt.Println("error while scanning", err)
+		return nil, err
 	}
-	return user
+	return user, nil
 }
 
-func (repo *UserRepo) SignUpUser(in *User) uint {
+func (repo *UserRepo) SignUpUser(in *User) (uint, error) {
 
 	repo.mu.Lock()
 	insertUser := `INSERT INTO users (username, password, birthday, phone_number, email, icon) VALUES ($1, $2, $3, $4, $5, $6)`
 	_, err := repo.DB.Exec(insertUser, in.Username, in.Password, in.Birthday, in.PhoneNumber, in.Email, in.Icon)
 	if err != nil {
-		fmt.Println("error while inserting", err)
+		return 0, err
 	}
 	repo.mu.Unlock()
 	var ID uint
 	row := repo.DB.QueryRow("SELECT ID FROM users WHERE username = $1", in.Username)
 	err = row.Scan(&ID)
 	if err != nil {
-		fmt.Println("error while scanning", err)
+		return 0, err
 	}
 
-	return ID
+	return ID, nil
 }
