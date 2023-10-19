@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"server/store"
 	"time"
+	"github.com/gorilla/mux"
 )
 
 // @title Prinesi-Poday API
@@ -67,11 +68,14 @@ func (api *Handler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
 		err = json.NewEncoder(w).Encode(&Error{Err: "data base error"})
 		return
 	}
+
 	body := map[string]interface{}{
 		"restaurants": rests,
 	}
+
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(&Result{Body: body})
+
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		err = json.NewEncoder(w).Encode(&Error{Err: "error while marshalling JSON"})
@@ -91,10 +95,6 @@ func (api *Handler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} error "internal server error"
 // @Router   /users [post]
 func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
-
-	if r.Method != "POST" {
-		return
-	}
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 
@@ -393,21 +393,23 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 const PORT = ":3333"
 
 func main() {
-	mux := http.NewServeMux()
+	router := mux.NewRouter()
 	api := &Handler{
-		restaurantstore: store.NewRestaurantStore(),
-		userstore:       store.NewUserStore(),
-		sessions:        make(map[string]uint, 10),
+	 	restaurantstore: store.NewRestaurantStore(),
+	 	userstore:       store.NewUserStore(),
+	 	sessions:        make(map[string]uint, 10),
 	}
-	mux.HandleFunc("/restaurants", api.GetRestaurantList)
-	mux.HandleFunc("/users", api.SignUp)
-	mux.HandleFunc("/login", api.Login)
-	mux.HandleFunc("/logout", api.Logout)
-	mux.HandleFunc("/auth", api.Auth)
+	
 
+	router.HandleFunc("/restaurants", api.GetRestaurantList).Methods("GET")
+	router.HandleFunc("/users", api.SignUp).Methods("POST")
+	router.HandleFunc("/login", api.Login).Methods("POST")
+	router.HandleFunc("/logout", api.Logout).Methods("DELETE")
+	router.HandleFunc("/auth", api.Auth).Methods("GET")
+	
 	server := &http.Server{
 		Addr:    PORT,
-		Handler: mux,
+		Handler: router,
 	}
 
 	fmt.Println("Server start")
