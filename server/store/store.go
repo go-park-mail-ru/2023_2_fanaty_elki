@@ -19,13 +19,13 @@ type Restaurant struct {
 }
 
 type User struct {
-	ID          uint   `json:"ID"`
-	Username    string `json:"Username"`
-	Password    string `json:"Password"`
-	Birthday    string `json:"Birthday"`
-	PhoneNumber string `json:"PhoneNumber"`
-	Email       string `json:"Email"`
-	Icon        string `json:"Icon"`
+	ID          uint           `json:"ID"`
+	Username    string         `json:"Username"`
+	Password    string         `json:"Password"`
+	Birthday    sql.NullString `json:"Birthday"`
+	PhoneNumber string         `json:"PhoneNumber"`
+	Email       string         `json:"Email"`
+	Icon        sql.NullString `json:"Icon"`
 }
 
 type RestaurantRepo struct {
@@ -128,8 +128,8 @@ func (repo *UserRepo) FindUserBy(field string, value string) *User {
 	user := &User{}
 	switch field {
 	case "Username":
-		row := repo.DB.QueryRow("SELECT id, username, password, birthday, phone_number, email FROM users WHERE username = $1", value)
-		err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.PhoneNumber, &user.Email)
+		row := repo.DB.QueryRow("SELECT id, username, password, birthday, phone_number, email, icon FROM users WHERE username = $1", value)
+		err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.PhoneNumber, &user.Email, &user.Icon)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				return nil
@@ -138,8 +138,8 @@ func (repo *UserRepo) FindUserBy(field string, value string) *User {
 		}
 		return user
 	case "Email":
-		row := repo.DB.QueryRow("SELECT id, username, password, birthday, phone_number, email FROM users WHERE email = $1", value)
-		err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.PhoneNumber, &user.Email)
+		row := repo.DB.QueryRow("SELECT id, username, password, birthday, phone_number, email, icon FROM users WHERE email = $1", value)
+		err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.PhoneNumber, &user.Email, &user.Icon)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				return nil
@@ -148,8 +148,8 @@ func (repo *UserRepo) FindUserBy(field string, value string) *User {
 		}
 		return user
 	case "PhoneNumber":
-		row := repo.DB.QueryRow("SELECT id, username, password, birthday, phone_number, email FROM users WHERE phone_number = $1", value)
-		err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.PhoneNumber, &user.Email)
+		row := repo.DB.QueryRow("SELECT id, username, password, birthday, phone_number, email, icon FROM users WHERE phone_number = $1", value)
+		err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.PhoneNumber, &user.Email, &user.Icon)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				return nil
@@ -181,7 +181,7 @@ func (repo *UserRepo) SignUpUser(in *User) uint {
 
 	repo.mu.Lock()
 	insertUser := `INSERT INTO users (username, password, birthday, phone_number, email, icon) VALUES ($1, $2, $3, $4, $5, $6)`
-	_, err := repo.DB.Exec(insertUser, in.Username, in.Password, in.Birthday, in.PhoneNumber, in.Email, "deficon")
+	_, err := repo.DB.Exec(insertUser, in.Username, in.Password, in.Birthday, in.PhoneNumber, in.Email, in.Icon)
 	if err != nil {
 		fmt.Println("error while inserting", err)
 	}

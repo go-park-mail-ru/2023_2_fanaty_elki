@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -148,7 +149,7 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	birthday := keyVal["Birthday"]
 	phoneNumber := keyVal["PhoneNumber"]
 	email := keyVal["Email"]
-	//icon := keyVal["Icon"]
+	icon := keyVal["Icon"]
 
 	if len(username) < 3 {
 		w.WriteHeader(http.StatusBadRequest)
@@ -245,13 +246,26 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+	var birthdayString sql.NullString
+	if birthday != "" {
+		birthdayString = sql.NullString{String: birthday, Valid: true}
+	} else {
+		birthdayString = sql.NullString{Valid: false}
+	}
+	var iconString sql.NullString
+	if icon != "" {
+		iconString = sql.NullString{String: icon, Valid: true}
+	} else {
+		iconString = sql.NullString{Valid: false}
+	}
 
 	in := &store.User{
 		Username:    username,
 		Password:    password,
-		Birthday:    birthday,
+		Birthday:    birthdayString,
 		PhoneNumber: phoneNumber,
 		Email:       email,
+		Icon:        iconString,
 	}
 
 	id := api.userstore.SignUpUser(in)
