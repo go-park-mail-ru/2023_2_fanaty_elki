@@ -19,11 +19,13 @@ type Restaurant struct {
 }
 
 type User struct {
-	ID       uint   `json:"ID"`
-	Username string `json:"Username"`
-	Password string `json:"Password"`
-	Birthday string `json:"Birthday"`
-	Email    string `json:"Email"`
+	ID          uint   `json:"ID"`
+	Username    string `json:"Username"`
+	Password    string `json:"Password"`
+	Birthday    string `json:"Birthday"`
+	PhoneNumber string `json:"PhoneNumber"`
+	Email       string `json:"Email"`
+	Icon        string `json:"Icon"`
 }
 
 type RestaurantRepo struct {
@@ -125,9 +127,9 @@ func (repo *UserRepo) FindUserBy(field string, value string) *User {
 	defer repo.mu.RUnlock()
 	user := &User{}
 	switch field {
-	case "username":
-		row := repo.DB.QueryRow("SELECT id, username, password, birthday, email FROM users WHERE username = $1", value)
-		err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.Email)
+	case "Username":
+		row := repo.DB.QueryRow("SELECT id, username, password, birthday, phone_number, email FROM users WHERE username = $1", value)
+		err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.PhoneNumber, &user.Email)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				return nil
@@ -135,9 +137,19 @@ func (repo *UserRepo) FindUserBy(field string, value string) *User {
 			fmt.Println("error while scanning", err)
 		}
 		return user
-	case "email":
-		row := repo.DB.QueryRow("SELECT id, username, password, birthday, email FROM users WHERE email = $1", value)
-		err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.Email)
+	case "Email":
+		row := repo.DB.QueryRow("SELECT id, username, password, birthday, phone_number, email FROM users WHERE email = $1", value)
+		err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.PhoneNumber, &user.Email)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return nil
+			}
+			fmt.Println("error while scanning", err)
+		}
+		return user
+	case "PhoneNumber":
+		row := repo.DB.QueryRow("SELECT id, username, password, birthday, phone_number, email FROM users WHERE phone_number = $1", value)
+		err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.PhoneNumber, &user.Email)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				return nil
@@ -169,7 +181,7 @@ func (repo *UserRepo) SignUpUser(in *User) uint {
 
 	repo.mu.Lock()
 	insertUser := `INSERT INTO users (username, password, birthday, phone_number, email, icon) VALUES ($1, $2, $3, $4, $5, $6)`
-	_, err := repo.DB.Exec(insertUser, in.Username, in.Password, in.Birthday, "+7916521", in.Email, "deficon")
+	_, err := repo.DB.Exec(insertUser, in.Username, in.Password, in.Birthday, in.PhoneNumber, in.Email, "deficon")
 	if err != nil {
 		fmt.Println("error while inserting", err)
 	}

@@ -143,10 +143,12 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	username := keyVal["username"]
-	password := keyVal["password"]
-	birthday := keyVal["birthday"]
-	email := keyVal["email"]
+	username := keyVal["Username"]
+	password := keyVal["Password"]
+	birthday := keyVal["Birthday"]
+	phoneNumber := keyVal["PhoneNumber"]
+	email := keyVal["Email"]
+	//icon := keyVal["Icon"]
 
 	if len(username) < 3 {
 		w.WriteHeader(http.StatusBadRequest)
@@ -184,7 +186,7 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	re := regexp.MustCompile(`\d{2}-\d{2}-\d{4}`)
+	re := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`)
 	if birthday != "" && !re.MatchString(birthday) {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "incorrect birthday"})
@@ -194,7 +196,17 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	re = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	re = regexp.MustCompile(`^[+]?[0-9]{3,25}$`)
+	if phoneNumber != "" && !re.MatchString(phoneNumber) {
+		w.WriteHeader(http.StatusBadRequest)
+		err = json.NewEncoder(w).Encode(&Error{Err: "incorrect phone number"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	re = regexp.MustCompile(`\S*@\S*`)
 	if !re.MatchString(email) {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "incorrect email"})
@@ -204,7 +216,7 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := api.userstore.FindUserBy("username", keyVal["username"])
+	user := api.userstore.FindUserBy("Username", keyVal["Username"])
 	if user != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "username already exists"})
@@ -214,7 +226,7 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user = api.userstore.FindUserBy("email", keyVal["email"])
+	user = api.userstore.FindUserBy("Email", keyVal["Email"])
 	if user != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "email already exists"})
@@ -224,17 +236,28 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user = api.userstore.FindUserBy("PhoneNumber", keyVal["PhoneNumber"])
+	if user != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		err = json.NewEncoder(w).Encode(&Error{Err: "phone number already exists"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
 	in := &store.User{
-		Username: username,
-		Password: password,
-		Birthday: birthday,
-		Email:    email,
+		Username:    username,
+		Password:    password,
+		Birthday:    birthday,
+		PhoneNumber: phoneNumber,
+		Email:       email,
 	}
 
 	id := api.userstore.SignUpUser(in)
 
 	body := map[string]interface{}{
-		"id": id,
+		"ID": id,
 	}
 	err = json.NewEncoder(w).Encode(&Result{Body: body})
 	if err != nil {
@@ -284,7 +307,7 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := api.userstore.FindUserBy("username", keyVal["username"])
+	user := api.userstore.FindUserBy("Username", keyVal["Username"])
 	if user == nil {
 		w.WriteHeader(http.StatusNotFound)
 		err = json.NewEncoder(w).Encode(&Error{Err: "user not found"})
@@ -293,7 +316,7 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	if user.Password != keyVal["password"] {
+	if user.Password != keyVal["Password"] {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "incorrect password"})
 		if err != nil {
@@ -323,8 +346,7 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, cookie)
 	body := map[string]interface{}{
-		"cookie":   cookie.Value,
-		"username": user.Username,
+		"Username": user.Username,
 	}
 
 	err = json.NewEncoder(w).Encode(&Result{Body: body})
@@ -447,7 +469,7 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 	user := api.userstore.GetUserById(session.UserID)
 	http.SetCookie(w, sess)
 	body := map[string]interface{}{
-		"username": user.Username,
+		"Username": user.Username,
 	}
 	err = json.NewEncoder(w).Encode(&Result{Body: body})
 	if err != nil {
