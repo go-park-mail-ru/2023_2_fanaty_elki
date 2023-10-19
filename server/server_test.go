@@ -13,8 +13,8 @@ import (
 )
 
 var api = &Handler{
-	restaurantstore: store.NewRestaurantStore(),
-	userstore:       store.NewUserStore(),
+	restaurantstore: store.NewRestaurantRepo(),
+	userstore:       store.NewUserRepo(),
 	sessions:        make(map[string]uint, 10),
 }
 

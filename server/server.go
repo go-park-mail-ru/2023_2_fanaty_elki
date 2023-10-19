@@ -3,14 +3,16 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
+	"log"
 	"net/http"
 	"regexp"
 	"server/store"
 	"time"
 
+	"github.com/gomodule/redigo/redis"
 	_ "github.com/lib/pq"
 )
 
@@ -20,6 +22,10 @@ import (
 // @host http://84.23.53.216:8001/
 const keyServerAddr = "serverAddr"
 const allowedOrigin = "http://84.23.53.216"
+
+var (
+	redisAddr = flag.String("addr", "redis://user:@localhost:6379/0", "redis addr")
+)
 
 type Result struct {
 	Body interface{}
@@ -32,19 +38,33 @@ type Error struct {
 type Handler struct {
 	restaurantstore *store.RestaurantRepo
 	userstore       *store.UserRepo
-	sessions        map[string]uint
+	sessManager     *store.SessionManager
 }
 
-var (
-	letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-)
+// var (
+// 	letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+// )
 
-func randStringRunes(n int) string {
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+// func randStringRunes(n int) string {
+// 	b := make([]rune, n)
+// 	for i := range b {
+// 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+// 	}
+// 	return string(b)
+// }
+
+func (api *Handler) checkSession(r *http.Request) *store.Session {
+	cookieSessionID, err := r.Cookie("session_id")
+	if err == http.ErrNoCookie {
+		return nil
+	} else if err != nil {
+		return nil
 	}
-	return string(b)
+
+	sess := api.sessManager.Check(&store.SessionID{
+		ID: cookieSessionID.Value,
+	})
+	return sess
 }
 
 // GetRestaurants godoc
@@ -282,13 +302,22 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	SID := randStringRunes(32)
+	//SID := randStringRunes(32)
 
-	api.sessions[SID] = user.ID
+	//api.sessions[SID] = user.ID
+	sess, err := api.sessManager.Create(&store.Session{
+		UserID:    user.ID,
+		Useragent: r.UserAgent(),
+	})
+	if err != nil {
+		fmt.Println("cant create session:", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	cookie := &http.Cookie{
 		Name:     "session_id",
-		Value:    SID,
+		Value:    sess.ID,
 		Expires:  time.Now().Add(10 * time.Hour),
 		HttpOnly: true,
 	}
@@ -320,8 +349,19 @@ func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
-	session, err := r.Cookie("session_id")
 	w.Header().Set("content-type", "application/json")
+	session, err := r.Cookie("session_id")
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// }
+	// if session == nil {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
+	// 	if err != nil {
+	// 		w.WriteHeader(http.StatusInternalServerError)
+	// 	}
+	// 	return
+	// }
 	if err == http.ErrNoCookie {
 		w.WriteHeader(http.StatusUnauthorized)
 		err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
@@ -329,18 +369,24 @@ func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
-	}
-	if _, ok := api.sessions[session.Value]; !ok {
-		w.WriteHeader(http.StatusUnauthorized)
-		err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		return
+	} else if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	delete(api.sessions, session.Value)
+	api.sessManager.Delete(&store.SessionID{
+		ID: session.Value,
+	})
+	// if _, ok := api.sessions[session.Value]; !ok {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
+	// 	if err != nil {
+	// 		w.WriteHeader(http.StatusInternalServerError)
+	// 	}
+	// 	return
+	// }
 
+	//delete(api.sessions, session.Value)
+	//api.sessManager.Delete(session)
 	session.Expires = time.Now().AddDate(0, 0, -1)
 	http.SetCookie(w, session)
 }
@@ -359,9 +405,28 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
-	session, err := r.Cookie("session_id")
+	//session, err := r.Cookie("session_id")
 	w.Header().Set("content-type", "application/json")
-	if err == http.ErrNoCookie {
+	// if err == http.ErrNoCookie {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
+	// 	if err != nil {
+	// 		w.WriteHeader(http.StatusInternalServerError)
+	// 	}
+	// 	return
+	// }
+
+	// id, ok := api.sessions[session.Value]
+	// if !ok {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
+	// 	if err != nil {
+	// 		w.WriteHeader(http.StatusInternalServerError)
+	// 	}
+	// 	return
+	// }
+	sess, err := r.Cookie("session_id")
+	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
 		if err != nil {
@@ -369,19 +434,18 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
-	id, ok := api.sessions[session.Value]
-	if !ok {
+	session := api.checkSession(r)
+	if session == nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
+		err := json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
 	}
 
-	user := api.userstore.GetUserById(id)
-	http.SetCookie(w, session)
+	user := api.userstore.GetUserById(session.UserID)
+	http.SetCookie(w, sess)
 	body := map[string]interface{}{
 		"username": user.Username,
 	}
@@ -394,6 +458,13 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 const PORT = ":3333"
 
 func main() {
+	flag.Parse()
+
+	var err error
+	redisConn, err := redis.DialURL(*redisAddr)
+	if err != nil {
+		log.Fatalf("cant connect to redis")
+	}
 
 	mux := http.NewServeMux()
 
@@ -402,7 +473,7 @@ func main() {
 	api := &Handler{
 		restaurantstore: store.NewRestaurantRepo(db),
 		userstore:       store.NewUserRepo(db),
-		sessions:        make(map[string]uint, 10),
+		sessManager:     store.NewSessionManager(redisConn),
 	}
 	mux.HandleFunc("/restaurants", api.GetRestaurantList)
 	mux.HandleFunc("/users", api.SignUp)
@@ -416,7 +487,7 @@ func main() {
 	}
 
 	fmt.Println("Server start")
-	err := server.ListenAndServe()
+	err = server.ListenAndServe()
 
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")

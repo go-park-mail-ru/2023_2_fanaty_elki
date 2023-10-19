@@ -86,7 +86,7 @@ func (repo *RestaurantRepo) GetRestaurants() ([]*Restaurant, error) {
 	repo.mu.RLock()
 	defer repo.mu.RUnlock()
 
-	rows, err := repo.DB.Query("SELECT * FROM restaurant")
+	rows, err := repo.DB.Query("SELECT id, name, rating, comments_count, category, delivery_price, delivery_time, icon FROM restaurant")
 	if err != nil {
 		fmt.Println("error while connecting", err)
 		return nil, err
