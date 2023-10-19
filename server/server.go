@@ -17,7 +17,6 @@ import (
 // @version 1.0
 // @license.name Apache 2.0
 // @host http://84.23.53.216:8001/
-const keyServerAddr = "serverAddr"
 const allowedOrigin = "http://84.23.53.216"
 
 type Result struct {
