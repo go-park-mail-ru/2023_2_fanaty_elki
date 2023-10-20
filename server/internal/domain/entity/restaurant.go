@@ -1,5 +1,7 @@
 package entity
 
+
+
 type Restaurant struct {
 	ID            uint    `json:"ID"`
 	Name          string  `json:"Name"`
