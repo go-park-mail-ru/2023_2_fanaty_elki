@@ -19,5 +19,13 @@ func NewRestaurantRepo(db *sql.DB) *RestaurantRepo {
 }
 
 func (repo *RestaurantRepo) GetRestaurants() ([]*entity.Restaurant, error){
-	return []*entity.Restaurant{}, nil
+	var res = entity.Restaurant{
+		ID:            1,
+		Name:          "Burger King",
+		Rating:        3.7,
+		CommentsCount: 60,
+		Icon:          "img/burger_king.jpg",
+		Category:      "Fastfood",
+	}
+	return []*entity.Restaurant{&res}, nil
 }
