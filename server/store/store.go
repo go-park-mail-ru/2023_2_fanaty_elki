@@ -3,7 +3,6 @@ package store
 import (
 	"database/sql"
 	"fmt"
-	"strings"
 	"sync"
 )
 
@@ -13,8 +12,6 @@ type Restaurant struct {
 	Rating        float32 `json:"Rating"`
 	CommentsCount int     `json:"CommentsCount"`
 	Icon          string  `json:"Icon"`
-	DeliveryTime  int     `json:"DeliveryTime"`
-	DeliveryPrice int     `json:"DeliveryPrice"`
 	Category      string  `json:"Category"`
 }
 
@@ -87,7 +84,7 @@ func (repo *RestaurantRepo) GetRestaurants() ([]*Restaurant, error) {
 	repo.mu.RLock()
 	defer repo.mu.RUnlock()
 
-	rows, err := repo.DB.Query("SELECT id, name, rating, comments_count, category, delivery_price, delivery_time, icon FROM restaurant")
+	rows, err := repo.DB.Query("SELECT id, name, rating, comments_count, category, icon FROM restaurant")
 	if err != nil {
 		return nil, err
 	}
@@ -101,13 +98,8 @@ func (repo *RestaurantRepo) GetRestaurants() ([]*Restaurant, error) {
 			&restaurant.Rating,
 			&restaurant.CommentsCount,
 			&restaurant.Category,
-			&restaurant.DeliveryPrice,
-			&restaurant.DeliveryTime,
 			&restaurant.Icon,
 		)
-		restaurant.Name = strings.TrimSpace(restaurant.Name)
-		restaurant.Icon = strings.TrimSpace(restaurant.Icon)
-		restaurant.Category = strings.TrimSpace(restaurant.Category)
 		if err != nil {
 			return nil, err
 		}
