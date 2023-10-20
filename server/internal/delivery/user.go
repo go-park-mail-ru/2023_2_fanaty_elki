@@ -3,36 +3,52 @@ package delivery
 import (
 	"server/internal/domain/entity"
 	"server/internal/usecases"
-	"math/rand"
-	"net/http"
-	"encoding/json"
-	"io/ioutil"
-	"regexp"
+	//"server/repository"
 	"database/sql"
+	"encoding/json"
+//	"flag"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"regexp"
 	"time"
+
+	//"github.com/gomodule/redigo/redis"
+	_ "github.com/lib/pq"
 )
 
 type UserHandler struct {
 	users usecases.UserUsecase
-	sessions  map[string]uint
+	sessManager  usecases.SessionUsecase
 }
 
 func NewUserHandler(users *usecases.UserUsecase) *UserHandler{
 	return &UserHandler{users: *users}
 }
 
-var (
-	letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-)
 
-func randStringRunes(n int) string {
-	b := make([]rune, n)
 
-	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+// type Handler struct {
+// 	restaurantstore *repository.RestaurantRepo
+// 	userstore       *repository.UserRepo
+// 	sessManager     *repository.SessionManager
+// }
+
+func (api *UserHandler) checkSession(r *http.Request) (*entity.Session, error) {
+	cookieSessionID, err := r.Cookie("session_id")
+	if err == http.ErrNoCookie {
+		return nil, nil
+	} else if err != nil {
+		return nil, err
 	}
 
-	return string(b)
+	sess, err := api.sessManager.Check(&entity.SessionID{
+		ID: cookieSessionID.Value,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return sess, nil
 }
 
 
@@ -127,7 +143,17 @@ func (api *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	re = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	re = regexp.MustCompile(`^[+]?[0-9]{3,25}$`)
+	if phoneNumber != "" && !re.MatchString(phoneNumber) {
+		w.WriteHeader(http.StatusBadRequest)
+		err = json.NewEncoder(w).Encode(&Error{Err: "incorrect phone number"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	re = regexp.MustCompile(`\S*@\S*`)
 	if !re.MatchString(email) {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "incorrect email"})
@@ -137,7 +163,11 @@ func (api *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, _ := api.users.FindUserBy("username", keyVal["Username"])
+	user, err := api.users.FindUserBy("Username", keyVal["Username"])
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	if user != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "username already exists"})
@@ -147,10 +177,28 @@ func (api *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, _ = api.users.FindUserBy("email", keyVal["Email"])
+	user, err = api.users.FindUserBy("Email", keyVal["Email"])
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	if user != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "email already exists"})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	user, err = api.users.FindUserBy("PhoneNumber", keyVal["PhoneNumber"])
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if user != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		err = json.NewEncoder(w).Encode(&Error{Err: "phone number already exists"})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -181,10 +229,15 @@ func (api *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		Icon:        iconString,
 	}
 
-	id := api.users.Create(in)
+	id, err := api.users.CreateUser(in)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	body := map[string]interface{}{
-		"id": id,
+		"ID": id,
 	}
 
 	err = json.NewEncoder(w).Encode(&Result{Body: body})
@@ -236,7 +289,11 @@ func (api *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, _ := api.users.FindUserBy("username", keyVal["username"])
+	user, err := api.users.FindUserBy("Username", keyVal["Username"])
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	if user == nil {
 		w.WriteHeader(http.StatusNotFound)
 		err = json.NewEncoder(w).Encode(&Error{Err: "user not found"})
@@ -245,8 +302,7 @@ func (api *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
-	if user.Password != keyVal["password"] {
+	if user.Password != keyVal["Password"] {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "incorrect password"})
 		if err != nil {
@@ -255,20 +311,26 @@ func (api *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	SID := randStringRunes(32)
-
-	api.sessions[SID] = user.ID
+	sess, err := api.sessManager.Create(&entity.Session{
+		UserID:    user.ID,
+		Useragent: r.UserAgent(),
+	})
+	if err != nil {
+		fmt.Println("can't create session:", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	cookie := &http.Cookie{
 		Name:     "session_id",
-		Value:    SID,
+		Value:    sess.ID,
 		Expires:  time.Now().Add(50 * time.Hour),
 		HttpOnly: true,
 	}
+
 	http.SetCookie(w, cookie)
 	body := map[string]interface{}{
-		"cookie":   cookie.Value,
-		"username": user.Username,
+		"Username": user.Username,
 	}
 
 	err = json.NewEncoder(w).Encode(&Result{Body: body})
@@ -294,8 +356,8 @@ func (api *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
-	session, err := r.Cookie("session_id")
 	w.Header().Set("content-type", "application/json")
+	session, err := r.Cookie("session_id")
 	if err == http.ErrNoCookie {
 		w.WriteHeader(http.StatusUnauthorized)
 		err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
@@ -303,17 +365,13 @@ func (api *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
-	}
-	if _, ok := api.sessions[session.Value]; !ok {
-		w.WriteHeader(http.StatusUnauthorized)
-		err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		return
+	} else if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	delete(api.sessions, session.Value)
+	api.sessManager.Delete(&entity.SessionID{
+		ID: session.Value,
+	})
 
 	session.Expires = time.Now().AddDate(0, 0, -1)
 	http.SetCookie(w, session)
@@ -333,9 +391,10 @@ func (api *UserHandler) Auth(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
-	session, err := r.Cookie("session_id")
 	w.Header().Set("content-type", "application/json")
-	if err == http.ErrNoCookie {
+
+	sess, err := r.Cookie("session_id")
+	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
 		if err != nil {
@@ -343,24 +402,34 @@ func (api *UserHandler) Auth(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
-	id, ok := api.sessions[session.Value]
-	if !ok {
+	session, err := api.checkSession(r)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if session == nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		err = json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
+		err := json.NewEncoder(w).Encode(&Error{Err: "unauthorized"})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
 	}
 
-	user := api.users.GetUserById(id - 1)
-	http.SetCookie(w, session)
+	user, err := api.users.GetUserById(session.UserID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	http.SetCookie(w, sess)
 	body := map[string]interface{}{
-		"username": user.Username,
+		"Username": user.Username,
 	}
 	err = json.NewEncoder(w).Encode(&Result{Body: body})
+	
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
+

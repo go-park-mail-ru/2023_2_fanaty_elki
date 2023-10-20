@@ -3,7 +3,7 @@ package usecases
 import (
 	"database/sql"
 	"server/internal/domain/entity"
-	"server/internal/repository"
+	"server/repository"
 )
 
 type RestaurantRepo interface {

@@ -3,13 +3,13 @@ package usecases
 import (
 	"database/sql"
 	"server/internal/domain/entity"
-	"server/internal/repository"
+	"server/repository"
 )
 
 
 type UserRepo interface{
-	GetUserById(id uint) *entity.User
-	Create(user *entity.User) error
+	GetUserById(id uint) (*entity.User, error)
+	CreateUser(user *entity.User) (uint, error)
 	FindUserBy(field string, value string) (*entity.User, error) 
 }
 
@@ -24,12 +24,12 @@ func NewUserUsecase(db *sql.DB) *UserUsecase {
 }
 
 
-func (us UserUsecase) GetUserById(id uint) *entity.User {
+func (us UserUsecase) GetUserById(id uint) (*entity.User, error) {
 	return us.userRepo.GetUserById(id)	
 }
 
-func (us UserUsecase) Create(user *entity.User) error {
-	return us.userRepo.Create(user) 
+func (us UserUsecase) CreateUser(user *entity.User) (uint, error) {
+	return us.userRepo.CreateUser(user) 
 }
 
 func (us UserUsecase) FindUserBy(field string, value string) (*entity.User, error) {
