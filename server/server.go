@@ -10,7 +10,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
-	"server/store"
+	"server/repository"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
@@ -37,12 +37,12 @@ type Error struct {
 }
 
 type Handler struct {
-	restaurantstore *store.RestaurantRepo
-	userstore       *store.UserRepo
-	sessManager     *store.SessionManager
+	restaurantstore *repository.RestaurantRepo
+	userstore       *repository.UserRepo
+	sessManager     *repository.SessionManager
 }
 
-func (api *Handler) checkSession(r *http.Request) (*store.Session, error) {
+func (api *Handler) checkSession(r *http.Request) (*repository.Session, error) {
 	cookieSessionID, err := r.Cookie("session_id")
 	if err == http.ErrNoCookie {
 		return nil, nil
@@ -50,7 +50,7 @@ func (api *Handler) checkSession(r *http.Request) (*store.Session, error) {
 		return nil, err
 	}
 
-	sess, err := api.sessManager.Check(&store.SessionID{
+	sess, err := api.sessManager.Check(&repository.SessionID{
 		ID: cookieSessionID.Value,
 	})
 	if err != nil {
@@ -264,7 +264,7 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		iconString = sql.NullString{Valid: false}
 	}
 
-	in := &store.User{
+	in := &repository.User{
 		Username:    username,
 		Password:    password,
 		Birthday:    birthdayString,
@@ -353,7 +353,7 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sess, err := api.sessManager.Create(&store.Session{
+	sess, err := api.sessManager.Create(&repository.Session{
 		UserID:    user.ID,
 		Useragent: r.UserAgent(),
 	})
@@ -409,7 +409,7 @@ func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	api.sessManager.Delete(&store.SessionID{
+	api.sessManager.Delete(&repository.SessionID{
 		ID: session.Value,
 	})
 
@@ -473,6 +473,32 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 
 const PORT = ":3333"
 
+func GetPostgres() (*sql.DB, error) {
+	const (
+		host     = "localhost"
+		port     = 5432
+		user     = "uliana"
+		password = "uliana"
+		dbname   = "prinesy-poday"
+	)
+
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("Successfully connected!")
+	return db, nil
+}
+
 func main() {
 	flag.Parse()
 
@@ -484,16 +510,16 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	db, err := store.GetPostgres()
+	db, err := GetPostgres()
 	if err != nil {
 		log.Fatalf("cant connect to postgres")
 		return
 	}
 	defer db.Close()
 	api := &Handler{
-		restaurantstore: store.NewRestaurantRepo(db),
-		userstore:       store.NewUserRepo(db),
-		sessManager:     store.NewSessionManager(redisConn),
+		restaurantstore: repository.NewRestaurantRepo(db),
+		userstore:       repository.NewUserRepo(db),
+		sessManager:     repository.NewSessionManager(redisConn),
 	}
 	mux.HandleFunc("/restaurants", api.GetRestaurantList)
 	mux.HandleFunc("/users", api.SignUp)

@@ -1,19 +1,9 @@
-package store
+package repository
 
 import (
 	"database/sql"
-	"fmt"
 	"sync"
 )
-
-type Restaurant struct {
-	ID            uint    `json:"ID"`
-	Name          string  `json:"Name"`
-	Rating        float32 `json:"Rating"`
-	CommentsCount int     `json:"CommentsCount"`
-	Icon          string  `json:"Icon"`
-	Category      string  `json:"Category"`
-}
 
 type User struct {
 	ID          uint           `json:"ID"`
@@ -25,51 +15,9 @@ type User struct {
 	Icon        sql.NullString `json:"Icon"`
 }
 
-type RestaurantRepo struct {
-	DB *sql.DB
-	mu sync.RWMutex
-}
-
 type UserRepo struct {
 	DB *sql.DB
 	mu sync.RWMutex
-}
-
-var Users = []*User{}
-
-//var DB *sql.DB
-
-func GetPostgres() (*sql.DB, error) {
-	const (
-		host     = "localhost"
-		port     = 5432
-		user     = "uliana"
-		password = "uliana"
-		dbname   = "prinesy-poday"
-	)
-
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
-	db, err := sql.Open("postgres", psqlInfo)
-	if err != nil {
-		return nil, err
-	}
-
-	err = db.Ping()
-	if err != nil {
-		return nil, err
-	}
-
-	fmt.Println("Successfully connected!")
-	return db, nil
-}
-
-func NewRestaurantRepo(db *sql.DB) *RestaurantRepo {
-	return &RestaurantRepo{
-		mu: sync.RWMutex{},
-		DB: db,
-	}
 }
 
 func NewUserRepo(db *sql.DB) *UserRepo {
@@ -77,43 +25,6 @@ func NewUserRepo(db *sql.DB) *UserRepo {
 		mu: sync.RWMutex{},
 		DB: db,
 	}
-}
-
-func (repo *RestaurantRepo) GetRestaurants() ([]*Restaurant, error) {
-
-	repo.mu.RLock()
-	defer repo.mu.RUnlock()
-
-	rows, err := repo.DB.Query("SELECT id, name, rating, comments_count, category, icon FROM restaurant")
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var Restaurants = []*Restaurant{}
-	for rows.Next() {
-		restaurant := &Restaurant{}
-		err = rows.Scan(
-			&restaurant.ID,
-			&restaurant.Name,
-			&restaurant.Rating,
-			&restaurant.CommentsCount,
-			&restaurant.Category,
-			&restaurant.Icon,
-		)
-		if err != nil {
-			return nil, err
-		}
-		Restaurants = append(Restaurants, restaurant)
-	}
-	err = rows.Err()
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		} else {
-			return nil, err
-		}
-	}
-	return Restaurants, nil
 }
 
 func (repo *UserRepo) FindUserBy(field string, value string) (*User, error) {
