@@ -1,36 +1,24 @@
-package main
+package delivery
 
 import (
-	"encoding/json"
-	"errors"
-	"fmt"
-	"io/ioutil"
+	"server/internal/domain/entity"
+	"server/internal/usecases"
 	"math/rand"
 	"net/http"
+	"encoding/json"
+	"io/ioutil"
 	"regexp"
-	"server/store"
+	"database/sql"
 	"time"
-	"github.com/gorilla/mux"
 )
 
-// @title Prinesi-Poday API
-// @version 1.0
-// @license.name Apache 2.0
-// @host http://84.23.53.216:8001/
-const allowedOrigin = "http://84.23.53.216"
-
-type Result struct {
-	Body interface{}
+type UserHandler struct {
+	users usecases.UserUsecase
+	sessions  map[string]uint
 }
 
-type Error struct {
-	Err string
-}
-
-type Handler struct {
-	restaurantstore *store.RestaurantStore
-	userstore       *store.UserStore
-	sessions        map[string]uint
+func NewUserHandler(users *usecases.UserUsecase) *UserHandler{
+	return &UserHandler{users: *users}
 }
 
 var (
@@ -39,48 +27,14 @@ var (
 
 func randStringRunes(n int) string {
 	b := make([]rune, n)
+
 	for i := range b {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
+
 	return string(b)
 }
 
-// GetRestaurants godoc
-// @Summary      giving restaurats
-// @Description  giving array of restaurants
-// @Tags        Restaurants
-// @Accept     */*
-// @Produce  application/json
-// @Success  200 {object}  []store.Restaurant "success returning array of restaurants"
-// @Failure 500 {object} error "internal server error"
-// @Router   /restaurants [get]
-func (api *Handler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
-
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("content-type", "application/json")
-
-	rests, err := api.restaurantstore.GetRestaurants()
-
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&Error{Err: "data base error"})
-		return
-	}
-
-	body := map[string]interface{}{
-		"restaurants": rests,
-	}
-
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(&Result{Body: body})
-
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&Error{Err: "error while marshalling JSON"})
-		return
-	}
-}
 
 // SignUp godoc
 // @Summary      Signing up a user
@@ -93,7 +47,7 @@ func (api *Handler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} error "bad request"
 // @Failure 500 {object} error "internal server error"
 // @Router   /users [post]
-func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
+func (api *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 
@@ -120,10 +74,12 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	username := keyVal["username"]
-	password := keyVal["password"]
-	birthday := keyVal["birthday"]
-	email := keyVal["email"]
+	username := keyVal["Username"]
+	password := keyVal["Password"]
+	birthday := keyVal["Birthday"]
+	email := keyVal["Email"]
+	icon := keyVal["Icon"]
+	phoneNumber := keyVal["PhoneNumber"]
 
 	if len(username) < 3 {
 		w.WriteHeader(http.StatusBadRequest)
@@ -161,7 +117,7 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	re := regexp.MustCompile(`\d{2}-\d{2}-\d{4}`)
+	re := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`)
 	if birthday != "" && !re.MatchString(birthday) {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "incorrect birthday"})
@@ -181,7 +137,7 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := api.userstore.FindUserBy("username", keyVal["username"])
+	user, _ := api.users.FindUserBy("username", keyVal["Username"])
 	if user != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "username already exists"})
@@ -191,7 +147,7 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user = api.userstore.FindUserBy("email", keyVal["email"])
+	user, _ = api.users.FindUserBy("email", keyVal["Email"])
 	if user != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "email already exists"})
@@ -201,24 +157,43 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	in := &store.User{
-		Username: username,
-		Password: password,
-		Birthday: birthday,
-		Email:    email,
+	var birthdayString sql.NullString
+	if birthday != "" {
+		birthdayString = sql.NullString{String: birthday, Valid: true}
+	} else {
+		birthdayString = sql.NullString{Valid: false}
 	}
 
-	id := api.userstore.SignUpUser(in)
+	var iconString sql.NullString
+	if icon != "" {
+		iconString = sql.NullString{String: icon, Valid: true}
+	} else {
+		iconString = sql.NullString{Valid: false}
+	}
+
+
+	in := &entity.User{
+		Username:    username,
+		Password:    password,
+		Birthday:    birthdayString,
+		PhoneNumber: phoneNumber,
+		Email:       email,
+		Icon:        iconString,
+	}
+
+	id := api.users.Create(in)
 
 	body := map[string]interface{}{
 		"id": id,
 	}
+
 	err = json.NewEncoder(w).Encode(&Result{Body: body})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 }
+
 
 // Login godoc
 // @Summary      Log in user
@@ -232,7 +207,7 @@ func (api *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Failure 404 {object} error "not found"
 // @Failure 500 {object} error "internal server error"
 // @Router   /login [post]
-func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
+func (api *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 
@@ -261,7 +236,7 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := api.userstore.FindUserBy("username", keyVal["username"])
+	user, _ := api.users.FindUserBy("username", keyVal["username"])
 	if user == nil {
 		w.WriteHeader(http.StatusNotFound)
 		err = json.NewEncoder(w).Encode(&Error{Err: "user not found"})
@@ -287,7 +262,7 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	cookie := &http.Cookie{
 		Name:     "session_id",
 		Value:    SID,
-		Expires:  time.Now().Add(10 * time.Hour),
+		Expires:  time.Now().Add(50 * time.Hour),
 		HttpOnly: true,
 	}
 	http.SetCookie(w, cookie)
@@ -303,6 +278,7 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 }
 
+
 // Logout godoc
 // @Summary      Log out user
 // @Description  Log out user
@@ -314,7 +290,7 @@ func (api *Handler) Login(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} error "bad request"
 // @Failure 401 {object} error "unauthorized"
 // @Router   /logout [get]
-func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
+func (api *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
@@ -353,7 +329,7 @@ func (api *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 // @Success  200 {object} integer "success authenticate return id"
 // @Failure 401 {object} error "unauthorized"
 // @Router   /auth [get]
-func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
+func (api *UserHandler) Auth(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
@@ -378,7 +354,7 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := api.userstore.GetUserById(id - 1)
+	user := api.users.GetUserById(id - 1)
 	http.SetCookie(w, session)
 	body := map[string]interface{}{
 		"username": user.Username,
@@ -386,38 +362,5 @@ func (api *Handler) Auth(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(&Result{Body: body})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-	}
-}
-
-const PORT = ":3333"
-
-func main() {
-	router := mux.NewRouter()
-	api := &Handler{
-	 	restaurantstore: store.NewRestaurantStore(),
-	 	userstore:       store.NewUserStore(),
-	 	sessions:        make(map[string]uint, 10),
-	}
-	
-
-	router.HandleFunc("/restaurants", api.GetRestaurantList).Methods("GET")
-	router.HandleFunc("/users", api.SignUp).Methods("POST")
-	router.HandleFunc("/login", api.Login).Methods("POST")
-	router.HandleFunc("/logout", api.Logout).Methods("DELETE")
-	router.HandleFunc("/auth", api.Auth).Methods("GET")
-	
-	server := &http.Server{
-		Addr:    PORT,
-		Handler: router,
-	}
-
-	fmt.Println("Server start")
-	err := server.ListenAndServe()
-
-	if errors.Is(err, http.ErrServerClosed) {
-		fmt.Printf("server closed\n")
-
-	} else if err != nil {
-		fmt.Printf("error listening for server: %s\n", err)
 	}
 }
