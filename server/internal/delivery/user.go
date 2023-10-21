@@ -3,18 +3,13 @@ package delivery
 import (
 	"server/internal/domain/entity"
 	"server/internal/usecases"
-	//"server/repository"
 	"database/sql"
 	"encoding/json"
-//	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"regexp"
 	"time"
-
-	//"github.com/gomodule/redigo/redis"
-	_ "github.com/lib/pq"
 )
 
 type UserHandler struct {
@@ -22,17 +17,12 @@ type UserHandler struct {
 	sessManager  usecases.SessionUsecase
 }
 
-func NewUserHandler(users *usecases.UserUsecase) *UserHandler{
-	return &UserHandler{users: *users}
+func NewUserHandler(users *usecases.UserUsecase, sessManager *usecases.SessionUsecase) *UserHandler{
+	return &UserHandler{
+		users: *users,
+		sessManager: *sessManager,
+	}
 }
-
-
-
-// type Handler struct {
-// 	restaurantstore *repository.RestaurantRepo
-// 	userstore       *repository.UserRepo
-// 	sessManager     *repository.SessionManager
-// }
 
 func (api *UserHandler) checkSession(r *http.Request) (*entity.Session, error) {
 	cookieSessionID, err := r.Cookie("session_id")
@@ -66,7 +56,6 @@ func (api *UserHandler) checkSession(r *http.Request) (*entity.Session, error) {
 func (api *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
-
 	w.Header().Set("content-type", "application/json")
 
 	if err != nil {
@@ -168,6 +157,7 @@ func (api *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	if user != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "username already exists"})
@@ -182,6 +172,7 @@ func (api *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	if user != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "email already exists"})
@@ -196,6 +187,7 @@ func (api *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	if user != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "phone number already exists"})
@@ -244,7 +236,6 @@ func (api *UserHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
-
 }
 
 
@@ -274,6 +265,7 @@ func (api *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
+
 		return
 	}
 
@@ -294,6 +286,7 @@ func (api *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	if user == nil {
 		w.WriteHeader(http.StatusNotFound)
 		err = json.NewEncoder(w).Encode(&Error{Err: "user not found"})
@@ -302,6 +295,7 @@ func (api *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+
 	if user.Password != keyVal["Password"] {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&Error{Err: "incorrect password"})
@@ -364,7 +358,9 @@ func (api *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
+
 		return
+		
 	} else if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
