@@ -2,7 +2,7 @@ package usecases
 
 import (
 	"server/internal/domain/entity"
-	"server/repository"
+	"server/internal/repository"
 	"github.com/gomodule/redigo/redis"
 )
 
