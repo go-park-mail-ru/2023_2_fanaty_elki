@@ -6,19 +6,19 @@ import (
 	"server/internal/domain/entity"
 )
 
-type RestaurantRepo struct {
+type restaurantRepo struct {
 	DB *sql.DB
 	mu sync.RWMutex
 }
 
-func NewRestaurantRepo(db *sql.DB) *RestaurantRepo {
-	return &RestaurantRepo{
+func NewRestaurantRepo(db *sql.DB) *restaurantRepo {
+	return &restaurantRepo{
 		mu: sync.RWMutex{},
 		DB: db,
 	}
 }
 
-func (repo *RestaurantRepo) GetRestaurants() ([]*entity.Restaurant, error) {
+func (repo *restaurantRepo) GetRestaurants() ([]*entity.Restaurant, error) {
 
 	repo.mu.RLock()
 	defer repo.mu.RUnlock()

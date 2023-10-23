@@ -1,11 +1,9 @@
 package entity
 
+import "time"
 
-type Session struct {
-	UserID    uint
-	Useragent string
-}
-
-type SessionID struct {
-	ID string
+type Cookie struct {
+	UserID uint
+	SessionToken string
+	MaxAge       time.Duration
 }

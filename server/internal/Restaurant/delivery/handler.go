@@ -1,17 +1,27 @@
 package delivery
 
 import (
-	"server/internal/usecases"
+	restaurantUsecase "server/internal/Restaurant/usecase"
 	"net/http"
 	"encoding/json"
 )
 
-type RestaurantHandler struct {
-	restaurants usecases.RestaurantUsecase
+const allowedOrigin = "http://84.23.53.216"
+
+type Result struct {
+	Body interface{}
 }
 
-func NewRestaurantHandler(restaurants *usecases.RestaurantUsecase) *RestaurantHandler{
-	return &RestaurantHandler{restaurants: *restaurants}
+type Error struct {
+	Err string
+}
+
+type RestaurantHandler struct {
+	restaurants restaurantUsecase.UsecaseI
+}
+
+func NewRestaurantHandler(restaurants restaurantUsecase.UsecaseI) *RestaurantHandler{
+	return &RestaurantHandler{restaurants: restaurants}
 }
 
 // GetRestaurants godoc
@@ -23,13 +33,13 @@ func NewRestaurantHandler(restaurants *usecases.RestaurantUsecase) *RestaurantHa
 // @Success  200 {object}  []store.Restaurant "success returning array of restaurants"
 // @Failure 500 {object} error "internal server error"
 // @Router   /restaurants [get]
-func (api *RestaurantHandler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
+func (handler *RestaurantHandler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
-	rests, err := api.restaurants.GetRestaurants()
+	rests, err := handler.restaurants.GetRestaurants()
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
