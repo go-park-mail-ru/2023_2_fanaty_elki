@@ -1,3 +1,4 @@
 go.work
 c.out
 server/db/config.go
+dump.rdb
