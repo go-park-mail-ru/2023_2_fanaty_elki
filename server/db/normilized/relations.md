@@ -1,69 +1,86 @@
-User - Таблица Пользователей и его персональные данные ( ник, почта, телефон и тд)
-Связанные таблицы: Card, User_address, Comment
-User:
-{Id} -> {Password, Birthday, Icon}
-{Username} ->  {Password, Birthday, Icon}
-{Phone_number} ->  {Password, Birthday, Icon}
-{Email} ->  {Password, Birthday, Icon}
+user - Таблица Пользователей и его персональные данные ( ник, почта, телефон и тд)
+Связанные таблицы: card, user_address, comment
+user:
+{id} -> {password, birthday, icon}
+{username} -> {password, birthday, icon}
+{phone_number} -> {password, birthday, icon}
+{email} -> {password, birthday, icon}
 
-Restaurant - Таблица Ресторанов и его данные ( название, рейтинг, и тд)
-Связанные таблицы: Restaurant_category, Restaurant_Address, Comment, Menu_Type, Product
-Restaurant:
-{Id}-> {Name, Rating, CommentsCount, Category, Icon}
-{Name}->{Rating, CommentsCount, Category, Icon}
 
-Category - Tаблица категорий ресторанов с текстовым названием категории
-Связанные таблицы: Restaurant_category
-Category:
-{Id}->{Text}
+restaurant - Таблица Ресторанов и его данные ( название, рейтинг, и тд)
+Связанные таблицы: restaurant_category, restaurant_address, comment, menu_type, product
+restaurant:
+{id}-> {name, rating, comments_count, category, icon}
+{name}->{rating, comments_count, category, icon}
 
-Restaurant_category - Таблица-связка между ресторанами(Restaurant) и категориями (Category)
-Restaurant_category:
-{Id}->{Restaurant_id, Category_id}
 
-Menu_Type - Раздел меню в ресторане
-Связанные таблицы: Product_Menu_Type
-Menu_Type:
-{Id}->{Name, Restaurant_id}
+category - Tаблица категорий ресторанов с текстовым названием категории
+Связанные таблицы: restaurant_category
+category:
+{id}->{text}
 
-Product - Продукт в ресторане ( с его ценой, временем приготовления и тд)
-Связанные таблицы: Product_Menu_Type, Order_Product
-Product:
-{Id}->{ Price, Cooking_time}
-{Name, Restraunt_id}->{Price, Cooking_time}
 
-Product_Menu_Type - Таблица-связка между продуктами (Product) и разделами меню (Menu_Type)
-Product_Menu_Type:
-{Id}->{Menu_Type_id, Product_id}
+restaurant_category - Таблица-связка между ресторанами(restaurant) и категориями (category)
+restaurant_category:
+{id}->{restaurant_id, category_id}
 
-Order - Таблица заказов
-Связанные таблицы: Order_Product
-Order:
-{Id}->{User_id, Date}
 
-Order_Product - Таблица-связка между продуктами (Product) и заказами (Order)
-Order_Product:
-{Id}->{Product_id, Order_id}
+menu_type - Раздел меню в ресторане
+Связанные таблицы: product_menu_type
+menu_type:
+{id}->{name, restaurant_id}
+
+
+product - Продукт в ресторане ( с его ценой, временем приготовления и тд)
+Связанные таблицы: product_menu_type, order_product
+product:
+{id}->{ price, cooking_time}
+{name, restraunt_id}->{price, cooking_time}
+
+
+product_menu_type - Таблица-связка между продуктами (product) и разделами меню (menu_type)
+product_menu_type:
+{id}->{menu_type_id, product_id}
+
+
+order - Таблица заказов
+Связанные таблицы: order_product
+order:
+{id}->{user_id, date}
+
+
+order_product - Таблица-связка между продуктами (product) и заказами (order)
+order_product:
+{id}->{product_id, order_id}
+
 
 Comment - Таблица комментариев пользователей к ресторанам
 Comment:
-{Id}->{Text, Restaurant_id, User_id, Rating}
+{id}->{text, restaurant_id, user_id, rating}
 
-Card - Таблица карт пользователей
-Card:
-{Id}->{Number, User_id}
 
-Address - Таблица адресов 
-Связанные таблицы: Restaurant_Address, User_Address
-Address:
-{Id}->{City, Street, House_number, Flat_number}
+card - Таблица карт пользователей
+card:
+{id}->{number, user_id}
 
-Restaurant_Address - Таблица адресов ресторанов (таблица-связка между адресами и ресторанами)
-Restaurant_Address:
-{Id}->{Restaurant_id, Address_id}
 
-User_Address - Таблица адресов ресторанов (таблица-связка между адресами и ресторанами)
-User_Address:
-{Id}->{User_id, Address_id}
+address - Таблица адресов
+Связанные таблицы: restaurant_address, user_address
+address:
+{id}->{city, street, house_number, flat_number}
+
+
+restaurant_address - Таблица адресов ресторанов (таблица-связка между адресами и ресторанами)
+restaurant_address:
+{id}->{restaurant_id, address_id}
+
+
+user_address - Таблица адресов ресторанов (таблица-связка между адресами и ресторанами)
+user_address:
+{id}->{user_id, address_id}
+
 
 Cсылка на ER-диаграммы: https://www.plantuml.com/plantuml/uml/fPJFxjem3CVlUOgS9_KD46BhXeQcCSJWN6N4WceqcH97MqLvzxN1C08cCFrEk5__-IJOpiIZSXYQlG23DRPoxS79Wv3odPpf_gSeeZt8HZKGFnRA-z_M3UuFjSETLkr9tra3bGdD3t1H-DIeUjzRiuqruYWcOFI0keCkeLU2KmOPzFoCNIgipJQQfMsQFjUNDXYCokk8gbG8M-jQXdKLLMiv6as_ZCSd8ELSoHbOXh22FvXB_GecLAls5sJ_2UwOcQ8BPtNOO9KhVl6bDwVS_mCzExjJmU0Tfzu0DTV-x1jTOTsdv6ZVd7uuh3VLFog4fwMgnySdJrgLib9j7iS_nwBXVJGSkJbahaPhaGE-rzg1zmomxDtH-8uEuCJ-R8DFjdYwLqZVBsuO3ynUZ5BuCUCUgGmakjzGlbHECsMfimo1gtNrfdLTKNG7xWaIZ2QFGtWdcHYgz6zNnSKYr_sg2rBE0KyZqbqGyOjthVsD9r5ep9dZaoUDLauBwX9fIPjlVCoqfQ3NWvBRS6JgxLy0
+
+
+![Alt text](image-1.png)

@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"fmt"
 	userRep "server/internal/User/repository"
 	"server/internal/domain/entity"
 )
@@ -30,7 +29,6 @@ func (us userUsecase) CreateUser(new_user *entity.User) (uint, error) {
 
 	user, err := us.userRepo.FindUserBy("Username", new_user.Username)
 	if err != nil {
-		fmt.Println(err)
 		return 0, entity.ErrInternalServerError
 	}
 
