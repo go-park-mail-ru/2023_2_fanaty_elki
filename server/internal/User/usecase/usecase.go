@@ -1,15 +1,15 @@
 package usecase
 
 import (
-	"server/internal/domain/entity"
+	"fmt"
 	userRep "server/internal/User/repository"
+	"server/internal/domain/entity"
 )
 
-
-type UsecaseI interface{
+type UsecaseI interface {
 	GetUserById(id uint) (*entity.User, error)
 	CreateUser(new_user *entity.User) (uint, error)
-	FindUserBy(field string, value string) (*entity.User, error) 
+	FindUserBy(field string, value string) (*entity.User, error)
 }
 
 type userUsecase struct {
@@ -22,15 +22,15 @@ func NewUserUsecase(repI userRep.UserRepositoryI) *userUsecase {
 	}
 }
 
-
 func (us userUsecase) GetUserById(id uint) (*entity.User, error) {
-	return us.userRepo.GetUserById(id)	
+	return us.userRepo.GetUserById(id)
 }
 
 func (us userUsecase) CreateUser(new_user *entity.User) (uint, error) {
-	
+
 	user, err := us.userRepo.FindUserBy("Username", new_user.Username)
 	if err != nil {
+		fmt.Println(err)
 		return 0, entity.ErrInternalServerError
 	}
 
@@ -56,10 +56,9 @@ func (us userUsecase) CreateUser(new_user *entity.User) (uint, error) {
 		return 0, entity.ErrConflictPhoneNumber
 	}
 
-	return us.userRepo.CreateUser(new_user) 
+	return us.userRepo.CreateUser(new_user)
 }
 
 func (us userUsecase) FindUserBy(field string, value string) (*entity.User, error) {
 	return us.userRepo.FindUserBy(field, value)
 }
-

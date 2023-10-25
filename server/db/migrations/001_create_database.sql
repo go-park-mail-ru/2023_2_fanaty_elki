@@ -1,3 +1,5 @@
+-- Write your migrate up statements here
+
 CREATE TABLE IF NOT EXISTS public.USERS
 (
     ID serial NOT NULL,
@@ -142,3 +144,8 @@ CREATE TABLE IF NOT EXISTS public.CARD
     PRIMARY KEY (ID),
     CONSTRAINT VALID_CARD CHECK (LENGTH(CARD_NUMBER) > 0 )
 );
+
+---- create above / drop below ----
+
+-- Write your migrate down statements here. If this migration is irreversible
+-- Then delete the separator line above.

@@ -1,29 +1,30 @@
 package repository
 
 import (
-	"database/sql"
-	"sync"
+	"context"
 	"server/internal/domain/entity"
+
+	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+const (
+	getRestaurantsList = "SELECT id, name, rating, comments_count, category, icon FROM restaurant"
 )
 
 type restaurantRepo struct {
-	DB *sql.DB
-	mu sync.RWMutex
+	DB *pgxpool.Pool
 }
 
-func NewRestaurantRepo(db *sql.DB) *restaurantRepo {
+func NewRestaurantRepo(db *pgxpool.Pool) *restaurantRepo {
 	return &restaurantRepo{
-		mu: sync.RWMutex{},
 		DB: db,
 	}
 }
 
 func (repo *restaurantRepo) GetRestaurants() ([]*entity.Restaurant, error) {
 
-	repo.mu.RLock()
-	defer repo.mu.RUnlock()
-
-	rows, err := repo.DB.Query("SELECT id, name, rating, comments_count, category, icon FROM restaurant")
+	rows, err := repo.DB.Query(context.Background(), getRestaurantsList)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +47,7 @@ func (repo *restaurantRepo) GetRestaurants() ([]*entity.Restaurant, error) {
 	}
 	err = rows.Err()
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if err.Error() == pgx.ErrNoRows.Error() {
 			return nil, nil
 		} else {
 			return nil, err

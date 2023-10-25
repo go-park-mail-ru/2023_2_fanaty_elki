@@ -23,13 +23,13 @@ type Error struct {
 
 type SessionHandler struct {
 	sessions sessionUsecase.UsecaseI
-	users userUsecase.UsecaseI	
+	users    userUsecase.UsecaseI
 }
 
-func NewSessionHandler(sessions sessionUsecase.UsecaseI, users userUsecase.UsecaseI) *SessionHandler{
+func NewSessionHandler(sessions sessionUsecase.UsecaseI, users userUsecase.UsecaseI) *SessionHandler {
 	return &SessionHandler{
 		sessions: sessions,
-		users: users,
+		users:    users,
 	}
 }
 
@@ -95,7 +95,6 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		Email:       keyVal["Email"],
 		Icon:        iconString,
 	}
-
 	id, err := handler.users.CreateUser(user)
 	if err != nil {
 		if err == entity.ErrInternalServerError {
@@ -109,7 +108,6 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		
 		return
 	}
 
@@ -123,7 +121,6 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-
 
 // Login godoc
 // @Summary      Log in user
@@ -201,7 +198,6 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 }
 
-
 // Logout godoc
 // @Summary      Log out user
 // @Description  Log out user
@@ -261,13 +257,13 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		err = json.NewEncoder(w).Encode(&Error{Err:entity.ErrUnauthorized.Error()})
+		err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnauthorized.Error()})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
 	}
-	
+
 	username, err := handler.sessions.Check(cookie.Value)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -288,7 +284,7 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 		"Username": username,
 	}
 	err = json.NewEncoder(w).Encode(&Result{Body: body})
-	
+
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
