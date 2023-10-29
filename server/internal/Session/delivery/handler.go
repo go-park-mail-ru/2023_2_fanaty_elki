@@ -1,7 +1,6 @@
 package delivery
 
 import (
-	"database/sql"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -9,6 +8,7 @@ import (
 	userUsecase "server/internal/User/usecase"
 	"server/internal/domain/entity"
 	"time"
+	"server/internal/domain/dto"
 )
 
 const allowedOrigin = "http://84.23.53.216"
@@ -58,8 +58,8 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	keyVal := make(map[string]string)
-	err = json.Unmarshal(jsonbody, &keyVal)
+	reqUser := dto.ReqCreateUser{}
+	err = json.Unmarshal(jsonbody, &reqUser)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -70,33 +70,7 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	birthday := keyVal["Birthday"]
-	icon := keyVal["Icon"]
-
-	var birthdayString sql.NullString
-	if birthday != "" {
-		birthdayString = sql.NullString{String: birthday, Valid: true}
-	} else {
-		birthdayString = sql.NullString{Valid: false}
-	}
-
-	var iconString sql.NullString
-	if icon != "" {
-		iconString = sql.NullString{String: icon, Valid: true}
-	} else {
-		iconString = sql.NullString{Valid: false}
-	}
-
-	user := &entity.User{
-		Username:    keyVal["Username"],
-		Password:    keyVal["Password"],
-		Birthday:    birthdayString,
-		PhoneNumber: keyVal["PhoneNumber"],
-		Email:       keyVal["Email"],
-		Icon:        iconString,
-	}
-
-	id, err := handler.users.CreateUser(user)
+	id, err := handler.users.CreateUser(dto.ToEntityCreateUser(&reqUser))
 	if err != nil {
 		if err == entity.ErrInternalServerError {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -108,8 +82,7 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-
-		
+	
 		return
 	}
 
@@ -123,7 +96,6 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-
 
 // Login godoc
 // @Summary      Log in user
@@ -154,8 +126,8 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	keyVal := make(map[string]string)
-	err = json.Unmarshal(jsonbody, &keyVal)
+	reqUser := dto.ReqLoginUser{}
+	err = json.Unmarshal(jsonbody, &reqUser)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -166,12 +138,7 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := &entity.User{
-		Username: keyVal["Username"],
-		Password: keyVal["Password"],
-	}
-
-	cookieUC, err := handler.sessions.Login(user)
+	cookieUC, err := handler.sessions.Login(dto.ToEntityLoginUser(&reqUser))
 	if err != nil {
 		if err == entity.ErrInternalServerError {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -191,7 +158,7 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, cookie)
 	body := map[string]interface{}{
-		"Username": user.Username,
+		"Username": reqUser.Username,
 	}
 
 	err = json.NewEncoder(w).Encode(&Result{Body: body})
@@ -232,7 +199,7 @@ func (handler *SessionHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	err = handler.sessions.Logout(&entity.Cookie{
 		SessionToken: cookie.Value,
-	})
+	})	
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

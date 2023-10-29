@@ -2,7 +2,9 @@ package postgres
 
 import (
 	"encoding/json"
+	"server/internal/domain/dto"
 	"server/internal/domain/entity"
+
 	"github.com/gomodule/redigo/redis"
 )
 
@@ -43,7 +45,7 @@ func (sm *sessionManager) Check(sessionToken string) (*entity.Cookie, error) {
 	return cookie, nil
 }
 
-func (sm *sessionManager) Delete(cookie *entity.Cookie) error {
+func (sm *sessionManager) Delete(cookie *dto.DBDeleteCookie) error {
 	mkey := "sessions:" + cookie.SessionToken
 	_, err := redis.Int(sm.redisConn.Do("DEL", mkey))
 	if err != nil {

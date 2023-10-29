@@ -5,8 +5,8 @@ import (
 	"sync"
 	"server/internal/domain/entity"
 	"server/internal/User/repository"
+	"server/internal/domain/dto"
 )
-
 
 type UserRepo struct {
 	DB *sql.DB
@@ -75,7 +75,7 @@ func (repo *UserRepo) GetUserById(id uint) (*entity.User, error) {
 	return user, nil
 }
 
-func (repo *UserRepo) CreateUser(in *entity.User) (uint, error) {
+func (repo *UserRepo) CreateUser(in *dto.DBCreateUser) (uint, error) {
 
 	repo.mu.Lock()
 	insertUser := `INSERT INTO users (username, password, birthday, phone_number, email, icon) VALUES ($1, $2, $3, $4, $5, $6)`

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"server/internal/domain/entity"
+	"server/internal/domain/dto"
 	userRep "server/internal/User/repository"
 )
 
@@ -56,7 +57,7 @@ func (us userUsecase) CreateUser(new_user *entity.User) (uint, error) {
 		return 0, entity.ErrConflictPhoneNumber
 	}
 
-	return us.userRepo.CreateUser(new_user) 
+	return us.userRepo.CreateUser(dto.ToRepoUser(new_user)) 
 }
 
 func (us userUsecase) FindUserBy(field string, value string) (*entity.User, error) {

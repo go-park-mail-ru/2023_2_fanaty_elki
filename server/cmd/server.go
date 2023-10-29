@@ -66,11 +66,11 @@ func main() {
 	sessionsHandler := sessionDev.NewSessionHandler(sessions, users)
 	
 
-	router.HandleFunc("/restaurants", restaurantsHandler.GetRestaurantList).Methods(GET)
-	router.HandleFunc("/users", sessionsHandler.SignUp).Methods(POST)
-	router.HandleFunc("/login", sessionsHandler.Login).Methods(POST)
-	router.HandleFunc("/logout", sessionsHandler.Logout).Methods(DELETE)
-	router.HandleFunc("/auth", sessionsHandler.Auth).Methods(GET)
+	router.HandleFunc("/api/restaurants", restaurantsHandler.GetRestaurantList).Methods(GET)
+	router.HandleFunc("/api/users", sessionsHandler.SignUp).Methods(POST)
+	router.HandleFunc("/api/login", sessionsHandler.Login).Methods(POST)
+	router.HandleFunc("/api/logout", sessionsHandler.Logout).Methods(DELETE)
+	router.HandleFunc("/api/auth", sessionsHandler.Auth).Methods(GET)
 	
 	server := &http.Server{
 		Addr:    PORT,

@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"server/store"
 	"testing"
 
 	"github.com/stretchr/testify/require"

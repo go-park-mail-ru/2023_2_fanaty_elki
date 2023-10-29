@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"server/internal/domain/entity"
+	"server/internal/domain/dto"
 	sessionRep "server/internal/Session/repository"
 	userRep "server/internal/User/repository"
 	"regexp"
@@ -53,7 +54,7 @@ func (ss sessionUsecase) SignUp(user *entity.User) (uint, error) {
 	}
 	
 	re := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`)
-	if user.Birthday.String != "" && !re.MatchString(user.Birthday.String) {
+	if user.Birthday != "" && !re.MatchString(user.Birthday) {
 		return 0, entity.ErrInvalidBirthday
 	}
 	
@@ -94,7 +95,7 @@ func (ss sessionUsecase) SignUp(user *entity.User) (uint, error) {
 		return 0, entity.ErrConflictPhoneNumber
 	}
 
-	return ss.userRepo.CreateUser(user)
+	return ss.userRepo.CreateUser(dto.ToRepoUser(user))
 }
 
 func (ss sessionUsecase) Login(user *entity.User) (*entity.Cookie, error) {
@@ -146,6 +147,6 @@ func (ss sessionUsecase) Check(SessionToken string) (*string, error) {
 }
 
 func (ss sessionUsecase) Logout(cookie *entity.Cookie) error {
-	return ss.sessionRepo.Delete(cookie)
+	return ss.sessionRepo.Delete(dto.ToDBDeleteCookie(cookie))
 	
 }

@@ -1,10 +1,12 @@
 package repository
 
-import "server/internal/domain/entity"
-
+import (
+	"server/internal/domain/entity"
+	"server/internal/domain/dto"
+)
 
 type UserRepositoryI interface{
-	GetUserById(id uint) (*entity.User, error)
-	CreateUser(user *entity.User) (uint, error)
+	GetUserById(id uint) (*entity.User, error) 
+	CreateUser(user *dto.DBCreateUser) (uint, error)
 	FindUserBy(field string, value string) (*entity.User, error)
 }
