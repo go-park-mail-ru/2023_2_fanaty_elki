@@ -8,9 +8,9 @@ import (
 	sessionDev "server/internal/Session/delivery"
 //	userDev "server/internal/User/delivery"
 	restaurantDev "server/internal/Restaurant/delivery"
-	sessionUC "server/internal/Session/usecase"
-	userUC "server/internal/User/usecase"
-	restaurantUC "server/internal/Restaurant/usecase"
+	sessionUsecase "server/internal/Session/usecase"
+	userUsecase "server/internal/User/usecase"
+	restaurantUsecase "server/internal/Restaurant/usecase"
 	sessionRep "server/internal/Session/repository/postgres"
 	userRep "server/internal/User/repository/postgres"
 	restaurantRep "server/internal/Restaurant/repository/postgres"
@@ -63,13 +63,13 @@ func main() {
 	restaurantRepo := restaurantRep.NewRestaurantRepo(db)
 	sessionRepo := sessionRep.NewSessionManager(redisConn)
 	
-	users := userUC.NewUserUsecase(userRepo)
-	restaurants := restaurantUC.NewRestaurantUsecase(restaurantRepo)
-	sessions := sessionUC.NewSessionUsecase(sessionRepo, userRepo)
+	userUC := userUsecase.NewUserUsecase(userRepo)
+	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo)
+	sessionUC := sessionUsecase.NewSessionUsecase(sessionRepo, userRepo)
 
 	//usersHandler := userDev.NewUserHandler(users)
-	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurants)
-	sessionsHandler := sessionDev.NewSessionHandler(sessions, users)
+	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC)
+	sessionsHandler := sessionDev.NewSessionHandler(sessionUC, userUC)
 	
 
 	router.HandleFunc("/api/restaurants", restaurantsHandler.GetRestaurantList).Methods(http.MethodGet)
