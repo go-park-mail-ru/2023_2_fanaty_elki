@@ -5,7 +5,6 @@ import (
 	"server/internal/domain/dto"
 	sessionRep "server/internal/Session/repository"
 	userRep "server/internal/User/repository"
-	"regexp"
 	"time"
 	"math/rand"
 )
@@ -17,7 +16,6 @@ var (
 )
 
 type UsecaseI interface {
-	SignUp(user *entity.User) (uint, error)
 	Login(user *entity.User) (*entity.Cookie, error)
 	Check(SessionToken string) (*string, error)
 	Logout(cookie *entity.Cookie) error
@@ -44,59 +42,6 @@ func randStringRunes(n int) string {
 	return string(b)
 }
 
-func (ss sessionUsecase) SignUp(user *entity.User) (uint, error) {
-	if len(user.Username) < 3 || len(user.Username) > 30 {
-		return 0, entity.ErrInvalidUsername
-	}
-	
-	if len(user.Username) < 3 || len(user.Username) > 50 {
-		return 0, entity.ErrInvalidPassword
-	}
-	
-	re := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`)
-	if user.Birthday != "" && !re.MatchString(user.Birthday) {
-		return 0, entity.ErrInvalidBirthday
-	}
-	
-	re = regexp.MustCompile(`^[+]?[0-9]{3,25}$`)
-	if user.PhoneNumber != "" && !re.MatchString(user.PhoneNumber) {
-		return 0, entity.ErrConflictPhoneNumber
-	}
-	
-	re = regexp.MustCompile(`\S*@\S*`)
-	if !re.MatchString(user.Email) {
-		return 0, entity.ErrInvalidEmail
-	}
-
-	us, err := ss.userRepo.FindUserBy("Username", user.Username)
-	if err != nil {
-		return 0, err
-	}
-
-	if us != nil {
-		return 0, entity.ErrConflictUsername
-	}
-
-	us, err = ss.userRepo.FindUserBy("Email", user.Email)
-	if err != nil {
-		return 0, err
-	}
-
-	if us != nil {
-		return 0, entity.ErrConflictEmail
-	}
-
-	us, err = ss.userRepo.FindUserBy("PhoneNumber", user.PhoneNumber)
-	if err != nil {
-		return 0, err
-	}
-
-	if us != nil {
-		return 0, entity.ErrConflictPhoneNumber
-	}
-
-	return ss.userRepo.CreateUser(dto.ToRepoUser(user))
-}
 
 func (ss sessionUsecase) Login(user *entity.User) (*entity.Cookie, error) {
 	
@@ -133,7 +78,6 @@ func (ss sessionUsecase) Login(user *entity.User) (*entity.Cookie, error) {
 func (ss sessionUsecase) Check(SessionToken string) (*string, error) {
 	
 	cookie, err := ss.sessionRepo.Check(SessionToken)
-	//fmt.Println(err.Error())	
 	if err != nil {
 		return nil, err
 	}
