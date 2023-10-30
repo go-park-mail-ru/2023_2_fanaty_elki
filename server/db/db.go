@@ -9,8 +9,8 @@ func GetPostgres() (*sql.DB, error) {
 	var (
 		host     = "localhost"
 		port     = 5432
-		user     = 	User.username
-		password = 	User.password
+		user     = "uliana"
+		password = "uliana"
 		dbname   = "prinesy-poday"
 	)
 
