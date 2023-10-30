@@ -4,21 +4,24 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"github.com/gorilla/mux"
 	sessionDev "server/internal/Session/delivery"
-//	userDev "server/internal/User/delivery"
-	restaurantDev "server/internal/Restaurant/delivery"
-	sessionUC "server/internal/Session/usecase"
-	userUC "server/internal/User/usecase"
-	restaurantUC "server/internal/Restaurant/usecase"
-	sessionRep "server/internal/Session/repository/postgres"
-	userRep "server/internal/User/repository/postgres"
-	restaurantRep "server/internal/Restaurant/repository/postgres"
-	"server/db"
+
+	"github.com/gorilla/mux"
+
+	//	userDev "server/internal/User/delivery"
 	"flag"
-	_"github.com/lib/pq"
-	"github.com/gomodule/redigo/redis"
 	"log"
+	"server/db"
+	restaurantDev "server/internal/Restaurant/delivery"
+	restaurantRep "server/internal/Restaurant/repository/postgres"
+	restaurantUC "server/internal/Restaurant/usecase"
+	sessionRep "server/internal/Session/repository/redis"
+	sessionUC "server/internal/Session/usecase"
+	userRep "server/internal/User/repository/postgres"
+	userUC "server/internal/User/usecase"
+
+	"github.com/gomodule/redigo/redis"
+	_ "github.com/lib/pq"
 )
 
 // @title Prinesi-Poday API
@@ -35,11 +38,10 @@ var (
 	redisAddr = flag.String("addr", "redis://user:@localhost:6379/0", "redis addr")
 )
 
-
 func main() {
 	flag.Parse()
 	router := mux.NewRouter()
-	
+
 	redisConn, err := redis.DialURL(*redisAddr)
 	if err != nil {
 		log.Fatalf("cant connect to redis")
@@ -56,7 +58,7 @@ func main() {
 	userRepo := userRep.NewUserRepo(db)
 	restaurantRepo := restaurantRep.NewRestaurantRepo(db)
 	sessionRepo := sessionRep.NewSessionManager(redisConn)
-	
+
 	users := userUC.NewUserUsecase(userRepo)
 	restaurants := restaurantUC.NewRestaurantUsecase(restaurantRepo)
 	sessions := sessionUC.NewSessionUsecase(sessionRepo, userRepo)
@@ -64,14 +66,13 @@ func main() {
 	//usersHandler := userDev.NewUserHandler(users)
 	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurants)
 	sessionsHandler := sessionDev.NewSessionHandler(sessions, users)
-	
 
 	router.HandleFunc("/api/restaurants", restaurantsHandler.GetRestaurantList).Methods(GET)
 	router.HandleFunc("/api/users", sessionsHandler.SignUp).Methods(POST)
 	router.HandleFunc("/api/login", sessionsHandler.Login).Methods(POST)
 	router.HandleFunc("/api/logout", sessionsHandler.Logout).Methods(DELETE)
 	router.HandleFunc("/api/auth", sessionsHandler.Auth).Methods(GET)
-	
+
 	server := &http.Server{
 		Addr:    PORT,
 		Handler: router,

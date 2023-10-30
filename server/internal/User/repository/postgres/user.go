@@ -58,8 +58,8 @@ func (repo *UserRepo) FindUserByPhone(value string) (*entity.User, error) {
 
 func (repo *UserRepo) FindUserById(id uint) (*entity.User, error) {
 	user := &entity.User{}
-	row := repo.DB.QueryRow("SELECT id, username, password, birthday, email FROM users WHERE id = $1", id)
-	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.Email)
+	row := repo.DB.QueryRow("SELECT id, username, password, birthday,  phone_number, email, icon FROM users WHERE id = $1", id)
+	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.PhoneNumber, &user.Email, &user.Icon)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil

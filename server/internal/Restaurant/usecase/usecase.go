@@ -1,8 +1,8 @@
 package usecase
 
 import (
-	"server/internal/domain/entity"
 	restRep "server/internal/Restaurant/repository"
+	"server/internal/domain/entity"
 )
 
 type UsecaseI interface {
@@ -10,10 +10,10 @@ type UsecaseI interface {
 }
 
 type restaurantUsecase struct {
-	RestaurantRepo restRep.RestaurantI
+	RestaurantRepo restRep.RestaurantRepositoryI
 }
 
-func NewRestaurantUsecase(resRep restRep.RestaurantI) *restaurantUsecase {
+func NewRestaurantUsecase(resRep restRep.RestaurantRepositoryI) *restaurantUsecase {
 	return &restaurantUsecase{
 		RestaurantRepo: resRep,
 	}
