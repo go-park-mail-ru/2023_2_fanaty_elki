@@ -27,9 +27,6 @@ import (
 // @host http://84.23.53.216:8001/
 
 const PORT = ":3333"
-const GET = "GET"
-const POST = "POST"
-const DELETE = "DELETE"
 
 var (
 	redisAddr = flag.String("addr", "redis://user:@localhost:6379/0", "redis addr")
@@ -66,11 +63,11 @@ func main() {
 	sessionsHandler := sessionDev.NewSessionHandler(sessions, users)
 	
 
-	router.HandleFunc("/api/restaurants", restaurantsHandler.GetRestaurantList).Methods(GET)
-	router.HandleFunc("/api/users", sessionsHandler.SignUp).Methods(POST)
-	router.HandleFunc("/api/login", sessionsHandler.Login).Methods(POST)
-	router.HandleFunc("/api/logout", sessionsHandler.Logout).Methods(DELETE)
-	router.HandleFunc("/api/auth", sessionsHandler.Auth).Methods(GET)
+	router.HandleFunc("/api/restaurants", restaurantsHandler.GetRestaurantList).Methods(http.MethodGet)
+	router.HandleFunc("/api/users", sessionsHandler.SignUp).Methods(http.MethodPost)
+	router.HandleFunc("/api/login", sessionsHandler.Login).Methods(http.MethodPost)
+	router.HandleFunc("/api/logout", sessionsHandler.Logout).Methods(http.MethodDelete)
+	router.HandleFunc("/api/auth", sessionsHandler.Auth).Methods(http.MethodDelete)
 	
 	server := &http.Server{
 		Addr:    PORT,
