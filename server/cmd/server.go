@@ -30,6 +30,15 @@ const PORT = ":3333"
 
 var (
 	redisAddr = flag.String("addr", "redis://user:@localhost:6379/0", "redis addr")
+	
+	host     = "localhost"
+	port     = 5432
+	user     = 	db.User.Username
+	password = 	db.User.Password
+	dbname   = "prinesy-poday"
+	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
+							"password=%s dbname=%s sslmode=disable",
+							host, port, user, password, dbname)
 )
 
 
@@ -42,7 +51,7 @@ func main() {
 		log.Fatalf("cant connect to redis")
 	}
 
-	db, err := db.GetPostgres()
+	db, err := db.GetPostgres(psqlInfo)
 	if err != nil {
 		fmt.Println(err)
 		log.Fatalf("cant connect to postgres")
