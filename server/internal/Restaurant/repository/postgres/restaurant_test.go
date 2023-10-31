@@ -18,8 +18,20 @@ func TestGetRestaurants(t *testing.T) {
 	rows := sqlmock.
 		NewRows([]string{"id", "name", "rating", "comments_count", "category", "icon"})
 	expect := []*entity.Restaurant{
-		{1, "Burger King", 3.7, 60, "Fastfood", "img/burger_king.jpg"},
-		{2, "MacBurger", 3.8, 69, "Fastfood", "img/mac_burger.jpg"},
+		{	1, 
+			"Burger King", 
+			3.7, 
+			60, 
+			"Fastfood", 
+			"img/burger_king.jpg"
+		},
+		{	2, 
+			"MacBurger", 
+			3.8, 
+			69, 
+			"Fastfood", 
+			"img/mac_burger.jpg"
+		},
 	}
 	for _, restaurant := range expect {
 		rows = rows.AddRow(restaurant.ID, restaurant.Name, restaurant.Rating, restaurant.CommentsCount, restaurant.Category, restaurant.Icon)
