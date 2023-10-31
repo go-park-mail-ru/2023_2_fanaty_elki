@@ -48,3 +48,7 @@ func (repo *restaurantRepo) GetRestaurants() ([]*entity.Restaurant, error) {
 	}
 	return Restaurants, nil
 }
+
+func (repo *restaurantRepo) GetRestaurantById() (*entity.Restaurant, error) {
+
+}
