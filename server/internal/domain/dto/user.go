@@ -15,6 +15,14 @@ type ReqCreateUser struct {
 	Icon        string		   `json:"Icon"`
 }
 
+type ReqGetUserProfile struct {
+	Username    string         `json:"Username"`
+	Birthday    string		   `json:"Birthday"`
+	PhoneNumber string         `json:"PhoneNumber"`
+	Email       string         `json:"Email"`
+	Icon        string		   `json:"Icon"`
+}
+
 type DBCreateUser struct {
 	ID          uint           
 	Username    string         
@@ -58,6 +66,16 @@ func ToRepoUser (user *entity.User) *DBCreateUser{
 		PhoneNumber: user.PhoneNumber,         
 		Email:       user.Email,         
 		Icon:        *transformStringToSqlString(user.Icon), 
+	}
+}
+
+func ToReqGetUserProfile(user *entity.User) *ReqGetUserProfile {
+	return &ReqGetUserProfile{
+		Username: user.Username,
+		Birthday: user.Birthday,
+		PhoneNumber: user.PhoneNumber,
+		Email: user.Email,
+		Icon: user.Icon,
 	}
 }
 

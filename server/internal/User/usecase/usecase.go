@@ -64,3 +64,4 @@ func (us userUsecase) FindUserBy(field string, value string) (*entity.User, erro
 	return us.userRepo.FindUserBy(field, value)
 }
 
+

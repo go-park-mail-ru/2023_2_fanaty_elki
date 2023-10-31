@@ -19,6 +19,7 @@ type UsecaseI interface {
 	Login(user *entity.User) (*entity.Cookie, error)
 	Check(SessionToken string) (*string, error)
 	Logout(cookie *entity.Cookie) error
+	GetUserProfile(sessionToken string) (*dto.ReqGetUserProfile, error)
 }
 
 type sessionUsecase struct {
@@ -33,7 +34,6 @@ func NewSessionUsecase(sessionRep sessionRep.SessionRepositoryI, userRep userRep
 	}
 }
 
-
 func randStringRunes(n int) string {
 	b := make([]rune, n)
 	for i := range b {
@@ -41,7 +41,6 @@ func randStringRunes(n int) string {
 	}
 	return string(b)
 }
-
 
 func (ss sessionUsecase) Login(user *entity.User) (*entity.Cookie, error) {
 	
@@ -91,6 +90,19 @@ func (ss sessionUsecase) Check(SessionToken string) (*string, error) {
 }
 
 func (ss sessionUsecase) Logout(cookie *entity.Cookie) error {
-	return ss.sessionRepo.Delete(dto.ToDBDeleteCookie(cookie))
+	return ss.sessionRepo.Delete(dto.ToDBDeleteCookie(cookie))	
+}
+
+func (ss sessionUsecase) GetUserProfile(sessionToken string) (*dto.ReqGetUserProfile, error) {
+	cookie, err := ss.sessionRepo.Check(sessionToken)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := ss.userRepo.GetUserById(cookie.UserID)
+	if err != nil{
+		return nil, err
+	}
 	
+	return dto.ToReqGetUserProfile(user), nil
 }

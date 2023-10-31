@@ -260,3 +260,42 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
+
+func (handler *SessionHandler) Profile(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
+	w.Header().Add("Access-Control-Allow-Credentials", "true")
+	w.Header().Set("content-type", "application/json")
+
+	cookie, err := r.Cookie("session_id")
+	if err == http.ErrNoCookie {
+		w.WriteHeader(http.StatusUnauthorized)
+		err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnauthorized.Error()})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	} else if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	user, err := handler.sessions.GetUserProfile(cookie.Value)
+	if err == entity.ErrInternalServerError{
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if user == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnauthorized.Error()})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	err = json.NewEncoder(w).Encode(&Result{Body: user})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
