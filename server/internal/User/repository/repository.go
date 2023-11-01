@@ -12,3 +12,4 @@ type UserRepositoryI interface {
 	FindUserByUsername(value string) (*entity.User, error)
 	FindUserByEmail(value string) (*entity.User, error)
 	FindUserByPhone(value string) (*entity.User, error)
+}

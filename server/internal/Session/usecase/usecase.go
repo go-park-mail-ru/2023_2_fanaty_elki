@@ -100,7 +100,7 @@ func (ss sessionUsecase) GetUserProfile(sessionToken string) (*dto.ReqGetUserPro
 		return nil, err
 	}
 
-	user, err := ss.userRepo.GetUserById(cookie.UserID)
+	user, err := ss.userRepo.FindUserById(cookie.UserID)
 	if err != nil{
 		return nil, err
 	}
