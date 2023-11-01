@@ -6,11 +6,9 @@ import (
 	"server/internal/domain/entity"
 )
 
-
-type UsecaseI interface{
-	GetUserById(id uint) (*entity.User, error)
+type UsecaseI interface {
+  GetUserById(id uint) (*entity.User, error)
 	CreateUser(new_user *entity.User) (uint, error)
-	FindUserBy(field string, value string) (*entity.User, error)
 	UpdateUser(newUser *entity.User) (error) 
 }
 
@@ -24,7 +22,6 @@ func NewUserUsecase(repI userRep.UserRepositoryI) *userUsecase {
 	}
 }
 
-
 func (us userUsecase) GetUserById(id uint) (*entity.User, error) {
 	return us.userRepo.GetUserById(id)	
 }
@@ -37,9 +34,6 @@ func (us userUsecase) CreateUser(newUser *entity.User) (uint, error) {
 	return us.userRepo.CreateUser(dto.ToRepoCreateUser(newUser)) 
 }
 
-func (us userUsecase) FindUserBy(field string, value string) (*entity.User, error) {
-	return us.userRepo.FindUserBy(field, value)
-}
 
 func (us userUsecase) UpdateUser(newUser *entity.User) (error) {
 	_, err := us.checkUser(newUser)
@@ -84,8 +78,7 @@ func (us userUsecase) UpdateUser(newUser *entity.User) (error) {
  
 func (us userUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
 
-	user, err := us.userRepo.FindUserBy("Username", checkUser.Username)
-
+	user, err = us.userRepo.FindUserByUsername(checkUser.Username)
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}
@@ -94,7 +87,7 @@ func (us userUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
 		return nil, entity.ErrConflictUsername
 	}
 
-	user, err = us.userRepo.FindUserBy("Email", checkUser.Email)
+	user, err = us.userRepo.FindUserByEmail(checkUser.Email)
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}
@@ -103,7 +96,7 @@ func (us userUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
 		return nil, entity.ErrConflictEmail
 	}
 
-	user, err = us.userRepo.FindUserBy("PhoneNumber", checkUser.PhoneNumber)
+	user, err = us.userRepo.FindUserByPhone(checkUser.PhoneNumber)
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}
@@ -114,3 +107,7 @@ func (us userUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
 	
 	return user, nil
 }
+
+	return us.userRepo.CreateUser(dto.ToRepoUser(new_user))
+}
+

@@ -1,12 +1,12 @@
 package usecase
 
 import (
-	"server/internal/domain/entity"
-	"server/internal/domain/dto"
+	"math/rand"
 	sessionRep "server/internal/Session/repository"
 	userRep "server/internal/User/repository"
+	"server/internal/domain/dto"
+	"server/internal/domain/entity"
 	"time"
-	"math/rand"
 )
 
 const sessKeyLen = 10
@@ -25,13 +25,13 @@ type UsecaseI interface {
 
 type sessionUsecase struct {
 	sessionRepo sessionRep.SessionRepositoryI
-	userRepo userRep.UserRepositoryI
+	userRepo    userRep.UserRepositoryI
 }
 
 func NewSessionUsecase(sessionRep sessionRep.SessionRepositoryI, userRep userRep.UserRepositoryI) *sessionUsecase {
 	return &sessionUsecase{
 		sessionRepo: sessionRep,
-		userRepo: userRep,
+		userRepo:    userRep,
 	}
 }
 
@@ -44,13 +44,13 @@ func randStringRunes(n int) string {
 }
 
 func (ss sessionUsecase) Login(user *entity.User) (*entity.Cookie, error) {
-	
-	us, err := ss.userRepo.FindUserBy("Username", user.Username)
-	
+
+	us, err := ss.userRepo.FindUserByUsername(user.Username)
+
 	if err != nil {
 		return nil, err
 	}
-	
+
 	if us == nil {
 		return nil, entity.ErrBadRequest
 	}
@@ -60,9 +60,9 @@ func (ss sessionUsecase) Login(user *entity.User) (*entity.Cookie, error) {
 	}
 
 	cookie := &entity.Cookie{
-		UserID: us.ID,
+		UserID:       us.ID,
 		SessionToken: randStringRunes(sessKeyLen),
-		MaxAge: 50 * time.Hour,	
+		MaxAge:       50 * time.Hour,
 	}
 
 	err = ss.sessionRepo.Create(cookie)
@@ -76,13 +76,13 @@ func (ss sessionUsecase) Login(user *entity.User) (*entity.Cookie, error) {
 }
 
 func (ss sessionUsecase) Check(SessionToken string) (*string, error) {
-	
+
 	cookie, err := ss.sessionRepo.Check(SessionToken)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := ss.userRepo.GetUserById(cookie.UserID)
+	user, err := ss.userRepo.FindUserById(cookie.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -116,4 +116,5 @@ func (ss sessionUsecase) GetIdByCookie(SessionToken string) (uint, error) {
 	}
 
 	return cookie.UserID, nil
+
 }

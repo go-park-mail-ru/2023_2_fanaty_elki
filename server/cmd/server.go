@@ -4,21 +4,26 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"github.com/gorilla/mux"
 	sessionDev "server/internal/Session/delivery"
-//	userDev "server/internal/User/delivery"
-	restaurantDev "server/internal/Restaurant/delivery"
-	sessionUsecase "server/internal/Session/usecase"
-	userUsecase "server/internal/User/usecase"
-	restaurantUsecase "server/internal/Restaurant/usecase"
-	sessionRep "server/internal/Session/repository/postgres"
-	userRep "server/internal/User/repository/postgres"
-	restaurantRep "server/internal/Restaurant/repository/postgres"
-	"server/db"
+
+	"github.com/gorilla/mux"
+
+	//	userDev "server/internal/User/delivery"
+	//	userDev "server/internal/User/delivery"
 	"flag"
-	_"github.com/lib/pq"
-	"github.com/gomodule/redigo/redis"
 	"log"
+	"server/db"
+	productRep "server/internal/Product/repository/postgres"
+	restaurantDev "server/internal/Restaurant/delivery"
+	restaurantRep "server/internal/Restaurant/repository/postgres"
+	restaurantUsecase "server/internal/Restaurant/usecase"
+	sessionRep "server/internal/Session/repository/redis"
+	sessionUsecase "server/internal/Session/usecase"
+	userRep "server/internal/User/repository/postgres"
+	userUsecase "server/internal/User/usecase"
+
+	"github.com/gomodule/redigo/redis"
+	_ "github.com/lib/pq"
 )
 
 // @title Prinesi-Poday API
@@ -30,22 +35,21 @@ const PORT = ":3333"
 
 var (
 	redisAddr = flag.String("addr", "redis://user:@localhost:6379/0", "redis addr")
-	
+
 	host     = "localhost"
 	port     = 5432
-	user     = 	db.User.Username
-	password = 	db.User.Password
+	user     = db.User.Username
+	password = db.User.Password
 	dbname   = "prinesy-poday"
 	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
-							"password=%s dbname=%s sslmode=disable",
-							host, port, user, password, dbname)
+		"password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
 )
-
 
 func main() {
 	flag.Parse()
 	router := mux.NewRouter()
-	
+
 	redisConn, err := redis.DialURL(*redisAddr)
 	if err != nil {
 		log.Fatalf("cant connect to redis")
@@ -61,25 +65,25 @@ func main() {
 
 	userRepo := userRep.NewUserRepo(db)
 	restaurantRepo := restaurantRep.NewRestaurantRepo(db)
+	productRepo := productRep.NewProductRepo(db)
 	sessionRepo := sessionRep.NewSessionManager(redisConn)
-	
+
 	userUC := userUsecase.NewUserUsecase(userRepo)
-	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo)
+	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo, productRepo)
 	sessionUC := sessionUsecase.NewSessionUsecase(sessionRepo, userRepo)
 
-	//usersHandler := userDev.NewUserHandler(users)
 	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC)
 	sessionsHandler := sessionDev.NewSessionHandler(sessionUC, userUC)
-	
 
 	router.HandleFunc("/api/restaurants", restaurantsHandler.GetRestaurantList).Methods(http.MethodGet)
+	router.HandleFunc("/api/restaurants/{id}", restaurantsHandler.GetRestaurantById).Methods(http.MethodGet)
 	router.HandleFunc("/api/users", sessionsHandler.SignUp).Methods(http.MethodPost)
 	router.HandleFunc("/api/login", sessionsHandler.Login).Methods(http.MethodPost)
 	router.HandleFunc("/api/logout", sessionsHandler.Logout).Methods(http.MethodDelete)
 	router.HandleFunc("/api/auth", sessionsHandler.Auth).Methods(http.MethodDelete)
 	router.HandleFunc("/api/me", sessionsHandler.Profile).Methods(http.MethodGet)
 	router.HandleFunc("/api/me", sessionsHandler.UpdateProfile).Methods(http.MethodPatch)
-	
+
 	server := &http.Server{
 		Addr:    PORT,
 		Handler: router,
