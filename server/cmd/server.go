@@ -13,6 +13,7 @@ import (
 	"flag"
 	"log"
 	"server/db"
+	productRep "server/internal/Product/repository/postgres"
 	restaurantDev "server/internal/Restaurant/delivery"
 	restaurantRep "server/internal/Restaurant/repository/postgres"
 	restaurantUsecase "server/internal/Restaurant/usecase"
@@ -64,17 +65,18 @@ func main() {
 
 	userRepo := userRep.NewUserRepo(db)
 	restaurantRepo := restaurantRep.NewRestaurantRepo(db)
+	productRepo := productRep.NewProductRepo(db)
 	sessionRepo := sessionRep.NewSessionManager(redisConn)
 
 	userUC := userUsecase.NewUserUsecase(userRepo)
-	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo)
+	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo, productRepo)
 	sessionUC := sessionUsecase.NewSessionUsecase(sessionRepo, userRepo)
 
-	//usersHandler := userDev.NewUserHandler(users)
 	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC)
 	sessionsHandler := sessionDev.NewSessionHandler(sessionUC, userUC)
 
 	router.HandleFunc("/api/restaurants", restaurantsHandler.GetRestaurantList).Methods(http.MethodGet)
+	router.HandleFunc("/api/restaurants/{id}", restaurantsHandler.GetRestaurantById).Methods(http.MethodGet)
 	router.HandleFunc("/api/users", sessionsHandler.SignUp).Methods(http.MethodPost)
 	router.HandleFunc("/api/login", sessionsHandler.Login).Methods(http.MethodPost)
 	router.HandleFunc("/api/logout", sessionsHandler.Logout).Methods(http.MethodDelete)

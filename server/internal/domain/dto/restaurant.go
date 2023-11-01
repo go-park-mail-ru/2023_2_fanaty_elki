@@ -1,6 +1,6 @@
 package dto
 
-//import "server/internal/domain/entity"
+import "server/internal/domain/entity"
 
 // type ReqGetRestaurant struct {
 // 	ID            uint    `json:"ID"`
@@ -14,10 +14,19 @@ package dto
 // func ToEntityRestaurant(restaurant *ReqGetRestaurant) *entity.Restaurant {
 // 	return &entity.Restaurant{
 // 		ID: restaurant.ID,
-// 		Name: restaurant.Name,          
-// 		Rating: restaurant.Rating,       
+// 		Name: restaurant.Name,
+// 		Rating: restaurant.Rating,
 // 		CommentsCount: restaurant.CommentsCount,
-// 		Icon: restaurant.Icon,         
+// 		Icon: restaurant.Icon,
 // 		Category: restaurant.Category,
 // 	}
-// } 
+// }
+
+type MenuTypeWithProducts struct {
+	MenuType *entity.MenuType
+	Products []*entity.Product
+}
+type RestaurantWithProducts struct {
+	Restaurant            *entity.Restaurant
+	MenuTypesWithProducts []*MenuTypeWithProducts
+}
