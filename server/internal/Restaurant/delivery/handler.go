@@ -34,7 +34,7 @@ func NewRestaurantHandler(restaurants restaurantUsecase.UsecaseI) *RestaurantHan
 // @Tags        Restaurants
 // @Accept     */*
 // @Produce  application/json
-// @Success  200 {object}  []store.Restaurant "success returning array of restaurants"
+// @Success  200 {object}  []entity.Restaurant "success returning array of restaurants"
 // @Failure 500 {object} error "internal server error"
 // @Router   /restaurants [get]
 func (handler *RestaurantHandler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {

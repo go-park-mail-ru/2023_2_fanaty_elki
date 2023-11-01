@@ -58,7 +58,7 @@ func (repo *UserRepo) FindUserByPhone(value string) (*entity.User, error) {
 
 func (repo *UserRepo) FindUserById(id uint) (*entity.User, error) {
 	user := &entity.User{}
-	row := repo.DB.QueryRow("SELECT id, username, password, birthday,  phone_number, email, icon FROM users WHERE id = $1", id)
+	row := repo.DB.QueryRow("SELECT id, username, password, birthday, phone_number, email, icon FROM users WHERE id = $1", id)
 	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.PhoneNumber, &user.Email, &user.Icon)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -69,19 +69,30 @@ func (repo *UserRepo) FindUserById(id uint) (*entity.User, error) {
 	return user, nil
 }
 
-func (repo *UserRepo) CreateUser(in *dto.DBCreateUser) (uint, error) {
+func (repo *UserRepo) CreateUser(user *dto.DBCreateUser) (uint, error) {
 
 	insertUser := `INSERT INTO users (username, password, birthday, phone_number, email, icon) VALUES ($1, $2, $3, $4, $5, $6)`
-	_, err := repo.DB.Exec(insertUser, in.Username, in.Password, in.Birthday, in.PhoneNumber, in.Email, in.Icon)
+	_, err := repo.DB.Exec(insertUser, user.Username, user.Password, user.Birthday, user.PhoneNumber, user.Email, user.Icon)
 	if err != nil {
 		return 0, entity.ErrInternalServerError
 	}
 	var ID uint
-	row := repo.DB.QueryRow("SELECT ID FROM users WHERE username = $1", in.Username)
+	row := repo.DB.QueryRow("SELECT ID FROM users WHERE username = $1", user.Username)
 	err = row.Scan(&ID)
 	if err != nil {
 		return 0, entity.ErrInternalServerError
 	}
 
 	return ID, nil
+}
+
+func (repo *UserRepo) UpdateUser(user *dto.DBUpdateUser) (error) {
+	updateUser := `UPDATE users 
+				   SET username = $1, password = $2, birthday = $3, phone_number = $4, email = $5, icon = $6
+				   WHERE id = $7`
+	_, err := repo.DB.Exec(updateUser, user.Username, user.Password, user.Birthday, user.PhoneNumber, user.Email, user.Icon, user.ID)
+	if err != nil {
+		return entity.ErrInternalServerError
+	}
+	return nil
 }
