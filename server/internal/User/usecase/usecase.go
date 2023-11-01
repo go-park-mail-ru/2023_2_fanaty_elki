@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"fmt"
 	"regexp"
 	userRep "server/internal/User/repository"
 	"server/internal/domain/dto"
