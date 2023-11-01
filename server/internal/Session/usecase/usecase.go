@@ -20,6 +20,7 @@ type UsecaseI interface {
 	Check(SessionToken string) (*string, error)
 	Logout(cookie *entity.Cookie) error
 	GetUserProfile(sessionToken string) (*dto.ReqGetUserProfile, error)
+	GetIdByCookie(SessionToken string) (uint, error)
 }
 
 type sessionUsecase struct {
@@ -105,4 +106,14 @@ func (ss sessionUsecase) GetUserProfile(sessionToken string) (*dto.ReqGetUserPro
 	}
 	
 	return dto.ToReqGetUserProfile(user), nil
+}
+
+func (ss sessionUsecase) GetIdByCookie(SessionToken string) (uint, error) {
+	
+	cookie, err := ss.sessionRepo.Check(SessionToken)
+	if err != nil {
+		return 0, err
+	}
+
+	return cookie.UserID, nil
 }

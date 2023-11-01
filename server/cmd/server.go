@@ -78,6 +78,7 @@ func main() {
 	router.HandleFunc("/api/logout", sessionsHandler.Logout).Methods(http.MethodDelete)
 	router.HandleFunc("/api/auth", sessionsHandler.Auth).Methods(http.MethodDelete)
 	router.HandleFunc("/api/me", sessionsHandler.Profile).Methods(http.MethodGet)
+	router.HandleFunc("/api/me", sessionsHandler.UpdateProfile).Methods(http.MethodPatch)
 	
 	server := &http.Server{
 		Addr:    PORT,

@@ -38,9 +38,40 @@ type ReqLoginUser struct {
 	Password string `json:"Password"`
 }
 
+type ReqUpdateUser struct {
+	Username string `json:"Username"`
+	Password string `json:"Password"`
+	Birthday string `json:"Birthday"`
+	PhoneNumber string `json:"PhoneNumber"`
+	Email string `json:"Email"`
+	Icon string `json:"Icon"`
+}
+
+type DBUpdateUser struct {
+	ID          uint           
+	Username    string         
+	Password    string         
+	Birthday    sql.NullString
+	PhoneNumber string         
+	Email       string         
+	Icon        sql.NullString 
+}
+
 func ToEntityCreateUser(reqUser *ReqCreateUser) *entity.User {
 	return &entity.User{
 		ID: reqUser.ID,
+		Username: reqUser.Username,         
+		Password: reqUser.Password,         
+		Birthday:    reqUser.Birthday,
+		PhoneNumber: reqUser.PhoneNumber,         
+		Email:       reqUser.Email,         
+		Icon:        reqUser.Icon, 
+	}
+} 
+
+func ToEntityUpdateUser(reqUser *ReqUpdateUser, id uint) *entity.User {
+	return &entity.User{
+		ID: id,
 		Username: reqUser.Username,         
 		Password: reqUser.Password,         
 		Birthday:    reqUser.Birthday,
@@ -57,7 +88,7 @@ func ToEntityLoginUser(reqUser *ReqLoginUser) *entity.User {
 	}
 } 
 
-func ToRepoUser (user *entity.User) *DBCreateUser{
+func ToRepoCreateUser (user *entity.User) *DBCreateUser{
 	return &DBCreateUser{
 		ID:          user.ID,           
 		Username:    user.Username,         
@@ -68,6 +99,20 @@ func ToRepoUser (user *entity.User) *DBCreateUser{
 		Icon:        *transformStringToSqlString(user.Icon), 
 	}
 }
+
+
+func ToRepoUpdateUser (user *entity.User) *DBUpdateUser{
+	return &DBUpdateUser{
+		ID:          user.ID,           
+		Username:    user.Username,         
+		Password:    user.Password,         
+		Birthday:    *transformStringToSqlString(user.Birthday),
+		PhoneNumber: user.PhoneNumber,         
+		Email:       user.Email,         
+		Icon:        *transformStringToSqlString(user.Icon), 
+	}
+}
+
 
 func ToReqGetUserProfile(user *entity.User) *ReqGetUserProfile {
 	return &ReqGetUserProfile{

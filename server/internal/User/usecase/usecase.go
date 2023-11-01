@@ -1,16 +1,17 @@
 package usecase
 
 import (
-	"server/internal/domain/entity"
-	"server/internal/domain/dto"
 	userRep "server/internal/User/repository"
+	"server/internal/domain/dto"
+	"server/internal/domain/entity"
 )
 
 
 type UsecaseI interface{
 	GetUserById(id uint) (*entity.User, error)
 	CreateUser(new_user *entity.User) (uint, error)
-	FindUserBy(field string, value string) (*entity.User, error) 
+	FindUserBy(field string, value string) (*entity.User, error)
+	UpdateUser(newUser *entity.User) (error) 
 }
 
 type userUsecase struct {
@@ -28,40 +29,88 @@ func (us userUsecase) GetUserById(id uint) (*entity.User, error) {
 	return us.userRepo.GetUserById(id)	
 }
 
-func (us userUsecase) CreateUser(new_user *entity.User) (uint, error) {
-	
-	user, err := us.userRepo.FindUserBy("Username", new_user.Username)
+func (us userUsecase) CreateUser(newUser *entity.User) (uint, error) {
+	_, err := us.checkUser(newUser)
 	if err != nil {
-		return 0, entity.ErrInternalServerError
+		return 0, err
 	}
-
-	if user != nil {
-		return 0, entity.ErrConflictUsername
-	}
-
-	user, err = us.userRepo.FindUserBy("Email", new_user.Email)
-	if err != nil {
-		return 0, entity.ErrInternalServerError
-	}
-
-	if user != nil {
-		return 0, entity.ErrConflictEmail
-	}
-
-	user, err = us.userRepo.FindUserBy("PhoneNumber", new_user.PhoneNumber)
-	if err != nil {
-		return 0, entity.ErrInternalServerError
-	}
-
-	if user != nil {
-		return 0, entity.ErrConflictPhoneNumber
-	}
-
-	return us.userRepo.CreateUser(dto.ToRepoUser(new_user)) 
+	return us.userRepo.CreateUser(dto.ToRepoCreateUser(newUser)) 
 }
 
 func (us userUsecase) FindUserBy(field string, value string) (*entity.User, error) {
 	return us.userRepo.FindUserBy(field, value)
 }
 
+func (us userUsecase) UpdateUser(newUser *entity.User) (error) {
+	_, err := us.checkUser(newUser)
+	if err != nil {
+		return err
+	}
+	
+	user, err := us.GetUserById(newUser.ID)
+	if err != nil {
+		return err
+	}
+	if user != nil { 
+		if newUser.Username != "" {
+			user.Username = newUser.Username
+		}
 
+		if newUser.Password != "" {
+			user.Password = newUser.Password
+		}
+
+		if newUser.Birthday != "" {
+			user.Birthday = newUser.Birthday
+		}
+
+		if newUser.PhoneNumber != "" {
+			user.PhoneNumber = newUser.PhoneNumber
+		}
+
+		if newUser.Email != "" {
+			user.Email = newUser.Email
+		}
+
+		if newUser.Icon != "" {
+			user.Icon = newUser.Icon
+		}
+		return us.userRepo.UpdateUser(dto.ToRepoUpdateUser(user))
+	}
+	
+	return entity.ErrNotFound
+	
+}
+ 
+func (us userUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
+
+	user, err := us.userRepo.FindUserBy("Username", checkUser.Username)
+
+	if err != nil {
+		return nil, entity.ErrInternalServerError
+	}
+
+	if user != nil {
+		return nil, entity.ErrConflictUsername
+	}
+
+	user, err = us.userRepo.FindUserBy("Email", checkUser.Email)
+	if err != nil {
+		return nil, entity.ErrInternalServerError
+	}
+
+	if user != nil {
+		return nil, entity.ErrConflictEmail
+	}
+
+	user, err = us.userRepo.FindUserBy("PhoneNumber", checkUser.PhoneNumber)
+	if err != nil {
+		return nil, entity.ErrInternalServerError
+	}
+
+	if user != nil {
+		return nil, entity.ErrConflictPhoneNumber
+	}
+	
+	return user, nil
+}
