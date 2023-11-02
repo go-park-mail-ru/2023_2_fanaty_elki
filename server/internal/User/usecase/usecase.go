@@ -50,4 +50,5 @@ func (us userUsecase) CreateUser(new_user *entity.User) (uint, error) {
 	}
 
 	return us.userRepo.CreateUser(dto.ToRepoUser(new_user))
+
 }

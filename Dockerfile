@@ -10,7 +10,7 @@ RUN go mod download
 
 COPY server ./
 
-RUN go build -o ./bin/server server.go
+RUN go build -o ./bin/server cmd/server.go
 
 FROM alpine AS runner
 
