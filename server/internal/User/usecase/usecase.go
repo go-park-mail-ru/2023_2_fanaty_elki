@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	cartRep "server/internal/Cart/repository"
 	userRep "server/internal/User/repository"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
@@ -12,11 +13,13 @@ type UsecaseI interface {
 
 type userUsecase struct {
 	userRepo userRep.UserRepositoryI
+	cartRepo cartRep.CartRepositoryI
 }
 
-func NewUserUsecase(repI userRep.UserRepositoryI) *userUsecase {
+func NewUserUsecase(userRepI userRep.UserRepositoryI, cartRepI cartRep.CartRepositoryI) *userUsecase {
 	return &userUsecase{
-		userRepo: repI,
+		userRepo: userRepI,
+		cartRepo: cartRepI,
 	}
 }
 
@@ -49,5 +52,14 @@ func (us userUsecase) CreateUser(new_user *entity.User) (uint, error) {
 		return 0, entity.ErrConflictPhoneNumber
 	}
 
-	return us.userRepo.CreateUser(dto.ToRepoUser(new_user))
+	userID, err := us.userRepo.CreateUser(dto.ToRepoUser(new_user))
+	if err != nil {
+		return 0, entity.ErrInternalServerError
+	}
+	_, err = us.cartRepo.CreateCart(userID)
+	if err != nil {
+		return 0, entity.ErrInternalServerError
+	}
+
+	return userID, err
 }

@@ -13,6 +13,9 @@ import (
 	"flag"
 	"log"
 	"server/db"
+	cartDev "server/internal/Cart/delivery"
+	cartRep "server/internal/Cart/repository/postgres"
+	cartUsecase "server/internal/Cart/usecase"
 	productRep "server/internal/Product/repository/postgres"
 	restaurantDev "server/internal/Restaurant/delivery"
 	restaurantRep "server/internal/Restaurant/repository/postgres"
@@ -66,17 +69,21 @@ func main() {
 	userRepo := userRep.NewUserRepo(db)
 	restaurantRepo := restaurantRep.NewRestaurantRepo(db)
 	productRepo := productRep.NewProductRepo(db)
+	cartRepo := cartRep.NewCartRepo(db)
 	sessionRepo := sessionRep.NewSessionManager(redisConn)
 
-	userUC := userUsecase.NewUserUsecase(userRepo)
+	userUC := userUsecase.NewUserUsecase(userRepo, cartRepo)
 	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo, productRepo)
+	cartUC := cartUsecase.NewCartUsecase(cartRepo, productRepo, sessionRepo)
 	sessionUC := sessionUsecase.NewSessionUsecase(sessionRepo, userRepo)
 
 	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC)
+	cartsHandler := cartDev.NewCartHandler(cartUC)
 	sessionsHandler := sessionDev.NewSessionHandler(sessionUC, userUC)
 
 	router.HandleFunc("/api/restaurants", restaurantsHandler.GetRestaurantList).Methods(http.MethodGet)
 	router.HandleFunc("/api/restaurants/{id}", restaurantsHandler.GetRestaurantById).Methods(http.MethodGet)
+	router.HandleFunc("/api/cart", cartsHandler.GetCart).Methods(http.MethodGet)
 	router.HandleFunc("/api/users", sessionsHandler.SignUp).Methods(http.MethodPost)
 	router.HandleFunc("/api/login", sessionsHandler.Login).Methods(http.MethodPost)
 	router.HandleFunc("/api/logout", sessionsHandler.Logout).Methods(http.MethodDelete)

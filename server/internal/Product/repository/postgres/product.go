@@ -48,3 +48,24 @@ func (repo *productRepo) GetProductsByMenuTypeId(id uint) ([]*entity.Product, er
 	}
 	return Products, nil
 }
+
+func (repo *productRepo) GetProductByID(id uint) (*entity.Product, error) {
+	product := &entity.Product{}
+	row := repo.DB.QueryRow("SELECT id, name, price, cooking_time, portion, description, icon FROM product WHERE id = $1", id)
+	err := row.Scan(
+		&product.ID,
+		&product.Name,
+		&product.Price,
+		&product.CookingTime,
+		&product.Portion,
+		&product.Description,
+		&product.Icon,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, entity.ErrInternalServerError
+	}
+	return product, nil
+}
