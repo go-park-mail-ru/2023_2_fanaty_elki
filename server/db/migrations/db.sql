@@ -1,12 +1,12 @@
 CREATE TABLE IF NOT EXISTS public.USERS
 (
     ID serial NOT NULL,
-    USERNAME varchar UNIQUE NOT NULL  ,
-	PASSWORD varchar NOT NULL,
+    USERNAME text UNIQUE NOT NULL  ,
+	PASSWORD text NOT NULL,
 	BIRTHDAY date,
-	PHONE_NUMBER varchar UNIQUE NOT NULL,
-    EMAIL varchar UNIQUE NOT NULL,
-	ICON varchar default 'deficon',
+	PHONE_NUMBER text UNIQUE NOT NULL,
+    EMAIL text UNIQUE NOT NULL,
+	ICON text default 'deficon',
     PRIMARY KEY (ID),
     CONSTRAINT VALID_USERNAME CHECK ( LENGTH(USERNAME) > 3 and LENGTH(USERNAME) < 20 ),
     CONSTRAINT VALID_PASSWORD CHECK ( LENGTH(PASSWORD) > 8 and LENGTH(PASSWORD) < 30 ),
@@ -17,10 +17,10 @@ CREATE TABLE IF NOT EXISTS public.USERS
 CREATE TABLE IF NOT EXISTS public.RESTAURANT
 (
     ID serial NOT NULL,
-    NAME varchar UNIQUE NOT NULL,
+    NAME text UNIQUE NOT NULL,
 	RATING numeric(2,1) default 0.0 NOT NULL,
 	COMMENTS_COUNT integer default 0 NOT NULL,
-	ICON varchar default 'deficon' NOT NULL,
+	ICON text default 'deficon' NOT NULL,
     PRIMARY KEY (ID),
     CONSTRAINT VALID_RESTAURANT CHECK ( LENGTH(NAME) > 0 ),
     CONSTRAINT VALID_RATING CHECK ( RATING >= 0.0 AND RATING <= 5.0),
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS public.RESTAURANT
 CREATE TABLE IF NOT EXISTS public.CATEGORY
 (
     ID serial NOT NULL,
-    NAME varchar UNIQUE NOT NULL,
+    NAME text UNIQUE NOT NULL,
     PRIMARY KEY (ID),
     CONSTRAINT VALID_TEXT CHECK ( LENGTH(NAME) > 0 )
 );
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS public.RESTAURANT_CATEGORY
 CREATE TABLE IF NOT EXISTS public.MENU_TYPE
 (
     ID serial NOT NULL,
-    NAME varchar default 'FOOD' NOT NULL,
+    NAME text default 'FOOD' NOT NULL,
     RESTAURANT_ID int REFERENCES RESTAURANT(ID) NOT NULL,
     PRIMARY KEY (ID),
     CONSTRAINT VALID_MENU_TYPE CHECK ( LENGTH(NAME) > 0 )
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS public.MENU_TYPE
 CREATE TABLE IF NOT EXISTS public.PRODUCT
 (
     ID serial NOT NULL,
-    NAME varchar NOT NULL, -- У блюда не может быть дефолтного значения, иначе как нам понять что это
+    NAME text NOT NULL, -- У блюда не может быть дефолтного значения, иначе как нам понять что это
     RESTAURANT_ID INT REFERENCES RESTAURANT(ID) NOT NULL,
     PRICE numeric(10,2) default '0.0' NOT NULL,
     COOKING_TIME INT default '0' NOT NULL,
@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS public.ORDER
     ID serial NOT NULL,
     USER_ID int REFERENCES public.USERS(ID) NOT NULL,
     ORDER_DATE TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
-    STATUS varchar default 'CREATED' NOT NULL,
+    STATUS text default 'CREATED' NOT NULL,
     PRIMARY KEY (ID),
     CONSTRAINT VALID_STATUS CHECK (LENGTH(STATUS) >= 0 )
 );
@@ -107,8 +107,8 @@ CREATE TABLE IF NOT EXISTS public.COMMENT
 CREATE TABLE IF NOT EXISTS public.ADDRESS
 (
     ID serial NOT NULL,
-    CITY varchar NOT NULL,
-    STREET varchar NOT NULL,
+    CITY text NOT NULL,
+    STREET text NOT NULL,
     HOUSE_NUMBER INT NOT NULL,
     FLAT_NUMBER INT, -- бывают ДОМА БЕЗ КВАРТИР
     PRIMARY KEY (ID),
@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS public.USER_ADDRESS
 CREATE TABLE IF NOT EXISTS public.CARD
 (
     ID serial NOT NULL,
-    CARD_NUMBER varchar NOT NULL, --ДЕФОЛТНЫЙ НОМЕР КАРТЫ ЭТО СТРАННО
+    CARD_NUMBER text NOT NULL, --ДЕФОЛТНЫЙ НОМЕР КАРТЫ ЭТО СТРАННО
     USER_ID int REFERENCES public.USERS(ID) NOT NULL,
     PRIMARY KEY (ID),
     CONSTRAINT VALID_CARD CHECK (LENGTH(CARD_NUMBER) > 0 )
