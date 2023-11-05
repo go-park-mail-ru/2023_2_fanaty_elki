@@ -28,11 +28,13 @@ func (us userUsecase) GetUserById(id uint) (*entity.User, error) {
 
 func (us userUsecase) CreateUser(newUser *entity.User) (uint, error) {
 	err := us.checkUserFieldsCreate(newUser)
+
 	if err != nil {
 		return 0, err
 	}
-	
+
 	_, err = us.checkUser(newUser)
+
 	if err != nil {
 		return 0, err
 	}
@@ -136,7 +138,7 @@ func (us userUsecase) checkUserFieldsCreate(user *entity.User) error {
 		return entity.ErrInvalidPassword
 	}
 
-	re := regexp.MustCompile(`\d{2}-\d{2}-\d{4}`) 
+	re := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`) 
 	if user.Birthday != "" && !re.MatchString(user.Birthday){
 		return entity.ErrInvalidBirthday
 	}
@@ -162,7 +164,7 @@ func (us userUsecase) checkUserFieldsUpdate(user *entity.User) error {
 		return entity.ErrInvalidPassword
 	}
 
-	re := regexp.MustCompile(`\d{2}-\d{2}-\d{4}`) 
+	re := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`) 
 	if !re.MatchString(user.Birthday) && user.Birthday != ""{
 		return entity.ErrInvalidBirthday
 	}

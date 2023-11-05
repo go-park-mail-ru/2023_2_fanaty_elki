@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"encoding/json"
+	// "fmt"
 	"io/ioutil"
 	"net/http"
 	sessionUsecase "server/internal/Session/usecase"
@@ -69,7 +70,7 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
+	
 	id, err := handler.users.CreateUser(dto.ToEntityCreateUser(&reqUser))
 	if err != nil {
 		if err == entity.ErrInternalServerError {
@@ -378,5 +379,4 @@ func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Requ
 	
 		return
 	}
-
 }
