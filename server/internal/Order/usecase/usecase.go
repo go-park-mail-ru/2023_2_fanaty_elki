@@ -10,7 +10,7 @@ type UsecaseI interface {
 	GetOrders(userId uint) ([]*dto.RespGetOrder, error)
 	CreateOrder(reqOrder *dto.ReqCreateOrder) (*dto.RespCreateOrder, error)
 	UpdateOrder(reqOrder *dto.ReqUpdateOrder) (error)
-	GetOrder(orderid uint) ()
+	GetOrder(reqOrder *dto.ReqGetOneOrder) (*dto.RespGetOneOrder, error)
 }
 
 type orderUsecase struct {
@@ -49,4 +49,8 @@ func (or *orderUsecase) UpdateOrder(reqOrder *dto.ReqUpdateOrder) (error) {
 
 func (or *orderUsecase) GetOrders(userId uint) ([]*dto.RespGetOrder, error) {
 	return or.orderRepo.GetOrders(userId)
+}
+
+func (or *orderUsecase) GetOrder(reqOrder *dto.ReqGetOneOrder) (*dto.RespGetOneOrder, error) {
+	return or.orderRepo.GetOrder(reqOrder)
 }

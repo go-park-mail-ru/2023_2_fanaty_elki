@@ -53,12 +53,12 @@ func (repo *orderRepo) UpdateOrder(order *dto.ReqUpdateOrder) (error) {
 }
 
 func (repo *orderRepo) GetOrders(userId uint) ([]*dto.RespGetOrder, error) {
-	getOrder := `SELECT id, status, created_at, updated_at
+	getOrders := `SELECT id, status, created_at, updated_at
 			 	 FROM orders
 				 WHERE user_id = $1
 				 ORDER BY created_at DESC`
 
-	rows, err := repo.DB.Query(getOrder, userId)
+	rows, err := repo.DB.Query(getOrders, userId)
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}
@@ -85,4 +85,54 @@ func (repo *orderRepo) GetOrders(userId uint) ([]*dto.RespGetOrder, error) {
 		return nil, entity.ErrInternalServerError
 	}
 	return orders, nil
+}
+
+func (repo *orderRepo) GetOrder(reqOrder *dto.ReqGetOneOrder) (*dto.RespGetOneOrder, error) {
+	getOrder := `SELECT status, order_date, updated_at
+				 FROM orders
+				 WHERE id = $1 AND user_id = $2`
+	order := dto.RespGetOneOrder{}
+	err := repo.DB.QueryRow(getOrder, reqOrder.OrderId, reqOrder.UserId).Scan(&order.Status, &order.Date, &order.UpdatedDate)
+	if err != nil {
+		if err == sql.ErrNoRows{
+			return nil, entity.ErrNotFound
+		}
+		return nil, entity.ErrInternalServerError
+	}
+
+	getProducts := `SELECT p.name, p.price, p.cooking_time, p.portion, p.icon
+					FROM product p
+					JOIN orders_product op ON p.id = op.product_id
+					JOIN orders o ON o.id = op.order_id
+					WHERE o.id = $1`
+	rows, err := repo.DB.Query(getProducts, reqOrder.OrderId)
+	if err != nil {
+		return nil, entity.ErrInternalServerError
+	}
+	defer rows.Close()
+	var products = []*dto.RespGetOrderProduct{}
+	for rows.Next() {
+		product := &dto.RespGetOrderProduct{}
+		err = rows.Scan(
+			&product.Name,
+			&product.Price,
+			&product.CookingTime,
+			&product.Portion,
+			&product.Icon,
+		)
+		if err != nil {
+			return nil, entity.ErrInternalServerError
+		}
+		products = append(products, product)
+	}	
+	err = rows.Err()
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, entity.ErrNotFound
+		} 
+		return nil, entity.ErrInternalServerError
+	}
+
+	order.Products = products
+	return &order, nil
 }

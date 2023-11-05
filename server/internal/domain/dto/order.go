@@ -29,6 +29,7 @@ type RespCreateOrder struct {
 	Date time.Time	`json:"Date"`
 }
 
+// Для слайса заказов
 type RespGetOrder struct {
 	Id uint `json:"Id"`
 	Status string `json:"Status"`
@@ -36,13 +37,18 @@ type RespGetOrder struct {
 	UpdatedDate time.Time `json:"UpdatedDate"`
 }
 
+// Для конкретного заказа
 type RespGetOneOrder struct {
 	Status string `json:"Status"`
 	Date time.Time `json:"Date"`
 	UpdatedDate time.Time `json:"UpdatedDate"`
-	Products []*Product
+	Products []*RespGetOrderProduct `json:"Products"`
 }
 
+type ReqGetOneOrder struct {
+	OrderId uint `json:"OrderId"`
+	UserId uint
+}
 func ToEntityCreateOrder(order *ReqCreateOrder) *entity.Order{
 	return &entity.Order{
 		Status: "Wait",
