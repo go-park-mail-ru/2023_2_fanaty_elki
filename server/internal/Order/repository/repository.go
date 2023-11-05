@@ -7,4 +7,6 @@ import (
 
 type OrderRepositoryI interface {
 	CreateOrder(order *dto.DBReqCreateOrder) (*dto.RespCreateOrder, error)
+	UpdateOrder(order *dto.ReqUpdateOrder) (error)
+	GetOrders(userId uint) ([]*dto.RespGetOrder, error)
 }

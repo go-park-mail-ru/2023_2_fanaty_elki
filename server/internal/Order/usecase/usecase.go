@@ -7,9 +7,10 @@ import (
 )
 
 type UsecaseI interface {
-//	GetOrder(id uint) *entity.Order
+	GetOrders(userId uint) ([]*dto.RespGetOrder, error)
 	CreateOrder(reqOrder *dto.ReqCreateOrder) (*dto.RespCreateOrder, error)
-//	UpdateOrder()
+	UpdateOrder(reqOrder *dto.ReqUpdateOrder) (error)
+	GetOrder(orderid uint) ()
 }
 
 type orderUsecase struct {
@@ -27,9 +28,6 @@ func (or *orderUsecase) CreateOrder(reqOrder *dto.ReqCreateOrder) (*dto.RespCrea
 	
 	products := make(map[uint]int)
 	for _, product := range reqOrder.Products {
-		// if _, ok := products[product]; !ok {
-		// 	products[product] = 0
-		// }
 		products[product]++
 	}
 
@@ -39,4 +37,16 @@ func (or *orderUsecase) CreateOrder(reqOrder *dto.ReqCreateOrder) (*dto.RespCrea
 	}
 
 	return respOrder, nil
+}
+
+func (or *orderUsecase) UpdateOrder(reqOrder *dto.ReqUpdateOrder) (error) {
+	err := or.orderRepo.UpdateOrder(reqOrder)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (or *orderUsecase) GetOrders(userId uint) ([]*dto.RespGetOrder, error) {
+	return or.orderRepo.GetOrders(userId)
 }

@@ -86,6 +86,8 @@ func main() {
 	router.HandleFunc("/api/me", sessionsHandler.Profile).Methods(http.MethodGet)
 	router.HandleFunc("/api/me", sessionsHandler.UpdateProfile).Methods(http.MethodPatch)
 	router.HandleFunc("/api/orders", orderHandler.CreateOrder).Methods(http.MethodPost)
+	router.HandleFunc("/api/orders", orderHandler.UpdateOrder).Methods(http.MethodPatch)
+	router.HandleFunc("/api/orders", orderHandler.GetOrders).Methods(http.MethodGet)
 
 	server := &http.Server{
 		Addr:    PORT,
