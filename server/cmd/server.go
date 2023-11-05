@@ -4,15 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	sessionDev "server/internal/Session/delivery"
-
+	
 	"github.com/gorilla/mux"
-
-	//	userDev "server/internal/User/delivery"
-	//	userDev "server/internal/User/delivery"
 	"flag"
 	"log"
 	"server/db"
+	sessionDev "server/internal/Session/delivery"
 	productRep "server/internal/Product/repository/postgres"
 	restaurantDev "server/internal/Restaurant/delivery"
 	restaurantRep "server/internal/Restaurant/repository/postgres"
@@ -21,7 +18,9 @@ import (
 	sessionUsecase "server/internal/Session/usecase"
 	userRep "server/internal/User/repository/postgres"
 	userUsecase "server/internal/User/usecase"
-
+	orderDev "server/internal/Order/delivery"
+	orderRep "server/internal/Order/repository/postgres"
+	orderUsecase "server/internal/Order/usecase"
 	"github.com/gomodule/redigo/redis"
 	_ "github.com/lib/pq"
 )
@@ -67,13 +66,16 @@ func main() {
 	restaurantRepo := restaurantRep.NewRestaurantRepo(db)
 	productRepo := productRep.NewProductRepo(db)
 	sessionRepo := sessionRep.NewSessionManager(redisConn)
+	orderRepo := orderRep.NewOrderRepo(db)
 
 	userUC := userUsecase.NewUserUsecase(userRepo)
 	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo, productRepo)
 	sessionUC := sessionUsecase.NewSessionUsecase(sessionRepo, userRepo)
+	orderUC := orderUsecase.NewOrderUsecase(orderRepo)
 
 	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC)
 	sessionsHandler := sessionDev.NewSessionHandler(sessionUC, userUC)
+	orderHandler := orderDev.NewOrderHandler(orderUC, sessionUC)
 
 	router.HandleFunc("/api/restaurants", restaurantsHandler.GetRestaurantList).Methods(http.MethodGet)
 	router.HandleFunc("/api/restaurants/{id}", restaurantsHandler.GetRestaurantById).Methods(http.MethodGet)
@@ -83,6 +85,10 @@ func main() {
 	router.HandleFunc("/api/auth", sessionsHandler.Auth).Methods(http.MethodDelete)
 	router.HandleFunc("/api/me", sessionsHandler.Profile).Methods(http.MethodGet)
 	router.HandleFunc("/api/me", sessionsHandler.UpdateProfile).Methods(http.MethodPatch)
+	router.HandleFunc("/api/orders", orderHandler.CreateOrder).Methods(http.MethodPost)
+	router.HandleFunc("/api/orders", orderHandler.UpdateOrder).Methods(http.MethodPatch)
+	router.HandleFunc("/api/orders", orderHandler.GetOrders).Methods(http.MethodGet)
+	router.HandleFunc("/api/orders/{id}", orderHandler.GetOrder).Methods(http.MethodGet)
 
 	server := &http.Server{
 		Addr:    PORT,
