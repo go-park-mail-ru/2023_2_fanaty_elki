@@ -6,4 +6,5 @@ type RespGetOrderProduct struct {
 	CookingTime int		`json:"CookingTime"`
 	Portion     string	`json:"Portion"`
 	Icon        string	`json:"Icon"`
+	Count 		int 	`json:"Count"`
 }

@@ -100,7 +100,7 @@ func (repo *orderRepo) GetOrder(reqOrder *dto.ReqGetOneOrder) (*dto.RespGetOneOr
 		return nil, entity.ErrInternalServerError
 	}
 
-	getProducts := `SELECT p.name, p.price, p.cooking_time, p.portion, p.icon
+	getProducts := `SELECT p.name, p.price, p.cooking_time, p.portion, p.icon, op.item_count
 					FROM product p
 					JOIN orders_product op ON p.id = op.product_id
 					JOIN orders o ON o.id = op.order_id
@@ -119,6 +119,7 @@ func (repo *orderRepo) GetOrder(reqOrder *dto.ReqGetOneOrder) (*dto.RespGetOneOr
 			&product.CookingTime,
 			&product.Portion,
 			&product.Icon,
+			&product.Count,
 		)
 		if err != nil {
 			return nil, entity.ErrInternalServerError
