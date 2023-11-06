@@ -28,7 +28,7 @@ func NewRestaurantHandler(restaurants restaurantUsecase.UsecaseI) *RestaurantHan
 	return &RestaurantHandler{restaurants: restaurants}
 }
 
-// GetRestaurants godoc
+// GetRestaurantsList godoc
 // @Summary      giving restaurats
 // @Description  giving array of restaurants
 // @Tags        Restaurants
@@ -65,6 +65,15 @@ func (handler *RestaurantHandler) GetRestaurantList(w http.ResponseWriter, r *ht
 	}
 }
 
+// GetRestaurantById godoc
+// @Summary      giving information about restaurant and its products
+// @Description  giving restaurant object and array of menu types with array of products in each menu type
+// @Tags        Restaurants
+// @Accept     */{id}
+// @Produce  application/json
+// @Success  200 {object}  dto.RestaurantWithProducts "success returning information about restaurant"
+// @Failure 500 {object} error "internal server error"
+// @Router   /restaurants/{id} [get]
 func (handler *RestaurantHandler) GetRestaurantById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
