@@ -41,22 +41,22 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 	w.Header().Set("content-type", "application/json")
 
 	cookie, err := r.Cookie("session_id")
-	if err == http.ErrNoCookie {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	} else if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	// if err == http.ErrNoCookie {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	return
+	// } else if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// }
 
 	userId, err := handler.sessionUC.GetIdByCookie(cookie.Value)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	if userId == 0 {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	return
+	// }
+	// if userId == 0 {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	return
+	// }
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -88,23 +88,23 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 func (handler *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("content-type", "application/json")
 
-	cookie, err := r.Cookie("session_id")
-	if err == http.ErrNoCookie {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	} else if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	// cookie, err := r.Cookie("session_id")
+	// // if err == http.ErrNoCookie {
+	// // 	w.WriteHeader(http.StatusUnauthorized)
+	// // 	return
+	// // } else if err != nil {
+	// // 	w.WriteHeader(http.StatusInternalServerError)
+	// // }
 
-	userId, err := handler.sessionUC.GetIdByCookie(cookie.Value)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	if userId == 0 {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+	// userId, err := handler.sessionUC.GetIdByCookie(cookie.Value)
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	return
+	// }
+	// if userId == 0 {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	return
+	// }
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -130,22 +130,22 @@ func (handler *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("content-type", "application/json")
 
 	cookie, err := r.Cookie("session_id")
-	if err == http.ErrNoCookie {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	} else if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	// if err == http.ErrNoCookie {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	return
+	// } else if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// }
 
 	userId, err := handler.sessionUC.GetIdByCookie(cookie.Value)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	if userId == 0 {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	return
+	// }
+	// if userId == 0 {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	return
+	// }
 	
 	respOrders, err := handler.orderUC.GetOrders(userId)
 
@@ -178,22 +178,22 @@ func (handler *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request){
 	}
 
 	cookie, err := r.Cookie("session_id")
-	if err == http.ErrNoCookie {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	} else if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	// if err == http.ErrNoCookie {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	return
+	// } else if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// }
 
 	userId, err := handler.sessionUC.GetIdByCookie(cookie.Value)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	if userId == 0 {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	return
+	// }
+	// if userId == 0 {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	return
+	// }
 
 	reqOrder := dto.ReqGetOneOrder{
 		UserId: userId,

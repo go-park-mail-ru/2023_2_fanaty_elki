@@ -87,6 +87,9 @@ func (ss sessionUsecase) Check(SessionToken string) (*string, error) {
 		return nil, err
 	}
 
+	if user == nil {
+		return nil, nil
+	}
 	return &user.Username, nil
 }
 
