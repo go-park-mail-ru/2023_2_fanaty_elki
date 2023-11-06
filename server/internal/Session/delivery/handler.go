@@ -40,12 +40,13 @@ func NewSessionHandler(sessions sessionUsecase.UsecaseI, users userUsecase.Useca
 // @Accept     application/json
 // @Produce  application/json
 // @Param 	user	 body	 store.User	 true	 "User object for signing up"
-// @Success  200 {object}  integer "success create User return id"
+// @Success  201 {object}  integer "success create User return id"
 // @Failure 400 {object} error "bad request"
 // @Failure 500 {object} error "internal server error"
 // @Router   /users [post]
 func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 
+	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Set("content-type", "application/json")
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
