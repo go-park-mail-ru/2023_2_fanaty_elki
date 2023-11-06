@@ -111,7 +111,7 @@ func main() {
 		Handler: router,
 	}
 
-	fmt.Println("Server start")
+	fmt.Println("Server start at port", PORT[1:])
 	err = server.ListenAndServe()
 
 	if errors.Is(err, http.ErrServerClosed) {
