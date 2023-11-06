@@ -6,3 +6,7 @@ type CartProduct struct {
 	Product   *entity.Product
 	ItemCount int
 }
+
+type ReqProductID struct {
+	ProductID uint `json:"ProductID"`
+}

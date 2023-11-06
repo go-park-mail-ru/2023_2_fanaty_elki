@@ -10,6 +10,10 @@ import (
 
 type UsecaseI interface {
 	GetUserCart(SessionToken string) ([]*dto.CartProduct, error)
+	AddProductToCart(SessionToken string, productID uint) error
+	DeleteProductFromCart(SessionToken string, productID uint) error
+	UpdateItemCountUp(SessionToken string, productID uint) error
+	UpdateItemCountDown(SessionToken string, productID uint) error
 }
 
 type cartUsecase struct {
@@ -55,4 +59,82 @@ func (cu cartUsecase) GetUserCart(SessionToken string) ([]*dto.CartProduct, erro
 		CartProducts = append(CartProducts, &CartProduct)
 	}
 	return CartProducts, nil
+}
+
+func (cu cartUsecase) AddProductToCart(SessionToken string, productID uint) error {
+	cookie, err := cu.SessionRepo.Check(SessionToken)
+	if err != nil {
+		return err
+	}
+
+	userID := cookie.UserID
+	cart, err := cu.CartRepo.GetCartByUserID(userID)
+	if err != nil {
+		return err
+	}
+
+	err = cu.CartRepo.AddProductToCart(cart.ID, productID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (cu cartUsecase) DeleteProductFromCart(SessionToken string, productID uint) error {
+	cookie, err := cu.SessionRepo.Check(SessionToken)
+	if err != nil {
+		return err
+	}
+
+	userID := cookie.UserID
+	cart, err := cu.CartRepo.GetCartByUserID(userID)
+	if err != nil {
+		return err
+	}
+
+	err = cu.CartRepo.DeleteProductFromCart(cart.ID, productID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (cu cartUsecase) UpdateItemCountUp(SessionToken string, productID uint) error {
+	cookie, err := cu.SessionRepo.Check(SessionToken)
+	if err != nil {
+		return err
+	}
+
+	userID := cookie.UserID
+	cart, err := cu.CartRepo.GetCartByUserID(userID)
+	if err != nil {
+		return err
+	}
+	err = cu.CartRepo.UpdateItemCountUp(cart.ID, productID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (cu cartUsecase) UpdateItemCountDown(SessionToken string, productID uint) error {
+	cookie, err := cu.SessionRepo.Check(SessionToken)
+	if err != nil {
+		return err
+	}
+
+	userID := cookie.UserID
+	cart, err := cu.CartRepo.GetCartByUserID(userID)
+	if err != nil {
+		return err
+	}
+	err = cu.CartRepo.UpdateItemCountDown(cart.ID, productID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

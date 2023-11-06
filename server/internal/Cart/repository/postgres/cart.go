@@ -50,7 +50,7 @@ func (repo *CartRepo) GetCartByUserID(userID uint) (*entity.Cart, error) {
 }
 
 func (repo *CartRepo) GetCartProductsByCartID(cartID uint) ([]*entity.CartProduct, error) {
-	rows, err := repo.DB.Query("SELECT id, product_id, cart_id, item_count FROM cart_product")
+	rows, err := repo.DB.Query("SELECT id, product_id, cart_id, item_count FROM cart_product WHERE cart_id = $1", cartID)
 	if err != nil {
 		return nil, err
 	}
@@ -79,4 +79,40 @@ func (repo *CartRepo) GetCartProductsByCartID(cartID uint) ([]*entity.CartProduc
 		}
 	}
 	return CartProducts, nil
+}
+
+func (repo *CartRepo) AddProductToCart(cartID uint, productID uint) error {
+	insertProduct := `INSERT INTO cart_product (product_id, cart_id) VALUES ($1, $2)`
+	_, err := repo.DB.Exec(insertProduct, productID, cartID)
+	if err != nil {
+		return entity.ErrInternalServerError
+	}
+	return nil
+}
+
+func (repo *CartRepo) DeleteProductFromCart(cartID uint, productID uint) error {
+	deleteProduct := `DELETE FROM cart_product WHERE cart_id = $1 AND product_id = $2`
+	_, err := repo.DB.Exec(deleteProduct, cartID, productID)
+	if err != nil {
+		return entity.ErrInternalServerError
+	}
+	return nil
+}
+
+func (repo *CartRepo) UpdateItemCountUp(cartID uint, productID uint) error {
+	updateProduct := `UPDATE cart_product SET item_count = item_count + 1 WHERE cart_id = $1 AND product_id = $2`
+	_, err := repo.DB.Exec(updateProduct, cartID, productID)
+	if err != nil {
+		return entity.ErrInternalServerError
+	}
+	return nil
+}
+
+func (repo *CartRepo) UpdateItemCountDown(cartID uint, productID uint) error {
+	updateProduct := `UPDATE cart_product SET item_count = item_count - 1 WHERE cart_id = $1 AND product_id = $2`
+	_, err := repo.DB.Exec(updateProduct, cartID, productID)
+	if err != nil {
+		return entity.ErrInternalServerError
+	}
+	return nil
 }
