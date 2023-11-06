@@ -2,7 +2,6 @@ package repository
 
 import (
 	"database/sql"
-	"fmt"
 	"server/internal/domain/entity"
 )
 
@@ -64,7 +63,6 @@ func (repo *restaurantRepo) GetRestaurantById(id uint) (*entity.Restaurant, erro
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		fmt.Println("repo ", err)
 		return nil, entity.ErrInternalServerError
 	}
 	return restaurant, nil

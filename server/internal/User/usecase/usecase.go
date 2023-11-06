@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"regexp"
+	cartRep "server/internal/Cart/repository"
 	userRep "server/internal/User/repository"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
@@ -9,21 +10,23 @@ import (
 
 type UsecaseI interface {
 	CreateUser(new_user *entity.User) (uint, error)
-	UpdateUser(newUser *entity.User) (error) 
+	UpdateUser(newUser *entity.User) error
 }
 
 type userUsecase struct {
 	userRepo userRep.UserRepositoryI
+	cartRepo cartRep.CartRepositoryI
 }
 
-func NewUserUsecase(repI userRep.UserRepositoryI) *userUsecase {
+func NewUserUsecase(userRepI userRep.UserRepositoryI, cartRepI cartRep.CartRepositoryI) *userUsecase {
 	return &userUsecase{
-		userRepo: repI,
+		userRepo: userRepI,
+		cartRepo: cartRepI,
 	}
 }
 
 func (us userUsecase) GetUserById(id uint) (*entity.User, error) {
-	return us.userRepo.FindUserById(id)	
+	return us.userRepo.FindUserById(id)
 }
 
 func (us userUsecase) CreateUser(newUser *entity.User) (uint, error) {
@@ -38,28 +41,38 @@ func (us userUsecase) CreateUser(newUser *entity.User) (uint, error) {
 	if err != nil {
 		return 0, err
 	}
-	return us.userRepo.CreateUser(dto.ToRepoCreateUser(newUser)) 
+
+	user, err := us.userRepo.CreateUser(dto.ToRepoCreateUser(newUser))
+	if err != nil {
+		return 0, entity.ErrInternalServerError
+	}
+
+	_, err = us.cartRepo.CreateCart(user)
+	if err != nil {
+		return 0, entity.ErrInternalServerError
+	}
+
+	return user, nil
 }
 
-
-func (us userUsecase) UpdateUser(newUser *entity.User) (error) {
+func (us userUsecase) UpdateUser(newUser *entity.User) error {
 	err := us.checkUserFieldsUpdate(newUser)
-	
+
 	if err != nil {
-		
+
 		return err
 	}
-	
+
 	_, err = us.checkUser(newUser)
 	if err != nil {
 		return err
 	}
-	
+
 	user, err := us.GetUserById(newUser.ID)
 	if err != nil {
 		return err
 	}
-	if user != nil { 
+	if user != nil {
 		if newUser.Username != "" {
 			user.Username = newUser.Username
 		}
@@ -85,11 +98,11 @@ func (us userUsecase) UpdateUser(newUser *entity.User) (error) {
 		}
 		return us.userRepo.UpdateUser(dto.ToRepoUpdateUser(user))
 	}
-	
+
 	return entity.ErrNotFound
-	
+
 }
- 
+
 func (us userUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
 	var user *entity.User
 
@@ -103,14 +116,14 @@ func (us userUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
 			return nil, entity.ErrConflictUsername
 		}
 	}
-	
+
 	if checkUser.Email != "" {
 		user, err := us.userRepo.FindUserByEmail(checkUser.Email)
 		if err != nil {
-			
+
 			return nil, entity.ErrInternalServerError
 		}
-		
+
 		if user != nil {
 			return nil, entity.ErrConflictEmail
 		}
@@ -134,12 +147,12 @@ func (us userUsecase) checkUserFieldsCreate(user *entity.User) error {
 		return entity.ErrInvalidUsername
 	}
 
-	if len(user.Password) < 3 || len(user.Password) > 30 {
+	if len(user.Password) < 8 || len(user.Password) > 30 {
 		return entity.ErrInvalidPassword
 	}
 
-	re := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`) 
-	if user.Birthday != "" && !re.MatchString(user.Birthday){
+	re := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`)
+	if user.Birthday != "" && !re.MatchString(user.Birthday) {
 		return entity.ErrInvalidBirthday
 	}
 
@@ -156,7 +169,7 @@ func (us userUsecase) checkUserFieldsCreate(user *entity.User) error {
 }
 
 func (us userUsecase) checkUserFieldsUpdate(user *entity.User) error {
-	if ((len(user.Username) < 3 || len(user.Username) > 30)) && user.Username != "" {
+	if (len(user.Username) < 3 || len(user.Username) > 30) && user.Username != "" {
 		return entity.ErrInvalidUsername
 	}
 
@@ -164,18 +177,18 @@ func (us userUsecase) checkUserFieldsUpdate(user *entity.User) error {
 		return entity.ErrInvalidPassword
 	}
 
-	re := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`) 
-	if !re.MatchString(user.Birthday) && user.Birthday != ""{
+	re := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`)
+	if !re.MatchString(user.Birthday) && user.Birthday != "" {
 		return entity.ErrInvalidBirthday
 	}
 
 	re = regexp.MustCompile(`@`)
-	if !re.MatchString(user.Email) && user.Email != ""{
+	if !re.MatchString(user.Email) && user.Email != "" {
 		return entity.ErrInvalidEmail
 	}
 
 	re = regexp.MustCompile(`^[+]?[0-9]{3,25}$`)
-	if !re.MatchString(user.PhoneNumber) && user.PhoneNumber != ""{
+	if !re.MatchString(user.PhoneNumber) && user.PhoneNumber != "" {
 		return entity.ErrInvalidPhoneNumber
 	}
 	return nil

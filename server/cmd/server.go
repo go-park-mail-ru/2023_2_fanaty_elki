@@ -4,25 +4,28 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	
-	"github.com/gorilla/mux"
+
 	"flag"
+	"github.com/gomodule/redigo/redis"
+	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
 	"log"
 	"server/db"
-	sessionDev "server/internal/Session/delivery"
+	cartDev "server/internal/Cart/delivery"
+	cartRep "server/internal/Cart/repository/postgres"
+	cartUsecase "server/internal/Cart/usecase"
+	orderDev "server/internal/Order/delivery"
+	orderRep "server/internal/Order/repository/postgres"
+	orderUsecase "server/internal/Order/usecase"
 	productRep "server/internal/Product/repository/postgres"
 	restaurantDev "server/internal/Restaurant/delivery"
 	restaurantRep "server/internal/Restaurant/repository/postgres"
 	restaurantUsecase "server/internal/Restaurant/usecase"
+	sessionDev "server/internal/Session/delivery"
 	sessionRep "server/internal/Session/repository/redis"
 	sessionUsecase "server/internal/Session/usecase"
 	userRep "server/internal/User/repository/postgres"
 	userUsecase "server/internal/User/usecase"
-	orderDev "server/internal/Order/delivery"
-	orderRep "server/internal/Order/repository/postgres"
-	orderUsecase "server/internal/Order/usecase"
-	"github.com/gomodule/redigo/redis"
-	_ "github.com/lib/pq"
 )
 
 // @title Prinesi-Poday API
@@ -65,24 +68,32 @@ func main() {
 	userRepo := userRep.NewUserRepo(db)
 	restaurantRepo := restaurantRep.NewRestaurantRepo(db)
 	productRepo := productRep.NewProductRepo(db)
+	cartRepo := cartRep.NewCartRepo(db)
 	sessionRepo := sessionRep.NewSessionManager(redisConn)
 	orderRepo := orderRep.NewOrderRepo(db)
 
-	userUC := userUsecase.NewUserUsecase(userRepo)
+	userUC := userUsecase.NewUserUsecase(userRepo, cartRepo)
 	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo, productRepo)
+	cartUC := cartUsecase.NewCartUsecase(cartRepo, productRepo, sessionRepo)
 	sessionUC := sessionUsecase.NewSessionUsecase(sessionRepo, userRepo)
 	orderUC := orderUsecase.NewOrderUsecase(orderRepo)
 
 	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC)
+	cartsHandler := cartDev.NewCartHandler(cartUC)
 	sessionsHandler := sessionDev.NewSessionHandler(sessionUC, userUC)
 	orderHandler := orderDev.NewOrderHandler(orderUC, sessionUC)
 
 	router.HandleFunc("/api/restaurants", restaurantsHandler.GetRestaurantList).Methods(http.MethodGet)
 	router.HandleFunc("/api/restaurants/{id}", restaurantsHandler.GetRestaurantById).Methods(http.MethodGet)
+	router.HandleFunc("/api/cart", cartsHandler.GetCart).Methods(http.MethodGet)
+	router.HandleFunc("/api/cart/add", cartsHandler.AddProductToCart).Methods(http.MethodPost)
+	router.HandleFunc("/api/cart/delete", cartsHandler.DeleteProductFromCart).Methods(http.MethodPost)
+	router.HandleFunc("/api/cart/update/up", cartsHandler.UpdateItemCountUp).Methods(http.MethodPatch)
+	router.HandleFunc("/api/cart/update/down", cartsHandler.UpdateItemCountDown).Methods(http.MethodPatch)
 	router.HandleFunc("/api/users", sessionsHandler.SignUp).Methods(http.MethodPost)
 	router.HandleFunc("/api/login", sessionsHandler.Login).Methods(http.MethodPost)
 	router.HandleFunc("/api/logout", sessionsHandler.Logout).Methods(http.MethodDelete)
-	router.HandleFunc("/api/auth", sessionsHandler.Auth).Methods(http.MethodDelete)
+	router.HandleFunc("/api/auth", sessionsHandler.Auth).Methods(http.MethodGet)
 	router.HandleFunc("/api/me", sessionsHandler.Profile).Methods(http.MethodGet)
 	router.HandleFunc("/api/me", sessionsHandler.UpdateProfile).Methods(http.MethodPatch)
 	router.HandleFunc("/api/orders", orderHandler.CreateOrder).Methods(http.MethodPost)
