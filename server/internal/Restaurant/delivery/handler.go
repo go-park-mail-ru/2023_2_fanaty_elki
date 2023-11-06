@@ -72,6 +72,7 @@ func (handler *RestaurantHandler) GetRestaurantList(w http.ResponseWriter, r *ht
 // @Accept     */{id}
 // @Produce  application/json
 // @Success  200 {object}  dto.RestaurantWithProducts "success returning information about restaurant"
+// @Failure 400 {object} error "bad request"
 // @Failure 500 {object} error "internal server error"
 // @Router   /restaurants/{id} [get]
 func (handler *RestaurantHandler) GetRestaurantById(w http.ResponseWriter, r *http.Request) {
