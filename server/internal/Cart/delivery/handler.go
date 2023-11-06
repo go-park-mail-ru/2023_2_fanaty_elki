@@ -9,8 +9,6 @@ import (
 	"server/internal/domain/entity"
 )
 
-const allowedOrigin = "http://84.23.53.216"
-
 type Result struct {
 	Body interface{}
 }
@@ -28,8 +26,6 @@ func NewCartHandler(cartUsecase cartUsecase.UsecaseI) *CartHandler {
 }
 
 func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	cookie, err := r.Cookie("session_id")
@@ -63,8 +59,6 @@ func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
 }
 
 func (handler *CartHandler) AddProductToCart(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
@@ -96,8 +90,6 @@ func (handler *CartHandler) AddProductToCart(w http.ResponseWriter, r *http.Requ
 }
 
 func (handler *CartHandler) DeleteProductFromCart(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
@@ -128,8 +120,6 @@ func (handler *CartHandler) DeleteProductFromCart(w http.ResponseWriter, r *http
 }
 
 func (handler *CartHandler) UpdateItemCountUp(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
@@ -160,8 +150,6 @@ func (handler *CartHandler) UpdateItemCountUp(w http.ResponseWriter, r *http.Req
 }
 
 func (handler *CartHandler) UpdateItemCountDown(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
