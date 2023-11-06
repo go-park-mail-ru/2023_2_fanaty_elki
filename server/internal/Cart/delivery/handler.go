@@ -14,7 +14,7 @@ type Result struct {
 	Body interface{}
 }
 
-type Error struct {
+type RespError struct {
 	Err string
 }
 
@@ -40,7 +40,7 @@ func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnauthorized.Error()})
+		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -49,7 +49,7 @@ func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
 	cart, err := handler.cartUsecase.GetUserCart(cookie.Value)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&Error{Err: "data base error"})
+		err = json.NewEncoder(w).Encode(&RespError{Err: "data base error"})
 		return
 	}
 
@@ -62,7 +62,7 @@ func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&Error{Err: "error while marshalling JSON"})
+		err = json.NewEncoder(w).Encode(&RespError{Err: "error while marshalling JSON"})
 		return
 	}
 }

@@ -18,7 +18,7 @@ type Result struct {
 	Body interface{}
 }
 
-type Error struct {
+type RespError struct {
 	Err string
 }
 
@@ -69,7 +69,7 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrProblemsReadingData.Error()})
+		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrProblemsReadingData.Error()})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -81,7 +81,7 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnmarshalingJson.Error()})
+		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnmarshalingJson.Error()})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -96,7 +96,7 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&Error{Err: err.Error()})
+		err = json.NewEncoder(w).Encode(&RespError{Err: err.Error()})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -137,7 +137,7 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrProblemsReadingData.Error()})
+		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrProblemsReadingData.Error()})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -149,7 +149,7 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrProblemsReadingData.Error()})
+		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrProblemsReadingData.Error()})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -203,7 +203,7 @@ func (handler *SessionHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
 	// if err == http.ErrNoCookie {
 	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnauthorized.Error()})
+	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
 	// 	if err != nil {
 	// 		w.WriteHeader(http.StatusInternalServerError)
 	// 	}
@@ -241,7 +241,7 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
 	// if err != nil {
 	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnauthorized.Error()})
+	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
 	// 	if err != nil {
 	// 		w.WriteHeader(http.StatusInternalServerError)
 	// 	}
@@ -256,7 +256,7 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 
 	// if username == nil {
 	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err := json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnauthorized.Error()})
+	// 	err := json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
 	// 	if err != nil {
 	// 		w.WriteHeader(http.StatusInternalServerError)
 	// 	}
@@ -290,7 +290,7 @@ func (handler *SessionHandler) Profile(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
 	// if err == http.ErrNoCookie {
 	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnauthorized.Error()})
+	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
 	// 	if err != nil {
 	// 		w.WriteHeader(http.StatusInternalServerError)
 	// 	}
@@ -307,7 +307,7 @@ func (handler *SessionHandler) Profile(w http.ResponseWriter, r *http.Request) {
 
 	// if user == nil {
 	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnauthorized.Error()})
+	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
 	// 	if err != nil {
 	// 		w.WriteHeader(http.StatusInternalServerError)
 	// 	}
@@ -327,7 +327,7 @@ func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Requ
 	cookie, err := r.Cookie("session_id")
 	// if err == http.ErrNoCookie {
 	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnauthorized.Error()})
+	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
 	// 	if err != nil {
 	// 		w.WriteHeader(http.StatusInternalServerError)
 	// 	}
@@ -344,7 +344,7 @@ func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Requ
 
 	// if id == 0 {
 	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err := json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnauthorized.Error()})
+	// 	err := json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
 	// 	if err != nil {
 	// 		w.WriteHeader(http.StatusInternalServerError)
 	// 	}
@@ -354,7 +354,7 @@ func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Requ
 	jsonbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrProblemsReadingData.Error()})
+		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrProblemsReadingData.Error()})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -378,7 +378,7 @@ func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Requ
 			return
 		}
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&Error{Err: err.Error()})
+		err = json.NewEncoder(w).Encode(&RespError{Err: err.Error()})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
