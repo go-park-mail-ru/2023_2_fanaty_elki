@@ -182,6 +182,13 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Router   /logout [get]
 func (handler *SessionHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
+	if r.Method == "OPTIONS" {
+		w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
+		w.Header().Add("Access-Control-Allow-Credentials", "true")
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
 	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")

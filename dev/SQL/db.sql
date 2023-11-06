@@ -203,9 +203,6 @@ CREATE TABLE IF NOT EXISTS public.CART_PRODUCT
     PRIMARY KEY (ID)
 );
 
-insert into cart_product(product_id, cart_id, item_count)
-values(2,3,1);
-insert into cart_product(product_id, cart_id, item_count)
-values(4,3,2);
+
 
 

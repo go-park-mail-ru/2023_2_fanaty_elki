@@ -83,8 +83,8 @@ func main() {
 	router.HandleFunc("/api/restaurants/{id}", restaurantsHandler.GetRestaurantById).Methods(http.MethodGet)
 	router.HandleFunc("/api/users", sessionsHandler.SignUp).Methods(http.MethodPost)
 	router.HandleFunc("/api/login", sessionsHandler.Login).Methods(http.MethodPost)
-	router.HandleFunc("/api/logout", sessionsHandler.Logout).Methods(http.MethodDelete)
-	router.HandleFunc("/api/auth", sessionsHandler.Auth).Methods(http.MethodDelete)
+	router.HandleFunc("/api/logout", sessionsHandler.Logout).Methods(http.MethodDelete, http.MethodOptions)
+	router.HandleFunc("/api/auth", sessionsHandler.Auth).Methods(http.MethodGet)
 
 	server := &http.Server{
 		Addr:    PORT,
