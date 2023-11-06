@@ -2,10 +2,10 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
 	"server/internal/User/repository"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
-	"fmt"
 )
 
 type UserRepo struct {
@@ -26,8 +26,10 @@ func (repo *UserRepo) FindUserByUsername(value string) (*entity.User, error) {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
+		fmt.Println(err)
 		return nil, entity.ErrInternalServerError
 	}
+	fmt.Println("birtday", user.Birthday)
 	return user, nil
 }
 
@@ -88,7 +90,7 @@ func (repo *UserRepo) CreateUser(user *dto.DBCreateUser) (uint, error) {
 	return ID, nil
 }
 
-func (repo *UserRepo) UpdateUser(user *dto.DBUpdateUser) (error) {
+func (repo *UserRepo) UpdateUser(user *dto.DBUpdateUser) error {
 	updateUser := `UPDATE users 
 				   SET username = $1, password = $2, birthday = $3, phone_number = $4, email = $5, icon = $6
 				   WHERE id = $7`

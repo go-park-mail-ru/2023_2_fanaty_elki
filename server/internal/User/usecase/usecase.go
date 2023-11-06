@@ -81,7 +81,7 @@ func (us userUsecase) UpdateUser(newUser *entity.User) error {
 			user.Password = newUser.Password
 		}
 
-		if newUser.Birthday != "" {
+		if newUser.Birthday.String != "" { // возможно тут нужен Valid и везде далее тоже
 			user.Birthday = newUser.Birthday
 		}
 
@@ -93,7 +93,7 @@ func (us userUsecase) UpdateUser(newUser *entity.User) error {
 			user.Email = newUser.Email
 		}
 
-		if newUser.Icon != "" {
+		if newUser.Icon.String != "" {
 			user.Icon = newUser.Icon
 		}
 		return us.userRepo.UpdateUser(dto.ToRepoUpdateUser(user))
@@ -152,7 +152,7 @@ func (us userUsecase) checkUserFieldsCreate(user *entity.User) error {
 	}
 
 	re := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`)
-	if user.Birthday != "" && !re.MatchString(user.Birthday) {
+	if user.Birthday.String != "" && !re.MatchString(user.Birthday.String) {
 		return entity.ErrInvalidBirthday
 	}
 
@@ -178,7 +178,7 @@ func (us userUsecase) checkUserFieldsUpdate(user *entity.User) error {
 	}
 
 	re := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`)
-	if !re.MatchString(user.Birthday) && user.Birthday != "" {
+	if !re.MatchString(user.Birthday.String) && user.Birthday.String != "" {
 		return entity.ErrInvalidBirthday
 	}
 
