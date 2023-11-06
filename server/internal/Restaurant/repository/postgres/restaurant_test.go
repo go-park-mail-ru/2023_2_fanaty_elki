@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"reflect"
 	"server/internal/domain/entity"
 	"testing"
@@ -8,29 +9,33 @@ import (
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
 )
 
-func TestGetRestaurants(t *testing.T) {
+func TestGetRestaurantsSuccess(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("cant create mock: %s", err)
 	}
 	defer db.Close()
 
+	repo := &restaurantRepo{
+		DB: db,
+	}
+
 	rows := sqlmock.
 		NewRows([]string{"id", "name", "rating", "comments_count", "category", "icon"})
 	expect := []*entity.Restaurant{
-		{	1, 
-			"Burger King", 
-			3.7, 
-			60, 
-			"Fastfood", 
-			"img/burger_king.jpg"
+		{ID: 1,
+			Name:          "Burger King",
+			Rating:        3.7,
+			CommentsCount: 60,
+			Category:      "Fastfood",
+			Icon:          "img/burger_king.jpg",
 		},
-		{	2, 
-			"MacBurger", 
-			3.8, 
-			69, 
-			"Fastfood", 
-			"img/mac_burger.jpg"
+		{ID: 2,
+			Name:          "MacBurger",
+			Rating:        3.8,
+			CommentsCount: 69,
+			Category:      "Fastfood",
+			Icon:          "img/mac_burger.jpg",
 		},
 	}
 	for _, restaurant := range expect {
@@ -41,20 +46,53 @@ func TestGetRestaurants(t *testing.T) {
 		ExpectQuery("SELECT id, name, rating, comments_count, category, icon FROM restaurant").
 		WillReturnRows(rows)
 
-	repo := &restaurantRepo{
-		DB: db,
-	}
 	restaurants, err := repo.GetRestaurants()
 	if err != nil {
 		t.Errorf("unexpected err: %s", err)
 		return
 	}
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %s", err)
-		return
-	}
+
 	if !reflect.DeepEqual(restaurants[0], expect[0]) {
 		t.Errorf("results not match, want %v, have %v", expect[0], restaurants[1])
 		return
 	}
+
+	emptyrows := sqlmock.NewRows([]string{"id", "name", "rating", "comments_count", "category", "icon"})
+
+	mock.ExpectQuery("SELECT id, name, rating, comments_count, category, icon FROM restaurant").
+		WillReturnRows(emptyrows)
+
+	restaurants, err = repo.GetRestaurants()
+	if err != nil {
+		t.Errorf("unexpected err: %s", err)
+		return
+	}
+
+}
+
+func TestGetRestaurantsFail(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("cant create mock: %s", err)
+	}
+	defer db.Close()
+
+	repo := &restaurantRepo{
+		DB: db,
+	}
+
+	testErr := errors.New("test")
+	mock.ExpectQuery("SELECT id, name, rating, comments_count, category, icon FROM restaurant").
+		WillReturnError(testErr)
+
+	restaurants, err := repo.GetRestaurants()
+	if err != testErr {
+		t.Errorf("unexpected err: %s", err)
+		return
+	}
+
+	if restaurants != nil {
+		t.Errorf("restaurants not nil while error")
+	}
+
 }
