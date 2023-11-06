@@ -26,7 +26,11 @@ func NewUserUsecase(userRepI userRep.UserRepositoryI, cartRepI cartRep.CartRepos
 }
 
 func (us userUsecase) GetUserById(id uint) (*entity.User, error) {
-	return us.userRepo.FindUserById(id)
+	user, err := us.userRepo.FindUserById(id)
+	if err != nil {
+		return nil, err
+	}
+	return dto.ToEntityGetUser(user), nil	
 }
 
 func (us userUsecase) CreateUser(newUser *entity.User) (uint, error) {
@@ -104,7 +108,7 @@ func (us userUsecase) UpdateUser(newUser *entity.User) error {
 }
 
 func (us userUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
-	var user *entity.User
+	var user *dto.DBGetUser
 
 	if checkUser.Username != "" {
 		user, err := us.userRepo.FindUserByUsername(checkUser.Username)
@@ -139,7 +143,7 @@ func (us userUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
 			return nil, entity.ErrConflictPhoneNumber
 		}
 	}
-	return user, nil
+	return dto.ToEntityGetUser(user), nil
 }
 
 func (us userUsecase) checkUserFieldsCreate(user *entity.User) error {
