@@ -5,6 +5,9 @@ DROP TABLE IF EXISTS orders CASCADE;
 DROP TABLE IF EXISTS orders_product CASCADE;
 DROP TABLE IF EXISTS menu_type CASCADE;
 DROP TABLE IF EXISTS product_menu_type CASCADE;
+DROP TABLE IF EXISTS cart CASCADE;
+DROP TABLE IF EXISTS cart_product CASCADE;
+
 
 CREATE OR REPLACE FUNCTION trigger_set_timestamp()
 RETURNS TRIGGER AS $$
@@ -176,3 +179,33 @@ CREATE TABLE IF NOT EXISTS public.ORDERS_PRODUCT
     PRIMARY KEY (ID),
     CONSTRAINT VALID_COUNT CHECK ( ITEM_COUNT > 0 )
 );
+
+CREATE TABLE IF NOT EXISTS public.CART
+(
+    ID serial NOT NULL,
+    USER_ID int REFERENCES public.USERS(ID) NOT NULL,
+    CREATED_AT TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
+	UPDATED_AT TIMESTAMP WITH TIME ZONE default NOW(),
+    PRIMARY KEY (ID)
+);
+
+CREATE TRIGGER set_timestamp
+BEFORE UPDATE ON CART
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+CREATE TABLE IF NOT EXISTS public.CART_PRODUCT
+(
+    ID serial NOT NULL,
+    PRODUCT_ID int REFERENCES public.PRODUCT(ID) NOT NULL,
+    CART_ID int REFERENCES public.CART(ID) NOT NULL,
+    ITEM_COUNT INT default 1 NOT NULL,
+    PRIMARY KEY (ID)
+);
+
+insert into cart_product(product_id, cart_id, item_count)
+values(2,3,1);
+insert into cart_product(product_id, cart_id, item_count)
+values(4,3,2);
+
+
