@@ -7,6 +7,7 @@ import (
 	cartUsecase "server/internal/Cart/usecase"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
+	"github.com/gorilla/mux"
 )
 
 type Result struct {
@@ -23,6 +24,14 @@ type CartHandler struct {
 
 func NewCartHandler(cartUsecase cartUsecase.UsecaseI) *CartHandler {
 	return &CartHandler{cartUsecase: cartUsecase}
+}
+
+func (handler *CartHandler) RegisterHandler(router *mux.Router) {
+	router.HandleFunc("/api/cart", handler.GetCart).Methods(http.MethodGet)
+	router.HandleFunc("/api/cart/add", handler.AddProductToCart).Methods(http.MethodPost)
+	router.HandleFunc("/api/cart/delete", handler.DeleteProductFromCart).Methods(http.MethodPost)
+	router.HandleFunc("/api/cart/update/up", handler.UpdateItemCountUp).Methods(http.MethodPatch)
+	router.HandleFunc("/api/cart/update/down", handler.UpdateItemCountDown).Methods(http.MethodPatch)
 }
 
 func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {

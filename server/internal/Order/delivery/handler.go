@@ -16,7 +16,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-
 type Result struct {
 	Body interface{}
 }
@@ -26,18 +25,25 @@ type Error struct {
 }
 
 type OrderHandler struct {
-	orderUC orderUsecase.UsecaseI
+	orderUC   orderUsecase.UsecaseI
 	sessionUC sessionUsecase.UsecaseI
 }
 
 func NewOrderHandler(orderUC orderUsecase.UsecaseI, sessionUC sessionUsecase.UsecaseI) *OrderHandler {
 	return &OrderHandler{
-		orderUC: orderUC,
+		orderUC:   orderUC,
 		sessionUC: sessionUC,
 	}
 }
 
-func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request){
+func (handler *OrderHandler) RegisterHandler(router *mux.Router) {
+	router.HandleFunc("/api/orders", handler.CreateOrder).Methods(http.MethodPost)
+	router.HandleFunc("/api/orders", handler.UpdateOrder).Methods(http.MethodPatch)
+	router.HandleFunc("/api/orders", handler.GetOrders).Methods(http.MethodGet)
+	router.HandleFunc("/api/orders/{id}", handler.GetOrder).Methods(http.MethodGet)
+}
+
+func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
 	cookie, err := r.Cookie("session_id")
@@ -78,14 +84,14 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	err = json.NewEncoder(w).Encode(&Result{Body:respOrder})
+	err = json.NewEncoder(w).Encode(&Result{Body: respOrder})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 }
 
-func (handler *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request){
+func (handler *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
 	// cookie, err := r.Cookie("session_id")
@@ -123,10 +129,10 @@ func (handler *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
-	}	
+	}
 }
 
-func (handler *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request){
+func (handler *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
 	cookie, err := r.Cookie("session_id")
@@ -146,29 +152,29 @@ func (handler *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request){
 	// 	w.WriteHeader(http.StatusUnauthorized)
 	// 	return
 	// }
-	
+
 	respOrders, err := handler.orderUC.GetOrders(userId)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	
-	err = json.NewEncoder(w).Encode(&Result{Body:respOrders})
+
+	err = json.NewEncoder(w).Encode(&Result{Body: respOrders})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 }
 
-func (handler *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request){
+func (handler *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
 	vars := mux.Vars(r)
 	strid, ok := vars["id"]
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
-		return		
+		return
 	}
 
 	orderId, err := strconv.ParseUint(strid, 10, 64)
@@ -196,7 +202,7 @@ func (handler *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request){
 	// }
 
 	reqOrder := dto.ReqGetOneOrder{
-		UserId: userId,
+		UserId:  userId,
 		OrderId: uint(orderId),
 	}
 
@@ -209,8 +215,8 @@ func (handler *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request){
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	
-	err = json.NewEncoder(w).Encode(&Result{Body:respOrder})
+
+	err = json.NewEncoder(w).Encode(&Result{Body: respOrder})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

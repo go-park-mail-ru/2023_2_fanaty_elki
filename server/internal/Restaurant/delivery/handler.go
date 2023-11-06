@@ -26,6 +26,11 @@ func NewRestaurantHandler(restaurants restaurantUsecase.UsecaseI) *RestaurantHan
 	return &RestaurantHandler{restaurants: restaurants}
 }
 
+func (handler *RestaurantHandler) RegisterHandler(router *mux.Router) {
+	router.HandleFunc("/api/restaurants", handler.GetRestaurantList).Methods(http.MethodGet)
+	router.HandleFunc("/api/restaurants/{id}", handler.GetRestaurantById).Methods(http.MethodGet)
+}
+
 // GetRestaurantsList godoc
 // @Summary      giving restaurats
 // @Description  giving array of restaurants
@@ -110,3 +115,4 @@ func (handler *RestaurantHandler) GetRestaurantById(w http.ResponseWriter, r *ht
 		return
 	}
 }
+

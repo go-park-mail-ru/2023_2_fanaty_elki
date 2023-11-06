@@ -10,6 +10,7 @@ import (
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 	"time"
+	"github.com/gorilla/mux"
 )
 
 
@@ -32,6 +33,22 @@ func NewSessionHandler(sessions sessionUsecase.UsecaseI, users userUsecase.Useca
 		users:    users,
 	}
 }
+
+func (handler *SessionHandler) RegisterAuthHandler(router *mux.Router) {
+	router.HandleFunc("/api/logout", handler.Logout).Methods(http.MethodDelete)
+	router.HandleFunc("/api/auth", handler.Auth).Methods(http.MethodGet)
+	router.HandleFunc("/api/me", handler.Profile).Methods(http.MethodGet)
+	router.HandleFunc("/api/me", handler.UpdateProfile).Methods(http.MethodPatch)
+}
+
+func (handler *SessionHandler) RegisterCorsHandler(router *mux.Router) {
+	router.HandleFunc("/api/login", handler.Login).Methods(http.MethodPost)
+}
+
+func (handler *SessionHandler) RegisterHandler(router *mux.Router) {
+	router.HandleFunc("/api/users", handler.SignUp).Methods(http.MethodPost)
+}
+
 
 // SignUp godoc
 // @Summary      Signing up a user
