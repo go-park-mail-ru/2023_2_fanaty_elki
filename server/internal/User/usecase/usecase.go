@@ -105,7 +105,6 @@ func (us userUsecase) UpdateUser(newUser *entity.User) error {
 
 func (us userUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
 	var user *entity.User
-
 	if checkUser.Username != "" {
 		user, err := us.userRepo.FindUserByUsername(checkUser.Username)
 		if err != nil {
