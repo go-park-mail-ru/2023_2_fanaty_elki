@@ -16,7 +16,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const allowedOrigin = "http://84.23.53.216"
 
 type Result struct {
 	Body interface{}
@@ -39,8 +38,6 @@ func NewOrderHandler(orderUC orderUsecase.UsecaseI, sessionUC sessionUsecase.Use
 }
 
 func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request){
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	cookie, err := r.Cookie("session_id")
@@ -89,8 +86,6 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 }
 
 func (handler *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request){
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	cookie, err := r.Cookie("session_id")
@@ -132,8 +127,6 @@ func (handler *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request)
 }
 
 func (handler *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request){
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	cookie, err := r.Cookie("session_id")
@@ -169,8 +162,6 @@ func (handler *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request){
 }
 
 func (handler *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request){
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	vars := mux.Vars(r)

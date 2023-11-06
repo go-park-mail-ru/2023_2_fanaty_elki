@@ -10,8 +10,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const allowedOrigin = "http://84.23.53.216"
-
 type Result struct {
 	Body interface{}
 }
@@ -39,8 +37,6 @@ func NewRestaurantHandler(restaurants restaurantUsecase.UsecaseI) *RestaurantHan
 // @Router   /restaurants [get]
 func (handler *RestaurantHandler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	rests, err := handler.restaurants.GetRestaurants()
@@ -75,8 +71,6 @@ func (handler *RestaurantHandler) GetRestaurantList(w http.ResponseWriter, r *ht
 // @Failure 500 {object} error "internal server error"
 // @Router   /restaurants/{id} [get]
 func (handler *RestaurantHandler) GetRestaurantById(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	vars := mux.Vars(r)

@@ -12,7 +12,6 @@ import (
 	"time"
 )
 
-const allowedOrigin = "http://84.23.53.216"
 
 type Result struct {
 	Body interface{}
@@ -47,7 +46,6 @@ func NewSessionHandler(sessions sessionUsecase.UsecaseI, users userUsecase.Useca
 // @Router   /api/users [post]
 func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Set("content-type", "application/json")
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
@@ -114,8 +112,6 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Router   /api/login [post]
 func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
@@ -184,8 +180,6 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Router   /api/logout [delete]
 func (handler *SessionHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 	cookie, err := r.Cookie("session_id")
 	if err == http.ErrNoCookie {
@@ -223,8 +217,6 @@ func (handler *SessionHandler) Logout(w http.ResponseWriter, r *http.Request) {
 // @Router   /api/auth [get]
 func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	cookie, err := r.Cookie("session_id")
@@ -274,8 +266,6 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} error "unauthorized"
 // @Router   /api/me [get]
 func (handler *SessionHandler) Profile(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	cookie, err := r.Cookie("session_id")
@@ -314,9 +304,6 @@ func (handler *SessionHandler) Profile(w http.ResponseWriter, r *http.Request) {
 
 
 func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("content-type", "application/json")
 
 	cookie, err := r.Cookie("session_id")
 	if err == http.ErrNoCookie {
