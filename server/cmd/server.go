@@ -94,6 +94,7 @@ func main() {
 	router.PathPrefix("/api/me").Handler(authRouter)
 	router.PathPrefix("/api/orders").Handler(authRouter)
 	
+	router.Use(middleware.PanicMiddleware)
 	router.Use(middleware.CorsMiddleware)
 	corsRouter.Use(middleware.CorsCredentionalsMiddleware)
 	authRouter.Use(authMW.AuthMiddleware)
