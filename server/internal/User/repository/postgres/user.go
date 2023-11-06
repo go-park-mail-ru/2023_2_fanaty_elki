@@ -17,8 +17,8 @@ func NewUserRepo(db *sql.DB) repository.UserRepositoryI {
 	}
 }
 
-func (repo *UserRepo) FindUserByUsername(value string) (*entity.User, error) {
-	user := &entity.User{}
+func (repo *UserRepo) FindUserByUsername(value string) (*dto.DBGetUser, error) {
+	user := &dto.DBGetUser{}
 	row := repo.DB.QueryRow("SELECT id, username, password, birthday, phone_number, email, icon FROM users WHERE username = $1", value)
 	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.PhoneNumber, &user.Email, &user.Icon)
 	if err != nil {
@@ -30,8 +30,8 @@ func (repo *UserRepo) FindUserByUsername(value string) (*entity.User, error) {
 	return user, nil
 }
 
-func (repo *UserRepo) FindUserByEmail(value string) (*entity.User, error) {
-	user := &entity.User{}
+func (repo *UserRepo) FindUserByEmail(value string) (*dto.DBGetUser, error) {
+	user := &dto.DBGetUser{}
 	row := repo.DB.QueryRow("SELECT id, username, password, birthday, phone_number, email, icon FROM users WHERE email = $1", value)
 	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.PhoneNumber, &user.Email, &user.Icon)
 	if err != nil {
@@ -43,8 +43,8 @@ func (repo *UserRepo) FindUserByEmail(value string) (*entity.User, error) {
 	return user, nil
 }
 
-func (repo *UserRepo) FindUserByPhone(value string) (*entity.User, error) {
-	user := &entity.User{}
+func (repo *UserRepo) FindUserByPhone(value string) (*dto.DBGetUser, error) {
+	user := &dto.DBGetUser{}
 	row := repo.DB.QueryRow("SELECT id, username, password, birthday, phone_number, email, icon FROM users WHERE phone_number = $1", value)
 	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.PhoneNumber, &user.Email, &user.Icon)
 	if err != nil {
@@ -56,8 +56,8 @@ func (repo *UserRepo) FindUserByPhone(value string) (*entity.User, error) {
 	return user, nil
 }
 
-func (repo *UserRepo) FindUserById(id uint) (*entity.User, error) {
-	user := &entity.User{}
+func (repo *UserRepo) FindUserById(id uint) (*dto.DBGetUser, error) {
+	user := &dto.DBGetUser{}
 	row := repo.DB.QueryRow("SELECT id, username, password, birthday, phone_number, email, icon FROM users WHERE id = $1", id)
 	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.PhoneNumber, &user.Email, &user.Icon)
 	if err != nil {
