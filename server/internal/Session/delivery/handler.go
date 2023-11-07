@@ -2,7 +2,6 @@ package delivery
 
 import (
 	"encoding/json"
-	// "fmt"
 	"io/ioutil"
 	"net/http"
 	sessionUsecase "server/internal/Session/usecase"
@@ -146,7 +145,7 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	reqUser := dto.ReqLoginUser{}
 	err = json.Unmarshal(jsonbody, &reqUser)
-
+	
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrProblemsReadingData.Error()})
@@ -157,6 +156,7 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookieUC, err := handler.sessions.Login(dto.ToEntityLoginUser(&reqUser))
+	
 	if err != nil {
 		if err == entity.ErrInternalServerError {
 			w.WriteHeader(http.StatusInternalServerError)
