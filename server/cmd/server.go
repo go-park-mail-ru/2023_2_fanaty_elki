@@ -76,9 +76,7 @@ func main() {
 		return
 	}
 	defer baseLogger.Sync()
-	logger := middleware.NewACLog(baseLogger.Sugar().With(
-		
-	))
+	logger := middleware.NewACLog(baseLogger.Sugar())
 	
 
 	userRepo := userRep.NewUserRepo(db)

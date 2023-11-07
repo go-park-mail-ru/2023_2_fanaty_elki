@@ -8,11 +8,12 @@ import (
 var Cfg = zap.Config{
 	Encoding:         "json",
 	Level:            zap.NewAtomicLevelAt(zapcore.InfoLevel),
-	OutputPaths:      []string{"../logs/logs.txt", "stdout"},
-	ErrorOutputPaths: []string{"../logs/errors.txt", "stderr"}, 
-	// EncoderConfig: zapcore.EncoderConfig{
-	// 	MessageKey: "message",
-	// 	LevelKey:   "level",
-	// 	TimeKey:    "time",
-	// },
+	OutputPaths:      []string{"../logs/logs.json", "stdout"},
+	ErrorOutputPaths: []string{"../logs/errors.json", "stderr"}, 
+	EncoderConfig: zapcore.EncoderConfig{
+		MessageKey: "message",
+		LevelKey:   "level",
+		TimeKey:    "time",
+		EncodeTime: zapcore.ISO8601TimeEncoder,
+	},
 }
