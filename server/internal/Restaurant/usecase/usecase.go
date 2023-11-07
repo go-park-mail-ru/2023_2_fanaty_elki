@@ -15,19 +15,19 @@ type UsecaseI interface {
 }
 
 type restaurantUsecase struct {
-	RestaurantRepo restRep.RestaurantRepositoryI
-	ProductRepo    productRep.ProductRepositoryI
+	restaurantRepo restRep.RestaurantRepositoryI
+	productRepo    productRep.ProductRepositoryI
 }
 
 func NewRestaurantUsecase(resRep restRep.RestaurantRepositoryI, productRep productRep.ProductRepositoryI) *restaurantUsecase {
 	return &restaurantUsecase{
-		RestaurantRepo: resRep,
-		ProductRepo:    productRep,
+		restaurantRepo: resRep,
+		productRepo:    productRep,
 	}
 }
 
 func (res restaurantUsecase) GetRestaurants() ([]*entity.Restaurant, error) {
-	rests, err := res.RestaurantRepo.GetRestaurants()
+	rests, err := res.restaurantRepo.GetRestaurants()
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}
@@ -42,7 +42,7 @@ func (res restaurantUsecase) GetRestaurants() ([]*entity.Restaurant, error) {
 }
 
 func (res restaurantUsecase) GetRestaurantById(id uint) (*dto.RestaurantWithProducts, error) {
-	rest, err := res.RestaurantRepo.GetRestaurantById(id)
+	rest, err := res.restaurantRepo.GetRestaurantById(id)
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}
@@ -51,13 +51,13 @@ func (res restaurantUsecase) GetRestaurantById(id uint) (*dto.RestaurantWithProd
 	delprice = math.Round(delprice*100) / 100
 	rest.DeliveryTime = deltime
 	rest.DeliveryPrice = float32(delprice)
-	menuTypes, err := res.RestaurantRepo.GetMenuTypesByRestaurantId(id)
+	menuTypes, err := res.restaurantRepo.GetMenuTypesByRestaurantId(id)
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}
 	var menuTypesWithProducts []*dto.MenuTypeWithProducts
 	for _, menu := range menuTypes {
-		products, err := res.ProductRepo.GetProductsByMenuTypeId(menu.ID)
+		products, err := res.productRepo.GetProductsByMenuTypeId(menu.ID)
 		if err != nil {
 			return nil, entity.ErrInternalServerError
 		}
