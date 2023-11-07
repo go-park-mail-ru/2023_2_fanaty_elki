@@ -7,6 +7,7 @@ import (
 	cartUsecase "server/internal/Cart/usecase"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
+
 	"github.com/gorilla/mux"
 )
 
@@ -32,6 +33,7 @@ func (handler *CartHandler) RegisterHandler(router *mux.Router) {
 	router.HandleFunc("/api/cart/delete", handler.DeleteProductFromCart).Methods(http.MethodPost)
 	router.HandleFunc("/api/cart/update/up", handler.UpdateItemCountUp).Methods(http.MethodPatch)
 	router.HandleFunc("/api/cart/update/down", handler.UpdateItemCountDown).Methods(http.MethodPatch)
+	router.HandleFunc("/api/cart/clear", handler.CleanCart).Methods(http.MethodPost)
 }
 
 func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
@@ -182,6 +184,22 @@ func (handler *CartHandler) UpdateItemCountDown(w http.ResponseWriter, r *http.R
 	}
 
 	err = handler.cartUsecase.UpdateItemCountDown(cookie.Value, reqProduct.ProductID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func (handler *CartHandler) CleanCart(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", "application/json")
+
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err = handler.cartUsecase.CleanCart(cookie.Value)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

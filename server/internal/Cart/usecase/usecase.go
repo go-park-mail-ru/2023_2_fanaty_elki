@@ -14,6 +14,7 @@ type UsecaseI interface {
 	DeleteProductFromCart(SessionToken string, productID uint) error
 	UpdateItemCountUp(SessionToken string, productID uint) error
 	UpdateItemCountDown(SessionToken string, productID uint) error
+	CleanCart(SessionToken string) error
 }
 
 type cartUsecase struct {
@@ -132,6 +133,25 @@ func (cu cartUsecase) UpdateItemCountDown(SessionToken string, productID uint) e
 		return err
 	}
 	err = cu.cartRepo.UpdateItemCountDown(cart.ID, productID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (cu cartUsecase) CleanCart(SessionToken string) error {
+	cookie, err := cu.sessionRepo.Check(SessionToken)
+	if err != nil {
+		return err
+	}
+
+	userID := cookie.UserID
+	cart, err := cu.cartRepo.GetCartByUserID(userID)
+	if err != nil {
+		return err
+	}
+	err = cu.cartRepo.CleanCart(cart.ID)
 	if err != nil {
 		return err
 	}
