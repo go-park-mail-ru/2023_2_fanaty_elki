@@ -1,8 +1,8 @@
 package dto
 
 import (
-	"server/internal/domain/entity"
 	"database/sql"
+	"server/internal/domain/entity"
 )
 
 type ReqCreateUser struct {
@@ -57,7 +57,36 @@ type DBUpdateUser struct {
 	Icon        sql.NullString 
 }
 
+type DBGetUser struct {
+	ID          uint           
+	Username    string         
+	Password    string         
+	Birthday    sql.NullString
+	PhoneNumber string         
+	Email       string         
+	Icon        sql.NullString 
+}
+
+func ToEntityGetUser(reqUser *DBGetUser) *entity.User {
+	if reqUser == nil{
+		return nil
+	}
+	return &entity.User{
+		ID: reqUser.ID,
+		Username: reqUser.Username,         
+		Password: reqUser.Password,         
+		Birthday:    transformSqlStringToString(reqUser.Birthday),
+		PhoneNumber: reqUser.PhoneNumber,         
+		Email:       reqUser.Email,         
+		Icon:        transformSqlStringToString(reqUser.Icon), 
+	}
+} 
+
+
 func ToEntityCreateUser(reqUser *ReqCreateUser) *entity.User {
+	if reqUser == nil{
+		return nil
+	}
 	return &entity.User{
 		ID: reqUser.ID,
 		Username: reqUser.Username,         
@@ -70,6 +99,9 @@ func ToEntityCreateUser(reqUser *ReqCreateUser) *entity.User {
 } 
 
 func ToEntityUpdateUser(reqUser *ReqUpdateUser, id uint) *entity.User {
+	if reqUser == nil{
+		return nil
+	}
 	return &entity.User{
 		ID: id,
 		Username: reqUser.Username,         
@@ -82,6 +114,9 @@ func ToEntityUpdateUser(reqUser *ReqUpdateUser, id uint) *entity.User {
 } 
 
 func ToEntityLoginUser(reqUser *ReqLoginUser) *entity.User {
+	if reqUser == nil{
+		return nil
+	}
 	return &entity.User{
 		Username: reqUser.Username,         
 		Password: reqUser.Password,         
@@ -114,13 +149,13 @@ func ToRepoUpdateUser (user *entity.User) *DBUpdateUser{
 }
 
 
-func ToReqGetUserProfile(user *entity.User) *ReqGetUserProfile {
+func ToReqGetUserProfile(user *DBGetUser) *ReqGetUserProfile {
 	return &ReqGetUserProfile{
 		Username: user.Username,
-		Birthday: user.Birthday,
-		PhoneNumber: user.PhoneNumber,
-		Email: user.Email,
-		Icon: user.Icon,
+		Birthday:    transformSqlStringToString(user.Birthday),
+		PhoneNumber: user.PhoneNumber,         
+		Email:       user.Email,         
+		Icon:        transformSqlStringToString(user.Icon), 
 	}
 }
 
@@ -129,4 +164,11 @@ func transformStringToSqlString(str string) *sql.NullString {
 		return &sql.NullString{String: str, Valid: true}
 	}
 	return &sql.NullString{Valid: false}
+}
+
+func transformSqlStringToString(str sql.NullString) string {
+	if str.Valid {
+		return str.String
+	}
+	return ""
 }

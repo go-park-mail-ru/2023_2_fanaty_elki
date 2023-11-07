@@ -10,15 +10,15 @@ import (
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 	"time"
-)
 
-const allowedOrigin = "http://84.23.53.216"
+	"github.com/gorilla/mux"
+)
 
 type Result struct {
 	Body interface{}
 }
 
-type Error struct {
+type RespError struct {
 	Err string
 }
 
@@ -34,6 +34,21 @@ func NewSessionHandler(sessions sessionUsecase.UsecaseI, users userUsecase.Useca
 	}
 }
 
+func (handler *SessionHandler) RegisterAuthHandler(router *mux.Router) {
+	router.HandleFunc("/api/logout", handler.Logout).Methods(http.MethodDelete)
+	router.HandleFunc("/api/auth", handler.Auth).Methods(http.MethodGet)
+	router.HandleFunc("/api/me", handler.Profile).Methods(http.MethodGet)
+	router.HandleFunc("/api/me", handler.UpdateProfile).Methods(http.MethodPatch)
+}
+
+func (handler *SessionHandler) RegisterCorsHandler(router *mux.Router) {
+	router.HandleFunc("/api/login", handler.Login).Methods(http.MethodPost)
+}
+
+func (handler *SessionHandler) RegisterHandler(router *mux.Router) {
+	router.HandleFunc("/api/users", handler.SignUp).Methods(http.MethodPost)
+}
+
 // SignUp godoc
 // @Summary      Signing up a user
 // @Description  Signing up a user
@@ -47,13 +62,13 @@ func NewSessionHandler(sessions sessionUsecase.UsecaseI, users userUsecase.Useca
 // @Router   /api/users [post]
 func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
 	w.Header().Set("content-type", "application/json")
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
+
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrProblemsReadingData.Error()})
+		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrProblemsReadingData.Error()})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -65,21 +80,22 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnmarshalingJson.Error()})
+		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnmarshalingJson.Error()})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
 	}
-	
+
 	id, err := handler.users.CreateUser(dto.ToEntityCreateUser(&reqUser))
+
 	if err != nil {
 		if err == entity.ErrInternalServerError {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&Error{Err: err.Error()})
+		err = json.NewEncoder(w).Encode(&RespError{Err: err.Error()})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -114,15 +130,13 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Router   /api/login [post]
 func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrProblemsReadingData.Error()})
+		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrProblemsReadingData.Error()})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -134,7 +148,7 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrProblemsReadingData.Error()})
+		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrProblemsReadingData.Error()})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -184,27 +198,18 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Router   /api/logout [delete]
 func (handler *SessionHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
-	if r.Method == "OPTIONS" {
-		w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-		w.Header().Add("Access-Control-Allow-Credentials", "true")
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("content-type", "application/json")
+	// w.Header().Set("content-type", "application/json")
 	cookie, err := r.Cookie("session_id")
-	if err == http.ErrNoCookie {
-		w.WriteHeader(http.StatusUnauthorized)
-		err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnauthorized.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		return
-	} else if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	// if err == http.ErrNoCookie {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
+	// 	if err != nil {
+	// 		w.WriteHeader(http.StatusInternalServerError)
+	// 	}
+	// 	return
+	// } else if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// }
 
 	err = handler.sessions.Logout(&entity.Cookie{
 		SessionToken: cookie.Value,
@@ -230,34 +235,32 @@ func (handler *SessionHandler) Logout(w http.ResponseWriter, r *http.Request) {
 // @Router   /api/auth [get]
 func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	cookie, err := r.Cookie("session_id")
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnauthorized.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		return
-	}
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
+	// 	if err != nil {
+	// 		w.WriteHeader(http.StatusInternalServerError)
+	// 	}
+	// 	return
+	// }
 
 	username, err := handler.sessions.Check(cookie.Value)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	return
+	// }
 
-	if username == nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		err := json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnauthorized.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		return
-	}
+	// if username == nil {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	err := json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
+	// 	if err != nil {
+	// 		w.WriteHeader(http.StatusInternalServerError)
+	// 	}
+	// 	return
+	// }
 
 	http.SetCookie(w, cookie)
 	body := map[string]interface{}{
@@ -281,36 +284,34 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} error "unauthorized"
 // @Router   /api/me [get]
 func (handler *SessionHandler) Profile(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	cookie, err := r.Cookie("session_id")
-	if err == http.ErrNoCookie {
-		w.WriteHeader(http.StatusUnauthorized)
-		err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnauthorized.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		return
-	} else if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	// if err == http.ErrNoCookie {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
+	// 	if err != nil {
+	// 		w.WriteHeader(http.StatusInternalServerError)
+	// 	}
+	// 	return
+	// } else if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// }
 
 	user, err := handler.sessions.GetUserProfile(cookie.Value)
-	if err == entity.ErrInternalServerError{
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	// if err == entity.ErrInternalServerError{
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	return
+	// }
 
-	if user == nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnauthorized.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		return
-	}
+	// if user == nil {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
+	// 	if err != nil {
+	// 		w.WriteHeader(http.StatusInternalServerError)
+	// 	}
+	// 	return
+	// }
 
 	err = json.NewEncoder(w).Encode(&Result{Body: user})
 	if err != nil {
@@ -319,43 +320,39 @@ func (handler *SessionHandler) Profile(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
 func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("content-type", "application/json")
 
 	cookie, err := r.Cookie("session_id")
-	if err == http.ErrNoCookie {
-		w.WriteHeader(http.StatusUnauthorized)
-		err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnauthorized.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		return
-	} else if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	// if err == http.ErrNoCookie {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
+	// 	if err != nil {
+	// 		w.WriteHeader(http.StatusInternalServerError)
+	// 	}
+	// 	return
+	// } else if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// }
 
 	id, err := handler.sessions.GetIdByCookie(cookie.Value)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	return
+	// }
 
-	if id == 0 {
-		w.WriteHeader(http.StatusUnauthorized)
-		err := json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnauthorized.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		return
-	}
+	// if id == 0 {
+	// 	w.WriteHeader(http.StatusUnauthorized)
+	// 	err := json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
+	// 	if err != nil {
+	// 		w.WriteHeader(http.StatusInternalServerError)
+	// 	}
+	// 	return
+	// }
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrProblemsReadingData.Error()})
+		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrProblemsReadingData.Error()})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -379,12 +376,12 @@ func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Requ
 			return
 		}
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&Error{Err: err.Error()})
+		err = json.NewEncoder(w).Encode(&RespError{Err: err.Error()})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-	
+
 		return
 	}
 }

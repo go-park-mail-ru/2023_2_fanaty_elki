@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"fmt"
 	"regexp"
 	cartRep "server/internal/Cart/repository"
 	userRep "server/internal/User/repository"
@@ -26,7 +27,11 @@ func NewUserUsecase(userRepI userRep.UserRepositoryI, cartRepI cartRep.CartRepos
 }
 
 func (us userUsecase) GetUserById(id uint) (*entity.User, error) {
-	return us.userRepo.FindUserById(id)
+	user, err := us.userRepo.FindUserById(id)
+	if err != nil {
+		return nil, err
+	}
+	return dto.ToEntityGetUser(user), nil
 }
 
 func (us userUsecase) CreateUser(newUser *entity.User) (uint, error) {
@@ -43,11 +48,13 @@ func (us userUsecase) CreateUser(newUser *entity.User) (uint, error) {
 	}
 
 	user, err := us.userRepo.CreateUser(dto.ToRepoCreateUser(newUser))
+
 	if err != nil {
 		return 0, entity.ErrInternalServerError
 	}
 
 	_, err = us.cartRepo.CreateCart(user)
+	fmt.Println(err)
 	if err != nil {
 		return 0, entity.ErrInternalServerError
 	}
@@ -104,7 +111,8 @@ func (us userUsecase) UpdateUser(newUser *entity.User) error {
 }
 
 func (us userUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
-	var user *entity.User
+	var user *dto.DBGetUser
+
 	if checkUser.Username != "" {
 		user, err := us.userRepo.FindUserByUsername(checkUser.Username)
 		if err != nil {
@@ -138,7 +146,7 @@ func (us userUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
 			return nil, entity.ErrConflictPhoneNumber
 		}
 	}
-	return user, nil
+	return dto.ToEntityGetUser(user), nil
 }
 
 func (us userUsecase) checkUserFieldsCreate(user *entity.User) error {

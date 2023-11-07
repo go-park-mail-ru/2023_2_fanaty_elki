@@ -10,13 +10,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const allowedOrigin = "http://84.23.53.216"
-
 type Result struct {
 	Body interface{}
 }
 
-type Error struct {
+type RespError struct {
 	Err string
 }
 
@@ -26,6 +24,11 @@ type RestaurantHandler struct {
 
 func NewRestaurantHandler(restaurants restaurantUsecase.UsecaseI) *RestaurantHandler {
 	return &RestaurantHandler{restaurants: restaurants}
+}
+
+func (handler *RestaurantHandler) RegisterHandler(router *mux.Router) {
+	router.HandleFunc("/api/restaurants", handler.GetRestaurantList).Methods(http.MethodGet)
+	router.HandleFunc("/api/restaurants/{id}", handler.GetRestaurantById).Methods(http.MethodGet)
 }
 
 // GetRestaurantsList godoc
@@ -39,15 +42,13 @@ func NewRestaurantHandler(restaurants restaurantUsecase.UsecaseI) *RestaurantHan
 // @Router   /restaurants [get]
 func (handler *RestaurantHandler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	rests, err := handler.restaurants.GetRestaurants()
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&Error{Err: "data base error"})
+		err = json.NewEncoder(w).Encode(&RespError{Err: "data base error"})
 		return
 	}
 
@@ -60,7 +61,7 @@ func (handler *RestaurantHandler) GetRestaurantList(w http.ResponseWriter, r *ht
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&Error{Err: "error while marshalling JSON"})
+		err = json.NewEncoder(w).Encode(&RespError{Err: "error while marshalling JSON"})
 		return
 	}
 }
@@ -75,8 +76,6 @@ func (handler *RestaurantHandler) GetRestaurantList(w http.ResponseWriter, r *ht
 // @Failure 500 {object} error "internal server error"
 // @Router   /restaurants/{id} [get]
 func (handler *RestaurantHandler) GetRestaurantById(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	vars := mux.Vars(r)
@@ -88,7 +87,7 @@ func (handler *RestaurantHandler) GetRestaurantById(w http.ResponseWriter, r *ht
 	id64, err := strconv.ParseUint(strid, 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&Error{Err: "id is not a number"})
+		err = json.NewEncoder(w).Encode(&RespError{Err: "id is not a number"})
 		return
 	}
 
@@ -99,7 +98,7 @@ func (handler *RestaurantHandler) GetRestaurantById(w http.ResponseWriter, r *ht
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&Error{Err: "data base error"})
+		err = json.NewEncoder(w).Encode(&RespError{Err: "data base error"})
 		return
 	}
 
@@ -112,7 +111,8 @@ func (handler *RestaurantHandler) GetRestaurantById(w http.ResponseWriter, r *ht
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&Error{Err: "error while marshalling JSON"})
+		err = json.NewEncoder(w).Encode(&RespError{Err: "error while marshalling JSON"})
 		return
 	}
 }
+

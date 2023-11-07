@@ -7,15 +7,14 @@ import (
 	cartUsecase "server/internal/Cart/usecase"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
+	"github.com/gorilla/mux"
 )
-
-const allowedOrigin = "http://84.23.53.216"
 
 type Result struct {
 	Body interface{}
 }
 
-type Error struct {
+type RespError struct {
 	Err string
 }
 
@@ -27,15 +26,21 @@ func NewCartHandler(cartUsecase cartUsecase.UsecaseI) *CartHandler {
 	return &CartHandler{cartUsecase: cartUsecase}
 }
 
+func (handler *CartHandler) RegisterHandler(router *mux.Router) {
+	router.HandleFunc("/api/cart", handler.GetCart).Methods(http.MethodGet)
+	router.HandleFunc("/api/cart/add", handler.AddProductToCart).Methods(http.MethodPost)
+	router.HandleFunc("/api/cart/delete", handler.DeleteProductFromCart).Methods(http.MethodPost)
+	router.HandleFunc("/api/cart/update/up", handler.UpdateItemCountUp).Methods(http.MethodPatch)
+	router.HandleFunc("/api/cart/update/down", handler.UpdateItemCountDown).Methods(http.MethodPatch)
+}
+
 func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		err = json.NewEncoder(w).Encode(&Error{Err: entity.ErrUnauthorized.Error()})
+		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
@@ -44,7 +49,7 @@ func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
 	cart, err := handler.cartUsecase.GetUserCart(cookie.Value)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&Error{Err: "data base error"})
+		err = json.NewEncoder(w).Encode(&RespError{Err: "data base error"})
 		return
 	}
 
@@ -57,14 +62,12 @@ func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&Error{Err: "error while marshalling JSON"})
+		err = json.NewEncoder(w).Encode(&RespError{Err: "error while marshalling JSON"})
 		return
 	}
 }
 
 func (handler *CartHandler) AddProductToCart(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
@@ -96,8 +99,6 @@ func (handler *CartHandler) AddProductToCart(w http.ResponseWriter, r *http.Requ
 }
 
 func (handler *CartHandler) DeleteProductFromCart(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
@@ -128,8 +129,6 @@ func (handler *CartHandler) DeleteProductFromCart(w http.ResponseWriter, r *http
 }
 
 func (handler *CartHandler) UpdateItemCountUp(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
@@ -160,8 +159,6 @@ func (handler *CartHandler) UpdateItemCountUp(w http.ResponseWriter, r *http.Req
 }
 
 func (handler *CartHandler) UpdateItemCountDown(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-	w.Header().Add("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("content-type", "application/json")
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
