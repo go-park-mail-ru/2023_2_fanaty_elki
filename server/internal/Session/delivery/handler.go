@@ -2,7 +2,6 @@ package delivery
 
 import (
 	"encoding/json"
-	// "fmt"
 	"io/ioutil"
 	"net/http"
 	sessionUsecase "server/internal/Session/usecase"
@@ -146,7 +145,7 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	reqUser := dto.ReqLoginUser{}
 	err = json.Unmarshal(jsonbody, &reqUser)
-
+	
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrProblemsReadingData.Error()})
@@ -157,6 +156,7 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookieUC, err := handler.sessions.Login(dto.ToEntityLoginUser(&reqUser))
+	
 	if err != nil {
 		if err == entity.ErrInternalServerError {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -172,6 +172,8 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Value:    cookieUC.SessionToken,
 		Expires:  time.Now().Add(cookieUC.MaxAge),
 		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+		Secure: true,
 	}
 
 	http.SetCookie(w, cookie)
@@ -238,7 +240,7 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("content-type", "application/json")
 
-	cookie, err := r.Cookie("session_id")
+	oldCookie, err := r.Cookie("session_id")
 	// if err != nil {
 	// 	w.WriteHeader(http.StatusUnauthorized)
 	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
@@ -248,7 +250,7 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
-	username, err := handler.sessions.Check(cookie.Value)
+	username, err := handler.sessions.Check(oldCookie.Value)
 	// if err != nil {
 	// 	w.WriteHeader(http.StatusInternalServerError)
 	// 	return
@@ -263,7 +265,17 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
+	cookie := &http.Cookie{
+		Name:     "session_id",
+		Value:    oldCookie.Value,
+		Expires:  time.Now().Add(time.Duration(oldCookie.MaxAge) * time.Hour),
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+		Secure: true,
+	}
+
 	http.SetCookie(w, cookie)
+
 	body := map[string]interface{}{
 		"Username": username,
 	}

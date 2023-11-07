@@ -62,7 +62,7 @@ func (ss sessionUsecase) Login(user *entity.User) (*entity.Cookie, error) {
 	cookie := &entity.Cookie{
 		UserID:       us.ID,
 		SessionToken: randStringRunes(sessKeyLen),
-		MaxAge:       50 * time.Hour,
+		MaxAge:       150 * time.Hour,
 	}
 
 	err = ss.sessionRepo.Create(cookie)
