@@ -2,9 +2,9 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
 	"server/internal/Cart/repository"
 	"server/internal/domain/entity"
-	"fmt"
 )
 
 type CartRepo struct {
@@ -113,6 +113,15 @@ func (repo *CartRepo) UpdateItemCountUp(cartID uint, productID uint) error {
 func (repo *CartRepo) UpdateItemCountDown(cartID uint, productID uint) error {
 	updateProduct := `UPDATE cart_product SET item_count = item_count - 1 WHERE cart_id = $1 AND product_id = $2`
 	_, err := repo.DB.Exec(updateProduct, cartID, productID)
+	if err != nil {
+		return entity.ErrInternalServerError
+	}
+	return nil
+}
+
+func (repo *CartRepo) CleanCart(cartID uint) error {
+	deleteProducts := `DELETE FROM cart_product WHERE cart_id = $1`
+	_, err := repo.DB.Exec(deleteProducts, cartID)
 	if err != nil {
 		return entity.ErrInternalServerError
 	}
