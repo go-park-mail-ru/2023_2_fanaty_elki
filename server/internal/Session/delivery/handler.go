@@ -46,7 +46,7 @@ func (handler *SessionHandler) RegisterCorsHandler(router *mux.Router) {
 }
 
 func (handler *SessionHandler) RegisterHandler(router *mux.Router) {
-	
+
 }
 
 // SignUp godoc
@@ -145,7 +145,7 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	reqUser := dto.ReqLoginUser{}
 	err = json.Unmarshal(jsonbody, &reqUser)
-	
+
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrProblemsReadingData.Error()})
@@ -156,7 +156,7 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookieUC, err := handler.sessions.Login(dto.ToEntityLoginUser(&reqUser))
-	
+
 	if err != nil {
 		if err == entity.ErrInternalServerError {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -173,7 +173,7 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Expires:  time.Now().Add(cookieUC.MaxAge),
 		HttpOnly: true,
 		SameSite: http.SameSiteNoneMode,
-		Secure: true,
+		Secure:   true,
 	}
 
 	http.SetCookie(w, cookie)
@@ -268,10 +268,10 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	cookie := &http.Cookie{
 		Name:     "session_id",
 		Value:    oldCookie.Value,
-		Expires:  time.Now().Add(time.Duration(oldCookie.MaxAge) * time.Hour),
+		Expires:  time.Now().Add(150 * time.Hour),
 		HttpOnly: true,
 		SameSite: http.SameSiteNoneMode,
-		Secure: true,
+		Secure:   true,
 	}
 
 	http.SetCookie(w, cookie)
