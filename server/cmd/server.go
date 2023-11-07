@@ -6,9 +6,6 @@ import (
 	"net/http"
 
 	"flag"
-	"github.com/gomodule/redigo/redis"
-	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
 	"log"
 	"server/db"
 	cartDev "server/internal/Cart/delivery"
@@ -27,6 +24,11 @@ import (
 	userRep "server/internal/User/repository/postgres"
 	userUsecase "server/internal/User/usecase"
 	"server/internal/middleware"
+	"server/config"
+	"github.com/gomodule/redigo/redis"
+	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
+//	"go.uber.org/zap"
 )
 
 // @title Prinesi-Poday API
@@ -68,6 +70,17 @@ func main() {
 	}
 	defer db.Close()
 
+	baseLogger, err := config.Cfg.Build()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer baseLogger.Sync()
+	logger := middleware.NewACLog(baseLogger.Sugar().With(
+		
+	))
+	
+
 	userRepo := userRep.NewUserRepo(db)
 	restaurantRepo := restaurantRep.NewRestaurantRepo(db)
 	productRepo := productRep.NewProductRepo(db)
@@ -94,6 +107,7 @@ func main() {
 	router.PathPrefix("/api/me").Handler(authRouter)
 	router.PathPrefix("/api/orders").Handler(authRouter)
 	
+	router.Use(logger.ACLogMiddleware)
 	router.Use(middleware.PanicMiddleware)
 	router.Use(middleware.CorsMiddleware)
 	corsRouter.Use(middleware.CorsCredentionalsMiddleware)

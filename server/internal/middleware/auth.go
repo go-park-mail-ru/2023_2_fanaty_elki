@@ -14,6 +14,7 @@ func NewSessionMiddleware(sessionUC sessionUsecase.UsecaseI) *SessionMiddleware 
 		sessionUC: sessionUC,
 	}
 }
+
 func (mw *SessionMiddleware) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
 		w.Header().Add("Access-Control-Allow-Credentials", "true")
