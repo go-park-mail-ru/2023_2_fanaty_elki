@@ -106,7 +106,6 @@ func main() {
 
 	router.Use(middleware.PanicMiddleware)
 	router.Use(middleware.CorsMiddleware)
-	//corsRouter.Use(middleware.CorsMiddleware)
 	corsRouter.Use(middleware.CorsCredentionalsMiddleware)
 	authRouter.Use(authMW.AuthMiddleware)
 

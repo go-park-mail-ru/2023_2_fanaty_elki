@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 )
 
@@ -10,7 +9,6 @@ const allowedOrigin = "http://84.23.53.216"
 func CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
 		w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-		fmt.Println("CORSMW")
 		if r.Method == http.MethodOptions{
 			w.Header().Add("Access-Control-Allow-Credentials", "true")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, PATCH, OPTIONS")
@@ -24,10 +22,9 @@ func CorsMiddleware(next http.Handler) http.Handler {
 
 func CorsCredentionalsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
-		fmt.Println("CORS2MW")
 		w.Header().Add("Access-Control-Allow-Credentials", "true")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, PATCH, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		// w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, PATCH, OPTIONS")
+		// w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		next.ServeHTTP(w, r)
 	})
 }
