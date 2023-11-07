@@ -15,7 +15,9 @@ import (
 	orderDev "server/internal/Order/delivery"
 	orderRep "server/internal/Order/repository/postgres"
 	orderUsecase "server/internal/Order/usecase"
+	prodDev "server/internal/Product/delivery"
 	productRep "server/internal/Product/repository/postgres"
+	productUsecase "server/internal/Product/usecase"
 	restaurantDev "server/internal/Restaurant/delivery"
 	restaurantRep "server/internal/Restaurant/repository/postgres"
 	restaurantUsecase "server/internal/Restaurant/usecase"
@@ -85,11 +87,13 @@ func main() {
 	cartUC := cartUsecase.NewCartUsecase(cartRepo, productRepo, sessionRepo)
 	sessionUC := sessionUsecase.NewSessionUsecase(sessionRepo, userRepo)
 	orderUC := orderUsecase.NewOrderUsecase(orderRepo)
+	productUC := productUsecase.NewProductUsecase(productRepo)
 
 	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC)
 	cartsHandler := cartDev.NewCartHandler(cartUC)
 	sessionsHandler := sessionDev.NewSessionHandler(sessionUC, userUC)
 	orderHandler := orderDev.NewOrderHandler(orderUC, sessionUC)
+	productHandler := prodDev.NewProductHandler(productUC)
 	authMW := middleware.NewSessionMiddleware(sessionUC)
 
 	router.PathPrefix("/api/login").Handler(corsRouter)
@@ -110,6 +114,7 @@ func main() {
 	sessionsHandler.RegisterCorsHandler(corsRouter)
 	sessionsHandler.RegisterAuthHandler(authRouter)
 	orderHandler.RegisterHandler(authRouter)
+	productHandler.RegisterHandler(router)
 
 	server := &http.Server{
 		Addr:    PORT,
