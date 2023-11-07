@@ -6,6 +6,7 @@ package mock_usecase
 
 import (
 	reflect "reflect"
+	dto "server/internal/domain/dto"
 	entity "server/internal/domain/entity"
 
 	gomock "github.com/golang/mock/gomock"
@@ -32,6 +33,21 @@ func NewMockUsecaseI(ctrl *gomock.Controller) *MockUsecaseI {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockUsecaseI) EXPECT() *MockUsecaseIMockRecorder {
 	return m.recorder
+}
+
+// GetRestaurantById mocks base method.
+func (m *MockUsecaseI) GetRestaurantById(id uint) (*dto.RestaurantWithProducts, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRestaurantById", id)
+	ret0, _ := ret[0].(*dto.RestaurantWithProducts)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRestaurantById indicates an expected call of GetRestaurantById.
+func (mr *MockUsecaseIMockRecorder) GetRestaurantById(id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRestaurantById", reflect.TypeOf((*MockUsecaseI)(nil).GetRestaurantById), id)
 }
 
 // GetRestaurants mocks base method.

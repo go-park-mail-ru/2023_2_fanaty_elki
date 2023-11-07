@@ -2,7 +2,7 @@ package entity
 
 type Cart struct {
 	ID     uint
-	UserID string
+	UserID uint
 }
 
 type CartProduct struct {
