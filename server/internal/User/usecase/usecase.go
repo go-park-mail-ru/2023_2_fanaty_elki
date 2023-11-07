@@ -6,6 +6,7 @@ import (
 	userRep "server/internal/User/repository"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
+	"fmt"
 )
 
 type UsecaseI interface {
@@ -35,23 +36,25 @@ func (us userUsecase) GetUserById(id uint) (*entity.User, error) {
 
 func (us userUsecase) CreateUser(newUser *entity.User) (uint, error) {
 	err := us.checkUserFieldsCreate(newUser)
-
+	
 	if err != nil {
 		return 0, err
 	}
 
 	_, err = us.checkUser(newUser)
-
+	
 	if err != nil {
 		return 0, err
 	}
 
 	user, err := us.userRepo.CreateUser(dto.ToRepoCreateUser(newUser))
+	
 	if err != nil {
 		return 0, entity.ErrInternalServerError
 	}
 
 	_, err = us.cartRepo.CreateCart(user)
+	fmt.Println(err)
 	if err != nil {
 		return 0, entity.ErrInternalServerError
 	}

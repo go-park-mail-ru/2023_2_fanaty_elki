@@ -8,7 +8,7 @@ type Result struct {
 	Body interface{}
 }
 
-type Error struct {
+type RespError struct {
 	Err string
 }
 

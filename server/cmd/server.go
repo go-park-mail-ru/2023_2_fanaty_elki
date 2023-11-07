@@ -27,6 +27,7 @@ import (
 	sessionUsecase "server/internal/Session/usecase"
 	userRep "server/internal/User/repository/postgres"
 	userUsecase "server/internal/User/usecase"
+	"server/internal/middleware"
 )
 
 // @title Prinesi-Poday API
@@ -53,6 +54,8 @@ var (
 func main() {
 	flag.Parse()
 	router := mux.NewRouter()
+	authRouter := mux.NewRouter()
+	corsRouter := mux.NewRouter()
 
 	redisConn, err := redis.DialURL(*redisAddr)
 	if err != nil {
@@ -86,31 +89,33 @@ func main() {
 	cartsHandler := cartDev.NewCartHandler(cartUC)
 	sessionsHandler := sessionDev.NewSessionHandler(sessionUC, userUC)
 	orderHandler := orderDev.NewOrderHandler(orderUC, sessionUC)
+	authMW := middleware.NewSessionMiddleware(sessionUC)
 
-	router.HandleFunc("/api/restaurants", restaurantsHandler.GetRestaurantList).Methods(http.MethodGet)
-	router.HandleFunc("/api/restaurants/{id}", restaurantsHandler.GetRestaurantById).Methods(http.MethodGet)
-	router.HandleFunc("/api/cart", cartsHandler.GetCart).Methods(http.MethodGet)
-	router.HandleFunc("/api/cart/add", cartsHandler.AddProductToCart).Methods(http.MethodPost)
-	router.HandleFunc("/api/cart/delete", cartsHandler.DeleteProductFromCart).Methods(http.MethodPost)
-	router.HandleFunc("/api/cart/update/up", cartsHandler.UpdateItemCountUp).Methods(http.MethodPatch)
-	router.HandleFunc("/api/cart/update/down", cartsHandler.UpdateItemCountDown).Methods(http.MethodPatch)
-	router.HandleFunc("/api/users", sessionsHandler.SignUp).Methods(http.MethodPost)
-	router.HandleFunc("/api/login", sessionsHandler.Login).Methods(http.MethodPost)
-	router.HandleFunc("/api/logout", sessionsHandler.Logout).Methods(http.MethodDelete, http.MethodOptions)
-	router.HandleFunc("/api/auth", sessionsHandler.Auth).Methods(http.MethodGet)
-	router.HandleFunc("/api/me", sessionsHandler.Profile).Methods(http.MethodGet)
-	router.HandleFunc("/api/me", sessionsHandler.UpdateProfile).Methods(http.MethodPatch)
-	router.HandleFunc("/api/orders", orderHandler.CreateOrder).Methods(http.MethodPost)
-	router.HandleFunc("/api/orders", orderHandler.UpdateOrder).Methods(http.MethodPatch)
-	router.HandleFunc("/api/orders", orderHandler.GetOrders).Methods(http.MethodGet)
-	router.HandleFunc("/api/orders/{id}", orderHandler.GetOrder).Methods(http.MethodGet)
+	router.PathPrefix("/api/login").Handler(corsRouter)
+	router.PathPrefix("/api/logout").Handler(authRouter)
+	router.PathPrefix("/api/auth").Handler(authRouter)
+	router.PathPrefix("/api/cart").Handler(authRouter)
+	router.PathPrefix("/api/me").Handler(authRouter)
+	router.PathPrefix("/api/orders").Handler(authRouter)
+	
+	router.Use(middleware.PanicMiddleware)
+	router.Use(middleware.CorsMiddleware)
+	corsRouter.Use(middleware.CorsCredentionalsMiddleware)
+	authRouter.Use(authMW.AuthMiddleware)
+	
+	restaurantsHandler.RegisterHandler(router)
+	cartsHandler.RegisterHandler(authRouter)
+	sessionsHandler.RegisterHandler(router)
+	sessionsHandler.RegisterCorsHandler(corsRouter)
+	sessionsHandler.RegisterAuthHandler(authRouter)
+	orderHandler.RegisterHandler(authRouter)
 
 	server := &http.Server{
 		Addr:    PORT,
 		Handler: router,
 	}
 
-	fmt.Println("Server start")
+	fmt.Println("Server start at port", PORT[1:])
 	err = server.ListenAndServe()
 
 	if errors.Is(err, http.ErrServerClosed) {
