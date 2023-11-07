@@ -43,10 +43,11 @@ func (handler *SessionHandler) RegisterAuthHandler(router *mux.Router) {
 
 func (handler *SessionHandler) RegisterCorsHandler(router *mux.Router) {
 	router.HandleFunc("/api/login", handler.Login).Methods(http.MethodPost)
+	router.HandleFunc("/api/users", handler.SignUp).Methods(http.MethodPost)
 }
 
 func (handler *SessionHandler) RegisterHandler(router *mux.Router) {
-	router.HandleFunc("/api/users", handler.SignUp).Methods(http.MethodPost)
+	
 }
 
 
