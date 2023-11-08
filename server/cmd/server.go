@@ -76,9 +76,16 @@ func main() {
 		return
 	}
 	defer baseLogger.Sync()
-	logger := middleware.NewACLog(baseLogger.Sugar())
-	
 
+	errorLogger, err := config.ErrorCfg.Build()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer errorLogger.Sync()
+
+	logger := middleware.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
+	
 	userRepo := userRep.NewUserRepo(db)
 	restaurantRepo := restaurantRep.NewRestaurantRepo(db)
 	productRepo := productRep.NewProductRepo(db)
@@ -95,7 +102,7 @@ func main() {
 	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC)
 	cartsHandler := cartDev.NewCartHandler(cartUC)
 	sessionsHandler := sessionDev.NewSessionHandler(sessionUC, userUC)
-	orderHandler := orderDev.NewOrderHandler(orderUC, sessionUC)
+	orderHandler := orderDev.NewOrderHandler(orderUC, sessionUC, logger)
 	authMW := middleware.NewSessionMiddleware(sessionUC)
 
 	router.PathPrefix("/api/login").Handler(corsRouter)

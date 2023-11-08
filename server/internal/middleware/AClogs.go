@@ -1,19 +1,15 @@
 package middleware
 
 import (
-	//"fmt"
 	"net/http"
 	"time"
-
 	"go.uber.org/zap"
-
-	//"go.uber.org/zap/zapcore"
 	"github.com/google/uuid"
-	
 )
 
 type ACLog struct {
-	logger *zap.SugaredLogger	
+	logger *zap.SugaredLogger
+	errorLogger *zap.SugaredLogger
 }
 
 type responseRecorder struct {
@@ -30,9 +26,10 @@ func NewLoggingResponseWriter(w http.ResponseWriter) *responseRecorder {
 	return &responseRecorder{w, http.StatusOK}
 }
 
-func NewACLog(logger *zap.SugaredLogger) *ACLog {
+func NewACLog(logger *zap.SugaredLogger, errorLogger *zap.SugaredLogger) *ACLog {
 	return &ACLog{
 		logger: logger,
+		errorLogger: errorLogger,
 	}
 }
 
@@ -53,4 +50,12 @@ func (ac *ACLog) ACLogMiddleware(next http.Handler) http.Handler {
 			zap.Duration("work time", time.Duration(time.Since(start).Microseconds())),
 		)
 	})
+}
+
+func (ac *ACLog) LogError(message string, err error, requestID string, url string) {
+	ac.errorLogger.Errorw(message, 
+		zap.Error(err),
+		zap.String("request-id", requestID),
+		zap.String("url", url),
+	)
 }
