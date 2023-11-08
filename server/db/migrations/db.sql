@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS public.RESTAURANT
 	RATING numeric(2,1) default 0.0 NOT NULL,
 	COMMENTS_COUNT integer default 0 NOT NULL,
 	CATEGORY varchar,
-	ICON varchar default 'deficon' NOT NULL,
+	ICON varchar default 'img/defaultIcon.png' NOT NULL,
 	CREATED_AT TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
 	UPDATED_AT TIMESTAMP WITH TIME ZONE default NOW(),
     PRIMARY KEY (ID),

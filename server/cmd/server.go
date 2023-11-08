@@ -89,7 +89,7 @@ func main() {
 	userRepo := userRep.NewUserRepo(db)
 	restaurantRepo := restaurantRep.NewRestaurantRepo(db)
 	productRepo := productRep.NewProductRepo(db)
-	cartRepo := cartRep.NewCartRepo(db)
+	cartRepo := cartRep.NewCartRepo(db) 
 	sessionRepo := sessionRep.NewSessionManager(redisConn)
 	orderRepo := orderRep.NewOrderRepo(db)
 
@@ -99,11 +99,11 @@ func main() {
 	sessionUC := sessionUsecase.NewSessionUsecase(sessionRepo, userRepo)
 	orderUC := orderUsecase.NewOrderUsecase(orderRepo)
 
-	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC)
-	cartsHandler := cartDev.NewCartHandler(cartUC)
-	sessionsHandler := sessionDev.NewSessionHandler(sessionUC, userUC)
+	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC, logger)
+	cartsHandler := cartDev.NewCartHandler(cartUC, logger)
+	sessionsHandler := sessionDev.NewSessionHandler(sessionUC, userUC, logger)
 	orderHandler := orderDev.NewOrderHandler(orderUC, sessionUC, logger)
-	authMW := middleware.NewSessionMiddleware(sessionUC)
+	authMW := middleware.NewSessionMiddleware(sessionUC, logger)
 
 	router.PathPrefix("/api/login").Handler(corsRouter)
 	router.PathPrefix("/api/logout").Handler(authRouter)

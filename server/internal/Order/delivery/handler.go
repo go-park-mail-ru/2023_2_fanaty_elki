@@ -9,10 +9,7 @@ import (
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 	mw "server/internal/middleware"
-
-	//	"server/internal/domain/entity"
 	"strconv"
-
 	"github.com/gorilla/mux"
 )
 
@@ -48,23 +45,9 @@ func (handler *OrderHandler) RegisterHandler(router *mux.Router) {
 func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
-	cookie, err := r.Cookie("session_id")
-	// if err == http.ErrNoCookie {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	return
-	// } else if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// }
+	cookie, _ := r.Cookie("session_id")
 
-	userId, err := handler.sessionUC.GetIdByCookie(cookie.Value)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
-	// if userId == 0 {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	return
-	// }
+	userId, _ := handler.sessionUC.GetIdByCookie(cookie.Value)
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -98,25 +81,7 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 }
 
 func (handler *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
-
-	// cookie, err := r.Cookie("session_id")
-	// // if err == http.ErrNoCookie {
-	// // 	w.WriteHeader(http.StatusUnauthorized)
-	// // 	return
-	// // } else if err != nil {
-	// // 	w.WriteHeader(http.StatusInternalServerError)
-	// // }
-
-	// userId, err := handler.sessionUC.GetIdByCookie(cookie.Value)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
-	// if userId == 0 {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	return
-	// }
+	//w.Header().Set("content-type", "application/json")
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {

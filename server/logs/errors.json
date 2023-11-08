@@ -1,1 +1,4 @@
 {"time":"2023-11-08T02:54:34.364+0300","message":"order: not found order","error":"item is not found","request-id":"d7a4889d-f55d-4778-bb24-a2b419409d30","url":"/api/orders/1"}
+{"time":"2023-11-08T03:41:29.555+0300","message":"problems with adding product to cart","error":"internal server error","request-id":"abdc6443-4a43-40e7-8207-9398b980be61","url":"/api/cart/add"}
+{"time":"2023-11-08T05:20:45.285+0300","message":"no cookie","error":"http: named cookie not present","request-id":"0fcbf6f3-cf70-4222-909a-6379e140e33b","url":"/api/me"}
+{"time":"2023-11-08T05:21:39.268+0300","message":"order: not found order","error":"item is not found","request-id":"fc1668fc-7dc3-4a70-9699-14ad6ae0bde1","url":"/api/orders/3"}
