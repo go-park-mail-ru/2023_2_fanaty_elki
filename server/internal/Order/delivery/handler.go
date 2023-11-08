@@ -2,17 +2,14 @@ package delivery
 
 import (
 	"encoding/json"
-	//	"fmt"
 	"io/ioutil"
 	"net/http"
 	orderUsecase "server/internal/Order/usecase"
 	sessionUsecase "server/internal/Session/usecase"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
-
-	//	"server/internal/domain/entity"
+	mw "server/internal/middleware"
 	"strconv"
-
 	"github.com/gorilla/mux"
 )
 
@@ -27,12 +24,14 @@ type RespError struct {
 type OrderHandler struct {
 	orderUC   orderUsecase.UsecaseI
 	sessionUC sessionUsecase.UsecaseI
+	logger *mw.ACLog
 }
 
-func NewOrderHandler(orderUC orderUsecase.UsecaseI, sessionUC sessionUsecase.UsecaseI) *OrderHandler {
+func NewOrderHandler(orderUC orderUsecase.UsecaseI, sessionUC sessionUsecase.UsecaseI, logger *mw.ACLog) *OrderHandler {
 	return &OrderHandler{
 		orderUC:   orderUC,
 		sessionUC: sessionUC,
+		logger: logger,
 	}
 }
 
@@ -46,26 +45,13 @@ func (handler *OrderHandler) RegisterHandler(router *mux.Router) {
 func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
-	cookie, err := r.Cookie("session_id")
-	// if err == http.ErrNoCookie {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	return
-	// } else if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// }
+	cookie, _ := r.Cookie("session_id")
 
-	userId, err := handler.sessionUC.GetIdByCookie(cookie.Value)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
-	// if userId == 0 {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	return
-	// }
+	userId, _ := handler.sessionUC.GetIdByCookie(cookie.Value)
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -73,12 +59,14 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 	reqOrder := dto.ReqCreateOrder{UserId: userId}
 	err = json.Unmarshal(jsonbody, &reqOrder)
 	if err != nil {
+		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	respOrder, err := handler.orderUC.CreateOrder(&reqOrder)
 	if err != nil {
+		handler.logger.LogError("problems with creating order", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -86,34 +74,19 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusCreated)
 	err = json.NewEncoder(w).Encode(&Result{Body: respOrder})
 	if err != nil {
+		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 }
 
 func (handler *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
-
-	// cookie, err := r.Cookie("session_id")
-	// // if err == http.ErrNoCookie {
-	// // 	w.WriteHeader(http.StatusUnauthorized)
-	// // 	return
-	// // } else if err != nil {
-	// // 	w.WriteHeader(http.StatusInternalServerError)
-	// // }
-
-	// userId, err := handler.sessionUC.GetIdByCookie(cookie.Value)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
-	// if userId == 0 {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	return
-	// }
+	//w.Header().Set("content-type", "application/json")
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		
+		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -121,12 +94,14 @@ func (handler *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request)
 	reqOrder := dto.ReqUpdateOrder{}
 	err = json.Unmarshal(jsonbody, &reqOrder)
 	if err != nil {
+		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	err = handler.orderUC.UpdateOrder(&reqOrder)
 	if err != nil {
+		handler.logger.LogError("problems while updating json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -136,13 +111,6 @@ func (handler *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
 	cookie, err := r.Cookie("session_id")
-	// if err == http.ErrNoCookie {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	return
-	// } else if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// }
-
 	userId, err := handler.sessionUC.GetIdByCookie(cookie.Value)
 	// if err != nil {
 	// 	w.WriteHeader(http.StatusInternalServerError)
@@ -156,12 +124,14 @@ func (handler *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
 	respOrders, err := handler.orderUC.GetOrders(userId)
 
 	if err != nil {
+		handler.logger.LogError("order: problems while getting orders json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	err = json.NewEncoder(w).Encode(&Result{Body: respOrders})
 	if err != nil {
+		handler.logger.LogError("order: problems while marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -179,6 +149,7 @@ func (handler *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 
 	orderId, err := strconv.ParseUint(strid, 10, 64)
 	if err != nil {
+		handler.logger.LogError("problems while parsing orders json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -209,6 +180,7 @@ func (handler *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 	respOrder, err := handler.orderUC.GetOrder(&reqOrder)
 	if err != nil {
 		if err == entity.ErrNotFound {
+			handler.logger.LogError("order: not found order", err, w.Header().Get("request-id"), r.URL.Path)
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
@@ -218,6 +190,7 @@ func (handler *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(&Result{Body: respOrder})
 	if err != nil {
+		handler.logger.LogError("order: problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

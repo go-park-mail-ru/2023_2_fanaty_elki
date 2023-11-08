@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	mw "server/internal/middleware"
 )
 
 
@@ -25,12 +26,14 @@ type RespError struct {
 type SessionHandler struct {
 	sessions sessionUsecase.UsecaseI
 	users    userUsecase.UsecaseI
+	logger *mw.ACLog
 }
 
-func NewSessionHandler(sessions sessionUsecase.UsecaseI, users userUsecase.UsecaseI) *SessionHandler {
+func NewSessionHandler(sessions sessionUsecase.UsecaseI, users userUsecase.UsecaseI, logger *mw.ACLog) *SessionHandler {
 	return &SessionHandler{
 		sessions: sessions,
 		users:    users,
+		logger: logger,
 	}
 }
 
@@ -69,11 +72,8 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	jsonbody, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
+		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrProblemsReadingData.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
 		return
 	}
 
@@ -81,11 +81,8 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(jsonbody, &reqUser)
 	
 	if err != nil {
+		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnmarshalingJson.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
 		return
 	}
 	
@@ -93,16 +90,12 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	
 	if err != nil {
 		if err == entity.ErrInternalServerError {
+			handler.logger.LogError("problems with creating user", err, w.Header().Get("request-id"), r.URL.Path)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		handler.logger.LogError("bad request", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&RespError{Err: err.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
 		return
 	}
 
@@ -113,6 +106,7 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(&Result{Body: body})
 	if err != nil {
+		handler.logger.LogError("problems marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -137,11 +131,8 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 	jsonbody, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
+		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrProblemsReadingData.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
 		return
 	}
 
@@ -149,11 +140,8 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(jsonbody, &reqUser)
 	
 	if err != nil {
+		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrProblemsReadingData.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
 		return
 	}
 
@@ -161,11 +149,12 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 	
 	if err != nil {
 		if err == entity.ErrInternalServerError {
+			handler.logger.LogError("problems with creating cookie", err, w.Header().Get("request-id"), r.URL.Path)
 			w.WriteHeader(http.StatusInternalServerError)
 		} else {
+			handler.logger.LogError("incorrect data", err, w.Header().Get("request-id"), r.URL.Path)
 			w.WriteHeader(http.StatusBadRequest)
 		}
-
 		return
 	}
 
@@ -174,8 +163,7 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Value:    cookieUC.SessionToken,
 		Expires:  time.Now().Add(cookieUC.MaxAge),
 		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-		Secure: true,
+		SameSite: http.SameSiteLaxMode,
 	}
 
 	http.SetCookie(w, cookie)
@@ -185,6 +173,7 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(&Result{Body: body})
 	if err != nil {
+		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
@@ -202,24 +191,13 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} error "unauthorized"
 // @Router   /api/logout [delete]
 func (handler *SessionHandler) Logout(w http.ResponseWriter, r *http.Request) {
-
-	// w.Header().Set("content-type", "application/json")
-	cookie, err := r.Cookie("session_id")
-	// if err == http.ErrNoCookie {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 	}
-	// 	return
-	// } else if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// }
-
-	err = handler.sessions.Logout(&entity.Cookie{
+	cookie, _ := r.Cookie("session_id")
+	err := handler.sessions.Logout(&entity.Cookie{
 		SessionToken: cookie.Value,
 	})
+
 	if err != nil {
+		handler.logger.LogError("problems with deleting cookie", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -242,38 +220,22 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("content-type", "application/json")
 
-	oldCookie, err := r.Cookie("session_id")
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 	}
-	// 	return
-	// }
-
+	oldCookie, _ := r.Cookie("session_id")
 	username, err := handler.sessions.Check(oldCookie.Value)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
-
-	// if username == nil {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err := json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 	}
-	// 	return
-	// }
+	if username == nil {
+		handler.logger.LogError("unauthorized", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusUnauthorized)
+		oldCookie.Expires = time.Now().AddDate(0, 0, -1)
+		http.SetCookie(w, oldCookie)
+		return
+	}
 
 	cookie := &http.Cookie{
 		Name:     "session_id",
 		Value:    oldCookie.Value,
 		Expires:  time.Now().Add(time.Duration(oldCookie.MaxAge) * time.Hour),
 		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-		Secure: true,
+		SameSite: http.SameSiteLaxMode,
 	}
 
 	http.SetCookie(w, cookie)
@@ -284,6 +246,7 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(&Result{Body: body})
 
 	if err != nil {
+		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
@@ -301,35 +264,17 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 func (handler *SessionHandler) Profile(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
-	cookie, err := r.Cookie("session_id")
-	// if err == http.ErrNoCookie {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 	}
-	// 	return
-	// } else if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// }
-
+	cookie, _ := r.Cookie("session_id")
 	user, err := handler.sessions.GetUserProfile(cookie.Value)
-	// if err == entity.ErrInternalServerError{
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
-
-	// if user == nil {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 	}
-	// 	return
-	// }
+	if err == entity.ErrInternalServerError{
+		handler.logger.LogError("problems with getting profile", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	err = json.NewEncoder(w).Encode(&Result{Body: user})
 	if err != nil {
+		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -338,46 +283,20 @@ func (handler *SessionHandler) Profile(w http.ResponseWriter, r *http.Request) {
 
 func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 
-	cookie, err := r.Cookie("session_id")
-	// if err == http.ErrNoCookie {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 	}
-	// 	return
-	// } else if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// }
-
-	id, err := handler.sessions.GetIdByCookie(cookie.Value)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
-
-	// if id == 0 {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err := json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 	}
-	// 	return
-	// }
+	cookie, _ := r.Cookie("session_id")
+	id, _ := handler.sessions.GetIdByCookie(cookie.Value)
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrProblemsReadingData.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
 		return
 	}
 
 	updatedUser := &dto.ReqUpdateUser{}
 	err = json.Unmarshal(jsonbody, &updatedUser)
 	if err != nil {
+		handler.logger.LogError("prbolems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -385,19 +304,16 @@ func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Requ
 	err = handler.users.UpdateUser(dto.ToEntityUpdateUser(updatedUser, id))
 	if err != nil {
 		if err == entity.ErrInternalServerError {
+			handler.logger.LogError("problems with updating user", err, w.Header().Get("request-id"), r.URL.Path)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		} else if err == entity.ErrNotFound {
+			handler.logger.LogError("user not found", err, w.Header().Get("request-id"), r.URL.Path)
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
+		handler.logger.LogError("incorrect data", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&RespError{Err: err.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	
 		return
 	}
 }

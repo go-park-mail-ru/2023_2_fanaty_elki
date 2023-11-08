@@ -6,7 +6,6 @@ import (
 	userRep "server/internal/User/repository"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
-	"fmt"
 )
 
 type UsecaseI interface {
@@ -47,6 +46,9 @@ func (us userUsecase) CreateUser(newUser *entity.User) (uint, error) {
 		return 0, err
 	}
 
+	if newUser.Icon == "" {
+		newUser.Icon = "img/defaultIcon.png"
+	}
 	user, err := us.userRepo.CreateUser(dto.ToRepoCreateUser(newUser))
 	
 	if err != nil {
@@ -54,7 +56,6 @@ func (us userUsecase) CreateUser(newUser *entity.User) (uint, error) {
 	}
 
 	_, err = us.cartRepo.CreateCart(user)
-	fmt.Println(err)
 	if err != nil {
 		return 0, entity.ErrInternalServerError
 	}

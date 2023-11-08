@@ -6,8 +6,8 @@ import (
 	"net/http"
 	cartUsecase "server/internal/Cart/usecase"
 	"server/internal/domain/dto"
-	"server/internal/domain/entity"
 	"github.com/gorilla/mux"
+	mw "server/internal/middleware"
 )
 
 type Result struct {
@@ -20,10 +20,14 @@ type RespError struct {
 
 type CartHandler struct {
 	cartUsecase cartUsecase.UsecaseI
+	logger *mw.ACLog
 }
 
-func NewCartHandler(cartUsecase cartUsecase.UsecaseI) *CartHandler {
-	return &CartHandler{cartUsecase: cartUsecase}
+func NewCartHandler(cartUsecase cartUsecase.UsecaseI, logger *mw.ACLog) *CartHandler {
+	return &CartHandler{
+		cartUsecase: cartUsecase,
+		logger: logger,
+	}
 }
 
 func (handler *CartHandler) RegisterHandler(router *mux.Router) {
@@ -37,19 +41,11 @@ func (handler *CartHandler) RegisterHandler(router *mux.Router) {
 func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
-	cookie, err := r.Cookie("session_id")
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		return
-	}
+	cookie, _ := r.Cookie("session_id")
 	cart, err := handler.cartUsecase.GetUserCart(cookie.Value)
 	if err != nil {
+		handler.logger.LogError("problems with getting cart", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&RespError{Err: "data base error"})
 		return
 	}
 
@@ -62,16 +58,17 @@ func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&RespError{Err: "error while marshalling JSON"})
+		handler.logger.LogError("problems while marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		return
 	}
 }
 
 func (handler *CartHandler) AddProductToCart(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
+	//w.Header().Set("content-type", "application/json")
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -80,18 +77,16 @@ func (handler *CartHandler) AddProductToCart(w http.ResponseWriter, r *http.Requ
 	err = json.Unmarshal(jsonbody, &reqProduct)
 
 	if err != nil {
+		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	cookie, err := r.Cookie("session_id")
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+	cookie, _ := r.Cookie("session_id")
 
 	err = handler.cartUsecase.AddProductToCart(cookie.Value, reqProduct.ProductID)
 	if err != nil {
+		handler.logger.LogError("problems with adding product to cart", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -99,10 +94,11 @@ func (handler *CartHandler) AddProductToCart(w http.ResponseWriter, r *http.Requ
 }
 
 func (handler *CartHandler) DeleteProductFromCart(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
+	//w.Header().Set("content-type", "application/json")
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -111,28 +107,27 @@ func (handler *CartHandler) DeleteProductFromCart(w http.ResponseWriter, r *http
 	err = json.Unmarshal(jsonbody, &reqProduct)
 
 	if err != nil {
+		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	cookie, err := r.Cookie("session_id")
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+	cookie, _ := r.Cookie("session_id")
 
 	err = handler.cartUsecase.DeleteProductFromCart(cookie.Value, reqProduct.ProductID)
 	if err != nil {
+		handler.logger.LogError("problems deleting product from cart", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 }
 
 func (handler *CartHandler) UpdateItemCountUp(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
+	//w.Header().Set("content-type", "application/json")
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -141,28 +136,27 @@ func (handler *CartHandler) UpdateItemCountUp(w http.ResponseWriter, r *http.Req
 	err = json.Unmarshal(jsonbody, &reqProduct)
 
 	if err != nil {
+		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	cookie, err := r.Cookie("session_id")
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+	cookie, _ := r.Cookie("session_id")
 
 	err = handler.cartUsecase.UpdateItemCountUp(cookie.Value, reqProduct.ProductID)
 	if err != nil {
+		handler.logger.LogError("problems updating item count up from cart", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 }
 
 func (handler *CartHandler) UpdateItemCountDown(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
+	//w.Header().Set("content-type", "application/json")
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -171,18 +165,16 @@ func (handler *CartHandler) UpdateItemCountDown(w http.ResponseWriter, r *http.R
 	err = json.Unmarshal(jsonbody, &reqProduct)
 
 	if err != nil {
+		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	cookie, err := r.Cookie("session_id")
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+	cookie, _ := r.Cookie("session_id")
 
 	err = handler.cartUsecase.UpdateItemCountDown(cookie.Value, reqProduct.ProductID)
 	if err != nil {
+		handler.logger.LogError("problems updating item count down from cart", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

@@ -95,6 +95,7 @@ func (repo *orderRepo) GetOrder(reqOrder *dto.ReqGetOneOrder) (*dto.RespGetOneOr
 	err := repo.DB.QueryRow(getOrder, reqOrder.OrderId, reqOrder.UserId).Scan(&order.Status, &order.Date, &order.UpdatedDate)
 	if err != nil {
 		if err == sql.ErrNoRows{
+			
 			return nil, entity.ErrNotFound
 		}
 		return nil, entity.ErrInternalServerError
