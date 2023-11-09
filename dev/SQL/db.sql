@@ -103,20 +103,50 @@ BEFORE UPDATE ON PRODUCT
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
 
-insert into product(name, price, cooking_time, portion, description)
-values('Кинг Фри станд','109.99', 5,'106 г','Горячий и свежий картофель Кинг Фри® - золотистые и хрустящие ломтики отлично дополнят любой обед');
+insert into product(name, price, cooking_time, portion, icon, description)
+values('Кинг Фри станд','109.99', 5,'106 г','img/king_stand.png', 'Горячий и свежий картофель Кинг Фри® - золотистые и хрустящие ломтики отлично дополнят любой обед');
 
-insert into product(name, price, cooking_time, portion, description)
-values('Кинг Фри большой','144.99', 5,'160 г','Горячий и свежий картофель Кинг Фри® - золотистые и хрустящие ломтики отлично дополнят любой обед');
+insert into product(name, price, cooking_time, portion, icon, description)
+values('Кинг Фри большой','144.99', 5,'160 г', 'img/king_big.png', 'Горячий и свежий картофель Кинг Фри® - золотистые и хрустящие ломтики отлично дополнят любой обед');
 
-insert into product(name, price, cooking_time, portion, description)
-values('Воппер','289.99', 15,'268 г','булочка для гамбургера с кунжутом(89 гр), котлета из говядины WHOPPER, майонез для салата, салат Айсберг, томаты, огурцы маринованные, лук репчатый, кетчуп томатный');
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Воппер','289.99', 15,'268 г', 'img/vopper.png', 'булочка для гамбургера с кунжутом(89 гр), котлета из говядины WHOPPER, майонез для салата, салат Айсберг, томаты, огурцы маринованные, лук репчатый, кетчуп томатный');
 
-insert into product(name, price, cooking_time, portion, description)
-values('Сибирский Кинг','349.99', 25,'262 г','Ешь в БК — спасай леса! Часть выручки мы направим на восстановление лесов Сибири, пострадавших от пожаров! 100%-я говядина, ароматный бекон, горчица и сливочный хрен на ржаной булочке. А ещё внутри сыр Чеддер, хрустящие маринованные огурчики, луковый конфитюр, ломтик томата и салат Айсберг.');
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Сибирский Кинг','349.99', 25,'262 г', 'img/sib.png','Ешь в БК — спасай леса! Часть выручки мы направим на восстановление лесов Сибири, пострадавших от пожаров! 100%-я говядина, ароматный бекон, горчица и сливочный хрен на ржаной булочке. А ещё внутри сыр Чеддер, хрустящие маринованные огурчики, луковый конфитюр, ломтик томата и салат Айсберг.');
 
-insert into product(name, price, cooking_time, portion, description)
-values('Сибирский Кинг с курицей','349.99', 25,'258 г','Ешь в БК — спасай леса! Часть выручки мы направим на восстановление лесов Сибири, пострадавших от пожаров! Сочная курочка и ароматный бекон под бодрящей горчицей и сливочным хреном на ржаной булочке. К ним добавили: луковый конфитюр, сыр Чеддер, маринованные огурчики, салат Айсберг и ломтик томата.');
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Сибирский Кинг с курицей','349.99', 25,'258 г', 'img/sib_chick.png','Ешь в БК — спасай леса! Часть выручки мы направим на восстановление лесов Сибири, пострадавших от пожаров! Сочная курочка и ароматный бекон под бодрящей горчицей и сливочным хреном на ржаной булочке. К ним добавили: луковый конфитюр, сыр Чеддер, маринованные огурчики, салат Айсберг и ломтик томата.');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Пирожок Абрикосовый','76.99', 5,'82 г', 'img/abr_pir.png','Пирожок с абрикосом – это настоящее лакомство для любителей фруктов. Ароматный, сочный и сладкий, он обязательно понравится всем, кто его попробует. Горячий пирожок с абрикосом уже ждет тебя в KFC. Состав: Масло растительное; Пирожок с начинкой "Абрикосовый"');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Кофе Капучино со вкусом груши с корицей большой','194.99', 15,'311 мл', 'img/cofe_pear.png','Вкус сезона! Кофейный напиток с ароматом эспрессо, нежной густой молочной пенкой и нотками груши с корицей. Состав: Кипяченая вода; Молоко питьевое; Кофе жаренный в зернах; Сироп со вкусом и ароматом груши и корицы "Груша-Корица"');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Пирожное Макарон Фисташка и Манго-Маракуйя','129.99', 5,'24 г', 'img/pir_mar.png','Нежные, чуть хрустящие миндальные печенья, соединенные кремовой начинкой и покрытые тонкой, хрупкой глазурью, никого не оставят равнодушными.');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Комбо на компанию','1099.99', 35,'1258 г', 'img/combo_company.png','3 Шефбургера ориг. / остр. + 2 Твистера ориг + Картофель Фри Малый 5 шт. + 5 Соусов на выбор');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Комбо c Шефбургер Де Люкс','299.99', 25,'558 г', 'img/combo_chef.png','Шефбургер Де Люкс ориг. / остр. + 9 Наггетсов + Соус на выбор');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Осенний салат с печёной тыквой и свёклой','410.99', 25,'210 г', 'img/autome_salad.png','Запеченная тыква, свекла отварная, сыр брынза, айсберг, рукола, грецкие орехи, горчичный соус, соус песто, крем бальзамик');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Салат из печёных баклажанов с соусом гамадари','490.99', 25,'200 г', 'img/salad_garry.png','Запечённые баклажаны, свежие помидоры, салат айсберг, рукола, свежий шпинат, кинза, грецкие орехи, соус гамадари');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Чизбургер','490.99', 15,'230 г', 'img/cheeseburger.png','Котлета из мраморной говядины, чеддер, кетчуп, горчица, огурцы маринованные, помидоры, пшеничная булочка');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Боул с индейкой','450.99', 25,'200 г', 'img/boul_ind.png','Индейка, овощная сальса (перец болгарский, огурец свежий, авокадо, манго, кинза, мята, соль, сок лайма, помидоры), смесь отварных круп, айсберг, романо, соус медово-горчичный (горчица зернистая, мед, масло оливковое, лимонный сок), помидоры черри, авокадо, лайм, шпинат, рукола, мята');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Боул с креветками','500.99', 25,'200 г', 'img/boul_crev.png','Креветки, овощная сальса (перец болгарский, огурец свежий, авокадо, манго, кинза, мята, соль, сок лайма, помидоры), смесь отварных круп, айсберг, романо, соус медово-горчичный (горчица зернистая, мед, масло оливковое, лимонный сок), помидоры черри, авокадо, лайм, шпинат, рукола, мята');
 
 CREATE TABLE IF NOT EXISTS public.MENU_TYPE
 (
@@ -131,6 +161,18 @@ insert into menu_type(name,restaurant_id)
 values('Популярное',1);
 insert into menu_type(name,restaurant_id)
 values('Новинки',1);
+
+insert into menu_type(name,restaurant_id)
+values('Новинки',4);
+insert into menu_type(name,restaurant_id)
+values('Ланчи и Комбо',4);
+
+insert into menu_type(name,restaurant_id)
+values('Осеннее предложение',5);
+insert into menu_type(name,restaurant_id)
+values('Завтраки',5);
+
+
 
 
 CREATE TABLE IF NOT EXISTS public.PRODUCT_MENU_TYPE
@@ -151,6 +193,29 @@ insert into product_menu_type(menu_type_id,product_id)
 values(2,4);
 insert into product_menu_type(menu_type_id,product_id)
 values(2,5);
+
+insert into product_menu_type(menu_type_id,product_id)
+values(3,6);
+insert into product_menu_type(menu_type_id,product_id)
+values(3,7);
+insert into product_menu_type(menu_type_id,product_id)
+values(3,8);
+insert into product_menu_type(menu_type_id,product_id)
+values(4,9);
+insert into product_menu_type(menu_type_id,product_id)
+values(4,10);
+
+insert into product_menu_type(menu_type_id,product_id)
+values(5,11);
+insert into product_menu_type(menu_type_id,product_id)
+values(5,12);
+insert into product_menu_type(menu_type_id,product_id)
+values(5,13);
+insert into product_menu_type(menu_type_id,product_id)
+values(6,14);
+insert into product_menu_type(menu_type_id,product_id)
+values(6,15);
+
 
 
 CREATE TABLE IF NOT EXISTS public.ORDERS

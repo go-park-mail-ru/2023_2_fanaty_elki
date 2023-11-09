@@ -11,7 +11,8 @@ import (
 
 type UsecaseI interface {
 	GetRestaurants() ([]*entity.Restaurant, error)
-	GetRestaurantById(id uint) (*dto.RestaurantWithProducts, error)
+	GetRestaurantById(id uint) (*entity.Restaurant, error)
+	GetRestaurantProducts(id uint) ([]*dto.MenuTypeWithProducts, error)
 }
 
 type restaurantUsecase struct {
@@ -32,25 +33,33 @@ func (res restaurantUsecase) GetRestaurants() ([]*entity.Restaurant, error) {
 		return nil, entity.ErrInternalServerError
 	}
 	for _, rest := range rests {
-		deltime := rand.Intn(60)
+		mindeltime := rand.Intn(60)
+		maxdeltime := mindeltime + rand.Intn(20)
 		delprice := rand.Float64() * 1000
 		delprice = math.Round(delprice*100) / 100
-		rest.DeliveryTime = deltime
+		rest.MinDeliveryTime = mindeltime
+		rest.MaxDeliveryTime = maxdeltime
 		rest.DeliveryPrice = float32(delprice)
 	}
 	return rests, nil
 }
 
-func (res restaurantUsecase) GetRestaurantById(id uint) (*dto.RestaurantWithProducts, error) {
+func (res restaurantUsecase) GetRestaurantById(id uint) (*entity.Restaurant, error) {
 	rest, err := res.restaurantRepo.GetRestaurantById(id)
 	if err != nil {
-		return nil, entity.ErrInternalServerError
+		return nil, err
 	}
-	deltime := rand.Intn(60)
+	mindeltime := rand.Intn(60)
+	maxdeltime := mindeltime + rand.Intn(20)
 	delprice := rand.Float64() * 1000
 	delprice = math.Round(delprice*100) / 100
-	rest.DeliveryTime = deltime
+	rest.MinDeliveryTime = mindeltime
+	rest.MaxDeliveryTime = maxdeltime
 	rest.DeliveryPrice = float32(delprice)
+	return rest, nil
+}
+
+func (res restaurantUsecase) GetRestaurantProducts(id uint) ([]*dto.MenuTypeWithProducts, error) {
 	menuTypes, err := res.restaurantRepo.GetMenuTypesByRestaurantId(id)
 	if err != nil {
 		return nil, entity.ErrInternalServerError
@@ -68,10 +77,5 @@ func (res restaurantUsecase) GetRestaurantById(id uint) (*dto.RestaurantWithProd
 		menuTypesWithProducts = append(menuTypesWithProducts, &menuTypeWithProducts)
 	}
 
-	restaurantWithProducts := dto.RestaurantWithProducts{
-		Restaurant:            rest,
-		MenuTypesWithProducts: menuTypesWithProducts,
-	}
-
-	return &restaurantWithProducts, nil
+	return menuTypesWithProducts, nil
 }

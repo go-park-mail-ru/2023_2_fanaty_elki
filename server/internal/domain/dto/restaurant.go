@@ -26,7 +26,3 @@ type MenuTypeWithProducts struct {
 	MenuType *entity.MenuType
 	Products []*entity.Product
 }
-type RestaurantWithProducts struct {
-	Restaurant            *entity.Restaurant
-	MenuTypesWithProducts []*MenuTypeWithProducts
-}

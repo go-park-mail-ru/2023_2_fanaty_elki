@@ -2,3 +2,8 @@
 {"time":"2023-11-08T03:41:29.555+0300","message":"problems with adding product to cart","error":"internal server error","request-id":"abdc6443-4a43-40e7-8207-9398b980be61","url":"/api/cart/add"}
 {"time":"2023-11-08T05:20:45.285+0300","message":"no cookie","error":"http: named cookie not present","request-id":"0fcbf6f3-cf70-4222-909a-6379e140e33b","url":"/api/me"}
 {"time":"2023-11-08T05:21:39.268+0300","message":"order: not found order","error":"item is not found","request-id":"fc1668fc-7dc3-4a70-9699-14ad6ae0bde1","url":"/api/orders/3"}
+{"time":"2023-11-09T22:52:02.792+0300","message":"problems restaurants id","error":"item is not found","request-id":"ebbb77a2-6db3-4111-8de6-6d6f881cd8a9","url":"/api/restaurants/9"}
+{"time":"2023-11-09T22:52:02.792+0300","message":"problems restaurants id","error":"item is not found","request-id":"ebbb77a2-6db3-4111-8de6-6d6f881cd8a9","url":"/api/restaurants/9"}
+{"time":"2023-11-09T23:00:47.169+0300","message":"problems with parameters","error":"id is not number","request-id":"21728a95-5d3a-49a6-94cc-99625421ad1b","url":"/api/restaurants/uu"}
+{"time":"2023-11-09T23:06:03.586+0300","message":"problems with parameters","error":"id is not number","request-id":"807b97b0-972b-4d5d-8dd0-c91ec90aab98","url":"/api/restaurants/ii/products"}
+{"time":"2023-11-09T23:17:26.107+0300","message":"problems restaurants id","error":"item is not found","request-id":"6c626c23-72b9-4e38-8eef-b8bcc8351804","url":"/api/restaurants/50"}
