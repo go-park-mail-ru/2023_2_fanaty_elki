@@ -2,11 +2,11 @@ package delivery
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
 	cartUsecase "server/internal/Cart/usecase"
 	"server/internal/domain/dto"
-	"github.com/gorilla/mux"
 	mw "server/internal/middleware"
 )
 
@@ -20,13 +20,13 @@ type RespError struct {
 
 type CartHandler struct {
 	cartUsecase cartUsecase.UsecaseI
-	logger *mw.ACLog
+	logger      *mw.ACLog
 }
 
 func NewCartHandler(cartUsecase cartUsecase.UsecaseI, logger *mw.ACLog) *CartHandler {
 	return &CartHandler{
 		cartUsecase: cartUsecase,
-		logger: logger,
+		logger:      logger,
 	}
 }
 
@@ -39,7 +39,7 @@ func (handler *CartHandler) RegisterHandler(router *mux.Router) {
 }
 
 func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 
 	cookie, _ := r.Cookie("session_id")
 	cart, err := handler.cartUsecase.GetUserCart(cookie.Value)
@@ -49,9 +49,7 @@ func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body := map[string]interface{}{
-		"Cart": cart,
-	}
+	body := cart
 
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(&Result{Body: body})
