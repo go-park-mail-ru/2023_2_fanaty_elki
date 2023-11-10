@@ -9,9 +9,8 @@ import (
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 	"time"
-
-	"github.com/gorilla/mux"
 	mw "server/internal/middleware"
+	"github.com/gorilla/mux"
 )
 
 
@@ -40,17 +39,13 @@ func NewSessionHandler(sessions sessionUsecase.UsecaseI, users userUsecase.Useca
 func (handler *SessionHandler) RegisterAuthHandler(router *mux.Router) {
 	router.HandleFunc("/api/logout", handler.Logout).Methods(http.MethodDelete)
 	router.HandleFunc("/api/auth", handler.Auth).Methods(http.MethodGet)
-	router.HandleFunc("/api/me", handler.Profile).Methods(http.MethodGet)
-	router.HandleFunc("/api/me", handler.UpdateProfile).Methods(http.MethodPatch)
+	router.HandleFunc("/api/users/me", handler.Profile).Methods(http.MethodGet)
+	router.HandleFunc("/api/users/me", handler.UpdateProfile).Methods(http.MethodPatch)
 }
 
 func (handler *SessionHandler) RegisterCorsHandler(router *mux.Router) {
 	router.HandleFunc("/api/login", handler.Login).Methods(http.MethodPost)
 	router.HandleFunc("/api/users", handler.SignUp).Methods(http.MethodPost)
-}
-
-func (handler *SessionHandler) RegisterHandler(router *mux.Router) {
-	
 }
 
 
@@ -67,8 +62,13 @@ func (handler *SessionHandler) RegisterHandler(router *mux.Router) {
 // @Router   /api/users [post]
 func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("content-type", "application/json")
-
+	w.Header().Set("Content-Type", "application/json")
+	if r.Header.Get("Content-Type") != "application/json"{
+		handler.logger.LogError("bad content-type", entity.ErrBadContentType,  w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	
 	jsonbody, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
@@ -87,17 +87,28 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	id, err := handler.users.CreateUser(dto.ToEntityCreateUser(&reqUser))
-	
-	if err != nil {
-		if err == entity.ErrInternalServerError {
+	switch err {
+		case entity.ErrInternalServerError:
 			handler.logger.LogError("problems with creating user", err, w.Header().Get("request-id"), r.URL.Path)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
+		case entity.ErrInvalidBirthday, entity.ErrInvalidPassword, entity.ErrInvalidEmail, entity.ErrInvalidUsername, entity.ErrInvalidPhoneNumber:
+			handler.logger.LogError("invalid field", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		case entity.ErrConflictEmail:
+			handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(entity.StatusConflicEmail)
+			return
+		case entity.ErrConflictUsername:
+			handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(entity.StatusConflicUsername)
+			return
+		case entity.ErrConflictPhoneNumber:
+			handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(entity.StatusConflicPhoneNumber)
+			return
 		}
-		handler.logger.LogError("bad request", err, w.Header().Get("request-id"), r.URL.Path)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
 
 	w.WriteHeader(http.StatusCreated)
 	body := map[string]interface{}{
@@ -126,7 +137,14 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Router   /api/login [post]
 func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("content-type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
+	
+	w.Header().Set("Content-Type", "application/json")
+	if r.Header.Get("Content-Type") != "application/json"{
+		handler.logger.LogError("bad content-type", entity.ErrBadContentType,  w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 
@@ -153,7 +171,7 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 		} else {
 			handler.logger.LogError("incorrect data", err, w.Header().Get("request-id"), r.URL.Path)
-			w.WriteHeader(http.StatusBadRequest)
+			w.WriteHeader(http.StatusUnauthorized)
 		}
 		return
 	}
@@ -167,16 +185,20 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, cookie)
-	body := map[string]interface{}{
-		"Username": reqUser.Username,
+
+	user, err := handler.sessions.GetUserProfile(cookie.Value)
+	if err == entity.ErrInternalServerError{
+		handler.logger.LogError("problems with getting profile", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
-	err = json.NewEncoder(w).Encode(&Result{Body: body})
+	err = json.NewEncoder(w).Encode(&Result{Body: user})
 	if err != nil {
 		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
-
 }
 
 // Logout godoc
@@ -218,11 +240,11 @@ func (handler *SessionHandler) Logout(w http.ResponseWriter, r *http.Request) {
 // @Router   /api/auth [get]
 func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("content-type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 
 	oldCookie, _ := r.Cookie("session_id")
-	username, err := handler.sessions.Check(oldCookie.Value)
-	if username == nil {
+	userId, err := handler.sessions.Check(oldCookie.Value)
+	if userId == 0 {
 		handler.logger.LogError("unauthorized", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusUnauthorized)
 		oldCookie.Expires = time.Now().AddDate(0, 0, -1)
@@ -233,21 +255,25 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	cookie := &http.Cookie{
 		Name:     "session_id",
 		Value:    oldCookie.Value,
-		Expires:  time.Now().Add(time.Duration(oldCookie.MaxAge) * time.Hour),
+		Expires:  time.Now().Add(150 * time.Hour),
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	}
 
 	http.SetCookie(w, cookie)
 
-	body := map[string]interface{}{
-		"Username": username,
+	user, err := handler.sessions.CreateCookieAuth(&entity.Cookie{
+		UserID: userId,
+		SessionToken: cookie.Value,
+	})
+	if err != nil {
+		handler.logger.LogError("problems with auth cookie", err, w.Header().Get("request-id"), r.URL.Path)
 	}
-	err = json.NewEncoder(w).Encode(&Result{Body: body})
-
+	err = json.NewEncoder(w).Encode(&Result{Body: user})
 	if err != nil {
 		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -262,8 +288,8 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} error "unauthorized"
 // @Router   /api/me [get]
 func (handler *SessionHandler) Profile(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
-
+	
+	w.Header().Set("Content-Type", "application/json")
 	cookie, _ := r.Cookie("session_id")
 	user, err := handler.sessions.GetUserProfile(cookie.Value)
 	if err == entity.ErrInternalServerError{
@@ -282,6 +308,13 @@ func (handler *SessionHandler) Profile(w http.ResponseWriter, r *http.Request) {
 
 
 func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json")
+	if r.Header.Get("Content-Type") != "application/json"{
+		handler.logger.LogError("bad content-type", entity.ErrBadContentType,  w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	cookie, _ := r.Cookie("session_id")
 	id, _ := handler.sessions.GetIdByCookie(cookie.Value)
@@ -302,18 +335,31 @@ func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Requ
 	}
 
 	err = handler.users.UpdateUser(dto.ToEntityUpdateUser(updatedUser, id))
-	if err != nil {
-		if err == entity.ErrInternalServerError {
+	switch err {
+		case entity.ErrInternalServerError:
 			handler.logger.LogError("problems with updating user", err, w.Header().Get("request-id"), r.URL.Path)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
-		} else if err == entity.ErrNotFound {
+		case entity.ErrInvalidEmail, entity.ErrInvalidUsername, entity.ErrInvalidPhoneNumber:
+			handler.logger.LogError("invalid field", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		case entity.ErrConflictEmail:
+			handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(entity.StatusConflicEmail)
+			return
+		case entity.ErrConflictUsername:
+			handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(entity.StatusConflicUsername)
+			return
+		case entity.ErrConflictPhoneNumber:
+			handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(entity.StatusConflicPhoneNumber)
+			return
+		case entity.ErrNotFound:
 			handler.logger.LogError("user not found", err, w.Header().Get("request-id"), r.URL.Path)
 			w.WriteHeader(http.StatusNotFound)
 			return
-		}
-		handler.logger.LogError("incorrect data", err, w.Header().Get("request-id"), r.URL.Path)
-		w.WriteHeader(http.StatusBadRequest)
-		return
 	}
 }
+

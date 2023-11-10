@@ -25,6 +25,7 @@ func NewUserUsecase(userRepI userRep.UserRepositoryI, cartRepI cartRep.CartRepos
 	}
 }
 
+
 func (us userUsecase) GetUserById(id uint) (*entity.User, error) {
 	user, err := us.userRepo.FindUserById(id)
 	if err != nil {
@@ -34,6 +35,7 @@ func (us userUsecase) GetUserById(id uint) (*entity.User, error) {
 }
 
 func (us userUsecase) CreateUser(newUser *entity.User) (uint, error) {
+	
 	err := us.checkUserFieldsCreate(newUser)
 	
 	if err != nil {
@@ -85,13 +87,9 @@ func (us userUsecase) UpdateUser(newUser *entity.User) error {
 			user.Username = newUser.Username
 		}
 
-		if newUser.Password != "" {
-			user.Password = newUser.Password
-		}
-
-		if newUser.Birthday != "" {
-			user.Birthday = newUser.Birthday
-		}
+		// if newUser.Password != "" {
+		// 	user.Password = newUser.Password
+		// }
 
 		if newUser.PhoneNumber != "" {
 			user.PhoneNumber = newUser.PhoneNumber
@@ -151,16 +149,17 @@ func (us userUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
 }
 
 func (us userUsecase) checkUserFieldsCreate(user *entity.User) error {
-	if len(user.Username) < 3 || len(user.Username) > 30 {
+	re := regexp.MustCompile(`^[a-zA-Z0-9_]{4,29}$`)
+	if !re.MatchString(user.Username) {
 		return entity.ErrInvalidUsername
 	}
 
-	if len(user.Password) < 8 || len(user.Password) > 30 {
+	if len(user.Password) == 0 {
 		return entity.ErrInvalidPassword
 	}
 
-	re := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`)
-	if user.Birthday != "" && !re.MatchString(user.Birthday) {
+	re = regexp.MustCompile(`\d{4}-\d{1,2}-\d{1,2}`)
+	if !re.MatchString(user.Birthday) {
 		return entity.ErrInvalidBirthday
 	}
 
@@ -169,7 +168,7 @@ func (us userUsecase) checkUserFieldsCreate(user *entity.User) error {
 		return entity.ErrInvalidEmail
 	}
 
-	re = regexp.MustCompile(`^[+]?[0-9]{3,25}$`)
+	re = regexp.MustCompile(`^\+7[0-9]{10}$`)
 	if user.PhoneNumber == "" || !re.MatchString(user.PhoneNumber) {
 		return entity.ErrInvalidPhoneNumber
 	}
@@ -177,27 +176,27 @@ func (us userUsecase) checkUserFieldsCreate(user *entity.User) error {
 }
 
 func (us userUsecase) checkUserFieldsUpdate(user *entity.User) error {
-	if (len(user.Username) < 3 || len(user.Username) > 30) && user.Username != "" {
+	re := regexp.MustCompile(`^[a-zA-Z0-9_]{4,29}$`)
+	if !re.MatchString(user.Username) {
 		return entity.ErrInvalidUsername
 	}
 
-	if (len(user.Password) < 3 || len(user.Password) > 30) && user.Password != "" {
-		return entity.ErrInvalidPassword
-	}
-
-	re := regexp.MustCompile(`\d{4}-\d{2}-\d{2}`)
-	if !re.MatchString(user.Birthday) && user.Birthday != "" {
-		return entity.ErrInvalidBirthday
-	}
+	// if (len(user.Password) < 3 || len(user.Password) > 30) && user.Password != "" {
+	// 	return entity.ErrInvalidPassword
+	// }
 
 	re = regexp.MustCompile(`@`)
 	if !re.MatchString(user.Email) && user.Email != "" {
 		return entity.ErrInvalidEmail
 	}
 
-	re = regexp.MustCompile(`^[+]?[0-9]{3,25}$`)
-	if !re.MatchString(user.PhoneNumber) && user.PhoneNumber != "" {
+	re = regexp.MustCompile(`^\+7[0-9]{10}$`)
+	if !re.MatchString(user.PhoneNumber) {
 		return entity.ErrInvalidPhoneNumber
+	}
+
+	if len(user.Icon) == 0{
+		return entity.ErrInvalidIcon
 	}
 	return nil
 }

@@ -24,6 +24,7 @@ func NewRestaurantUsecase(resRep restRep.RestaurantRepositoryI, productRep produ
 		restaurantRepo: resRep,
 		productRepo:    productRep,
 	}
+	
 }
 
 func (res restaurantUsecase) GetRestaurants() ([]*entity.Restaurant, error) {

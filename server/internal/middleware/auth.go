@@ -3,6 +3,7 @@ package middleware
 import (
 	"net/http"
 	sessionUsecase "server/internal/Session/usecase"
+	"time"
 )
 
 type SessionMiddleware struct {
@@ -38,6 +39,7 @@ func (mw *SessionMiddleware) AuthMiddleware(next http.Handler) http.Handler {
 		}
 		if userId == 0 {
 			mw.logger.LogError("user not found", err, w.Header().Get("request-id"), r.URL.Path)
+			cookie.Expires = time.Now().AddDate(0, 0, -1)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}

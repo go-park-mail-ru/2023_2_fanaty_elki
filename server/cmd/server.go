@@ -83,7 +83,6 @@ func main() {
 		return
 	}
 	defer errorLogger.Sync()
-
 	logger := middleware.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
 	
 	userRepo := userRep.NewUserRepo(db)
@@ -109,7 +108,7 @@ func main() {
 	router.PathPrefix("/api/logout").Handler(authRouter)
 	router.PathPrefix("/api/auth").Handler(authRouter)
 	router.PathPrefix("/api/cart").Handler(authRouter)
-	router.PathPrefix("/api/me").Handler(authRouter)
+	router.PathPrefix("/api/users/me").Handler(authRouter)
 	router.PathPrefix("/api/orders").Handler(authRouter)
 	router.PathPrefix("/api/users").Handler(corsRouter)
 
@@ -122,7 +121,6 @@ func main() {
 	
 	restaurantsHandler.RegisterHandler(router)
 	cartsHandler.RegisterHandler(authRouter)
-	sessionsHandler.RegisterHandler(router)
 	sessionsHandler.RegisterCorsHandler(corsRouter)
 	sessionsHandler.RegisterAuthHandler(authRouter)
 	orderHandler.RegisterHandler(authRouter)
