@@ -62,6 +62,8 @@ func (cu cartUsecase) GetUserCart(SessionToken string) ([]*dto.CartProduct, erro
 }
 
 func (cu cartUsecase) AddProductToCart(SessionToken string, productID uint) error {
+	//product, err := cu.productRepo.GetProductByID(productID)
+
 	cookie, err := cu.sessionRepo.Check(SessionToken)
 	if err != nil {
 		return err

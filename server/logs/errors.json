@@ -61,3 +61,13 @@
 {"time":"2023-11-09T23:41:55.920+0300","message":"no cookie","error":"http: named cookie not present","request-id":"27673297-b89c-4d62-968b-672725efcbc4","url":"/api/auth"}
 {"time":"2023-11-10T10:03:30.396+0300","message":"no cookie","error":"http: named cookie not present","request-id":"c020a731-3761-46b0-9d64-1932af38e26b","url":"/api/logout"}
 {"time":"2023-11-10T10:03:50.810+0300","message":"no cookie","error":"http: named cookie not present","request-id":"16cab3f0-ec12-465d-80c4-b9a7be78984b","url":"/api/auth"}
+{"time":"2023-11-09T22:52:02.792+0300","message":"problems restaurants id","error":"item is not found","request-id":"ebbb77a2-6db3-4111-8de6-6d6f881cd8a9","url":"/api/restaurants/9"}
+{"time":"2023-11-09T22:52:02.792+0300","message":"problems restaurants id","error":"item is not found","request-id":"ebbb77a2-6db3-4111-8de6-6d6f881cd8a9","url":"/api/restaurants/9"}
+{"time":"2023-11-09T23:00:47.169+0300","message":"problems with parameters","error":"id is not number","request-id":"21728a95-5d3a-49a6-94cc-99625421ad1b","url":"/api/restaurants/uu"}
+{"time":"2023-11-09T23:06:03.586+0300","message":"problems with parameters","error":"id is not number","request-id":"807b97b0-972b-4d5d-8dd0-c91ec90aab98","url":"/api/restaurants/ii/products"}
+{"time":"2023-11-09T23:17:26.107+0300","message":"problems restaurants id","error":"item is not found","request-id":"6c626c23-72b9-4e38-8eef-b8bcc8351804","url":"/api/restaurants/50"}
+{"time":"2023-11-09T23:46:39.693+0300","message":"problems restaurants id","error":"item is not found","request-id":"89174513-2c93-4dcf-8965-fdb041209c4a","url":"/api/restaurants/50"}
+{"time":"2023-11-10T00:24:32.166+0300","message":"no cookie","error":"http: named cookie not present","request-id":"71d6d7d3-1be7-43bb-937b-b5b9d6cb25ea","url":"/api/cart"}
+{"time":"2023-11-10T00:25:46.296+0300","message":"bad request","error":"username already exists","request-id":"b67c71f7-ee1c-4095-9523-77ad1020286c","url":"/api/users"}
+{"time":"2023-11-10T00:43:45.949+0300","message":"problems with adding product to cart","error":"internal server error","request-id":"1bb008e0-fde4-4241-89c2-5b7df4ef0938","url":"/api/cart/add"}
+{"time":"2023-11-10T00:44:59.335+0300","message":"problems with adding product to cart","error":"internal server error","request-id":"0ebc1732-f83f-49d8-978a-a66fb3770a59","url":"/api/cart/add"}

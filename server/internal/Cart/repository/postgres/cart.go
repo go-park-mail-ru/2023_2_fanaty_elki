@@ -2,9 +2,9 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
 	"server/internal/Cart/repository"
 	"server/internal/domain/entity"
-	"fmt"
 )
 
 type CartRepo struct {
@@ -44,7 +44,7 @@ func (repo *CartRepo) GetCartByUserID(userID uint) (*entity.Cart, error) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, entity.ErrInternalServerError
 		}
 		return nil, entity.ErrInternalServerError
 	}
@@ -54,7 +54,11 @@ func (repo *CartRepo) GetCartByUserID(userID uint) (*entity.Cart, error) {
 func (repo *CartRepo) GetCartProductsByCartID(cartID uint) ([]*entity.CartProduct, error) {
 	rows, err := repo.DB.Query("SELECT id, product_id, cart_id, item_count FROM cart_product WHERE cart_id = $1", cartID)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, err
+		}
 	}
 	defer rows.Close()
 
@@ -71,14 +75,6 @@ func (repo *CartRepo) GetCartProductsByCartID(cartID uint) ([]*entity.CartProduc
 			return nil, err
 		}
 		CartProducts = append(CartProducts, cartProduct)
-	}
-	err = rows.Err()
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		} else {
-			return nil, err
-		}
 	}
 	return CartProducts, nil
 }
