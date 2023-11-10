@@ -68,9 +68,7 @@ func (us userUsecase) CreateUser(newUser *entity.User) (uint, error) {
 
 func (us userUsecase) UpdateUser(newUser *entity.User) error {
 	err := us.checkUserFieldsUpdate(newUser)
-
 	if err != nil {
-
 		return err
 	}
 
@@ -125,6 +123,7 @@ func (us userUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
 	}
 
 	if checkUser.Email != "" {
+
 		user, err := us.userRepo.FindUserByEmail(checkUser.Email)
 		if err != nil {
 
@@ -178,7 +177,7 @@ func (us userUsecase) checkUserFieldsCreate(user *entity.User) error {
 
 func (us userUsecase) checkUserFieldsUpdate(user *entity.User) error {
 	re := regexp.MustCompile(`^[a-zA-Z0-9_]{4,29}$`)
-	if !re.MatchString(user.Username) {
+	if len(user.Username) != 0 && !re.MatchString(user.Username) {
 		return entity.ErrInvalidUsername
 	}
 
@@ -192,12 +191,8 @@ func (us userUsecase) checkUserFieldsUpdate(user *entity.User) error {
 	}
 
 	re = regexp.MustCompile(`^\+7[0-9]{10}$`)
-	if !re.MatchString(user.PhoneNumber) {
+	if !re.MatchString(user.PhoneNumber) && len(user.PhoneNumber) != 0{
 		return entity.ErrInvalidPhoneNumber
-	}
-
-	if len(user.Icon) == 0{
-		return entity.ErrInvalidIcon
 	}
 	return nil
 }
