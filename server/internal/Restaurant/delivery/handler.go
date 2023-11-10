@@ -2,9 +2,11 @@ package delivery
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"net/http"
 	restaurantUsecase "server/internal/Restaurant/usecase"
+	"server/internal/domain/entity"
+	mw "server/internal/middleware"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -20,15 +22,20 @@ type RespError struct {
 
 type RestaurantHandler struct {
 	restaurants restaurantUsecase.UsecaseI
+	logger      *mw.ACLog
 }
 
-func NewRestaurantHandler(restaurants restaurantUsecase.UsecaseI) *RestaurantHandler {
-	return &RestaurantHandler{restaurants: restaurants}
+func NewRestaurantHandler(restaurants restaurantUsecase.UsecaseI, logger *mw.ACLog) *RestaurantHandler {
+	return &RestaurantHandler{
+		restaurants: restaurants,
+		logger:      logger,
+	}
 }
 
 func (handler *RestaurantHandler) RegisterHandler(router *mux.Router) {
 	router.HandleFunc("/api/restaurants", handler.GetRestaurantList).Methods(http.MethodGet)
 	router.HandleFunc("/api/restaurants/{id}", handler.GetRestaurantById).Methods(http.MethodGet)
+	router.HandleFunc("/api/restaurants/{id}/products", handler.GetRestaurantProducts).Methods(http.MethodGet)
 }
 
 // GetRestaurantsList godoc
@@ -42,26 +49,24 @@ func (handler *RestaurantHandler) RegisterHandler(router *mux.Router) {
 // @Router   /restaurants [get]
 func (handler *RestaurantHandler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("content-type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 
 	rests, err := handler.restaurants.GetRestaurants()
 
 	if err != nil {
+		handler.logger.LogError("problems with getting restauratns", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&RespError{Err: "data base error"})
 		return
 	}
 
-	body := map[string]interface{}{
-		"restaurants": rests,
-	}
+	body := rests
 
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(&Result{Body: body})
 
 	if err != nil {
+		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&RespError{Err: "error while marshalling JSON"})
 		return
 	}
 }
@@ -76,17 +81,20 @@ func (handler *RestaurantHandler) GetRestaurantList(w http.ResponseWriter, r *ht
 // @Failure 500 {object} error "internal server error"
 // @Router   /restaurants/{id} [get]
 func (handler *RestaurantHandler) GetRestaurantById(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
 	strid, ok := vars["id"]
 	if !ok {
-		fmt.Println("id is missing in parameters")
+		handler.logger.LogError("problems with parameters", errors.New("id is missing in parameters"), w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	id64, err := strconv.ParseUint(strid, 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		handler.logger.LogError("problems with parameters", errors.New("id is not number"), w.Header().Get("request-id"), r.URL.Path)
 		err = json.NewEncoder(w).Encode(&RespError{Err: "id is not a number"})
 		return
 	}
@@ -96,23 +104,65 @@ func (handler *RestaurantHandler) GetRestaurantById(w http.ResponseWriter, r *ht
 	rest, err := handler.restaurants.GetRestaurantById(id)
 
 	if err != nil {
-		fmt.Println(err)
+		if err == entity.ErrNotFound {
+			handler.logger.LogError("problems restaurants id", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		handler.logger.LogError("problems restaurants id", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&RespError{Err: "data base error"})
 		return
 	}
 
-	body := map[string]interface{}{
-		"RestaurantWithProducts": rest,
-	}
+	body := rest
 
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(&Result{Body: body})
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&RespError{Err: "error while marshalling JSON"})
+		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		return
 	}
 }
 
+func (handler *RestaurantHandler) GetRestaurantProducts(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	vars := mux.Vars(r)
+	strid, ok := vars["id"]
+	if !ok {
+		handler.logger.LogError("problems with parameters", errors.New("id is missing in parameters"), w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	id64, err := strconv.ParseUint(strid, 10, 64)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		handler.logger.LogError("problems with parameters", errors.New("id is not number"), w.Header().Get("request-id"), r.URL.Path)
+		err = json.NewEncoder(w).Encode(&RespError{Err: "id is not a number"})
+		return
+	}
+
+	id := uint(id64)
+
+	menu, err := handler.restaurants.GetRestaurantProducts(id)
+
+	if err != nil {
+		handler.logger.LogError("problems restaurants id", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	body := menu
+
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(&Result{Body: body})
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
+		return
+	}
+}

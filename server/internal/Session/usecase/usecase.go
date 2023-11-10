@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	//"fmt"
+	"fmt"
 	"math/rand"
 	sessionRep "server/internal/Session/repository"
 	userRep "server/internal/User/repository"
@@ -17,10 +19,11 @@ var (
 
 type UsecaseI interface {
 	Login(user *entity.User) (*entity.Cookie, error)
-	Check(SessionToken string) (*string, error)
+	Check(SessionToken string) (uint, error)
 	Logout(cookie *entity.Cookie) error
 	GetUserProfile(sessionToken string) (*dto.ReqGetUserProfile, error)
 	GetIdByCookie(SessionToken string) (uint, error)
+	CreateCookieAuth(cookie *entity.Cookie) (*dto.ReqGetUserProfile, error)
 }
 
 type sessionUsecase struct {
@@ -66,7 +69,7 @@ func (ss sessionUsecase) Login(user *entity.User) (*entity.Cookie, error) {
 	}
 
 	err = ss.sessionRepo.Create(cookie)
-
+	fmt.Println(err)
 	if err != nil {
 		return nil, err
 	}
@@ -75,22 +78,24 @@ func (ss sessionUsecase) Login(user *entity.User) (*entity.Cookie, error) {
 
 }
 
-func (ss sessionUsecase) Check(SessionToken string) (*string, error) {
+func (ss sessionUsecase) Check(SessionToken string) (uint, error) {
 
 	cookie, err := ss.sessionRepo.Check(SessionToken)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-
+	if cookie == nil {
+		return 0, nil
+	}
 	user, err := ss.userRepo.FindUserById(cookie.UserID)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	if user == nil {
-		return nil, nil
+		return 0, nil
 	}
-	return &user.Username, nil
+	return user.ID, nil
 }
 
 func (ss sessionUsecase) Logout(cookie *entity.Cookie) error {
@@ -114,10 +119,19 @@ func (ss sessionUsecase) GetUserProfile(sessionToken string) (*dto.ReqGetUserPro
 func (ss sessionUsecase) GetIdByCookie(SessionToken string) (uint, error) {
 	
 	cookie, err := ss.sessionRepo.Check(SessionToken)
-	if err != nil {
+	if err != nil || cookie == nil{
 		return 0, err
 	}
 
 	return cookie.UserID, nil
 
 }
+
+func (ss sessionUsecase) CreateCookieAuth(cookie *entity.Cookie) (*dto.ReqGetUserProfile, error) {
+	err := ss.sessionRepo.Expire(cookie)
+	if err != nil {
+		return nil, err
+	}
+	return ss.GetUserProfile(cookie.SessionToken)
+}
+

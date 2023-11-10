@@ -2,11 +2,13 @@ package delivery
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	cartUsecase "server/internal/Cart/usecase"
-	"server/internal/domain/dto"
 	"server/internal/domain/entity"
+	mw "server/internal/middleware"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -21,178 +23,112 @@ type RespError struct {
 
 type CartHandler struct {
 	cartUsecase cartUsecase.UsecaseI
+	logger      *mw.ACLog
 }
 
-func NewCartHandler(cartUsecase cartUsecase.UsecaseI) *CartHandler {
-	return &CartHandler{cartUsecase: cartUsecase}
+func NewCartHandler(cartUsecase cartUsecase.UsecaseI, logger *mw.ACLog) *CartHandler {
+	return &CartHandler{
+		cartUsecase: cartUsecase,
+		logger:      logger,
+	}
 }
 
 func (handler *CartHandler) RegisterHandler(router *mux.Router) {
 	router.HandleFunc("/api/cart", handler.GetCart).Methods(http.MethodGet)
-	router.HandleFunc("/api/cart/add", handler.AddProductToCart).Methods(http.MethodPost)
-	router.HandleFunc("/api/cart/delete", handler.DeleteProductFromCart).Methods(http.MethodPost)
-	router.HandleFunc("/api/cart/update/up", handler.UpdateItemCountUp).Methods(http.MethodPatch)
-	router.HandleFunc("/api/cart/update/down", handler.UpdateItemCountDown).Methods(http.MethodPatch)
+	router.HandleFunc("/api/cart", handler.AddProductToCart).Methods(http.MethodPost)
+	router.HandleFunc("/api/cart/{id}", handler.DeleteProductFromCart).Methods(http.MethodDelete)
 	router.HandleFunc("/api/cart/clear", handler.CleanCart).Methods(http.MethodPost)
 }
 
 func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 
-	cookie, err := r.Cookie("session_id")
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		return
-	}
+	cookie, _ := r.Cookie("session_id")
 	cart, err := handler.cartUsecase.GetUserCart(cookie.Value)
 	if err != nil {
+		handler.logger.LogError("problems with getting cart", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&RespError{Err: "data base error"})
 		return
 	}
 
-	body := map[string]interface{}{
-		"Cart": cart,
-	}
+	body := cart
 
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(&Result{Body: body})
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&RespError{Err: "error while marshalling JSON"})
+		handler.logger.LogError("problems while marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		return
 	}
 }
 
 func (handler *CartHandler) AddProductToCart(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
-
 	jsonbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	var id uint
+	err = json.Unmarshal(jsonbody, &id)
+	if err != nil {
+		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	reqProduct := dto.ReqProductID{}
-	err = json.Unmarshal(jsonbody, &reqProduct)
+	cookie, _ := r.Cookie("session_id")
 
+	err = handler.cartUsecase.AddProductToCart(cookie.Value, id)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	cookie, err := r.Cookie("session_id")
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	err = handler.cartUsecase.AddProductToCart(cookie.Value, reqProduct.ProductID)
-	if err != nil {
+		if err == entity.ErrNotFound {
+			handler.logger.LogError("problems no product", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		handler.logger.LogError("problems with adding product to cart", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
+	w.WriteHeader(http.StatusCreated)
 }
 
 func (handler *CartHandler) DeleteProductFromCart(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
-
-	jsonbody, err := ioutil.ReadAll(r.Body)
-	if err != nil {
+	vars := mux.Vars(r)
+	strid, ok := vars["id"]
+	if !ok {
+		handler.logger.LogError("problems with parameters", errors.New("id is missing in parameters"), w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	reqProduct := dto.ReqProductID{}
-	err = json.Unmarshal(jsonbody, &reqProduct)
-
+	id64, err := strconv.ParseUint(strid, 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		handler.logger.LogError("problems with parameters", errors.New("id is not number"), w.Header().Get("request-id"), r.URL.Path)
+		err = json.NewEncoder(w).Encode(&RespError{Err: "id is not a number"})
 		return
 	}
 
-	cookie, err := r.Cookie("session_id")
+	id := uint(id64)
+
+	cookie, _ := r.Cookie("session_id")
+
+	err = handler.cartUsecase.DeleteProductFromCart(cookie.Value, id)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	err = handler.cartUsecase.DeleteProductFromCart(cookie.Value, reqProduct.ProductID)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
-func (handler *CartHandler) UpdateItemCountUp(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
-
-	jsonbody, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	reqProduct := dto.ReqProductID{}
-	err = json.Unmarshal(jsonbody, &reqProduct)
-
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	cookie, err := r.Cookie("session_id")
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	err = handler.cartUsecase.UpdateItemCountUp(cookie.Value, reqProduct.ProductID)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-}
-
-func (handler *CartHandler) UpdateItemCountDown(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
-
-	jsonbody, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	reqProduct := dto.ReqProductID{}
-	err = json.Unmarshal(jsonbody, &reqProduct)
-
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	cookie, err := r.Cookie("session_id")
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	err = handler.cartUsecase.UpdateItemCountDown(cookie.Value, reqProduct.ProductID)
-	if err != nil {
+		if err == entity.ErrNotFound {
+			handler.logger.LogError("problems no product or no product in cart", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		handler.logger.LogError("problems deleting product from cart", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 }
 
 func (handler *CartHandler) CleanCart(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
-
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)

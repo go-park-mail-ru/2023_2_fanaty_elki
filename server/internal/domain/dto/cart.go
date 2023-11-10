@@ -8,5 +8,5 @@ type CartProduct struct {
 }
 
 type ReqProductID struct {
-	ProductID uint `json:"ProductID"`
+	Id uint
 }

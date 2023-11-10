@@ -8,6 +8,7 @@ import (
 type ReqCreateOrder struct {
 	Products []uint `json:"Products"`
 	UserId uint `json:"UserID"`
+	Address *ReqCreateOrderAddress `json:"Address"`
 }
 
 type ReqUpdateOrder struct {
@@ -21,6 +22,7 @@ type DBReqCreateOrder struct {
 	UserId uint
 	Status string
 	Date time.Time
+	Address *DBCreateOrderAddress
 }
 
 type RespCreateOrder struct {
@@ -34,7 +36,8 @@ type RespGetOrder struct {
 	Id uint `json:"Id"`
 	Status string `json:"Status"`
 	Date time.Time `json:"Date"`
-	UpdatedDate time.Time `json:"UpdatedDate"`
+	Address *RespOrderAddress
+	//UpdatedDate time.Time `json:"UpdatedDate"`
 }
 
 // Для конкретного заказа
@@ -54,6 +57,7 @@ func ToEntityCreateOrder(order *ReqCreateOrder) *entity.Order{
 		Status: "Wait",
 		UserId: order.UserId,
 		Date: time.Now(),
+		Address: ToEntityCreateOrderAddress(order.Address),
 	}
 }
 
@@ -63,6 +67,7 @@ func ToDBReqCreateOrder(order *entity.Order, products *map[uint]int) *DBReqCreat
 		Products: products,
 		Status: order.Status,
 		Date: order.Date,
+		Address: ToDBCreateOrderAddress(order.Address),
 	}
 } 
 

@@ -8,6 +8,7 @@ import (
 
 	"flag"
 	"log"
+	"server/config"
 	"server/db"
 	cartDev "server/internal/Cart/delivery"
 	cartRep "server/internal/Cart/repository/postgres"
@@ -15,7 +16,7 @@ import (
 	orderDev "server/internal/Order/delivery"
 	orderRep "server/internal/Order/repository/postgres"
 	orderUsecase "server/internal/Order/usecase"
-	prodDev "server/internal/Product/delivery"
+	productDev "server/internal/Product/delivery"
 	productRep "server/internal/Product/repository/postgres"
 	productUsecase "server/internal/Product/usecase"
 	restaurantDev "server/internal/Restaurant/delivery"
@@ -75,6 +76,21 @@ func main() {
 	}
 	defer db.Close()
 
+	baseLogger, err := config.Cfg.Build()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer baseLogger.Sync()
+
+	errorLogger, err := config.ErrorCfg.Build()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer errorLogger.Sync()
+	logger := middleware.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
+
 	userRepo := userRep.NewUserRepo(db)
 	restaurantRepo := restaurantRep.NewRestaurantRepo(db)
 	productRepo := productRep.NewProductRepo(db)
@@ -89,29 +105,30 @@ func main() {
 	orderUC := orderUsecase.NewOrderUsecase(orderRepo)
 	productUC := productUsecase.NewProductUsecase(productRepo)
 
-	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC)
-	cartsHandler := cartDev.NewCartHandler(cartUC)
-	sessionsHandler := sessionDev.NewSessionHandler(sessionUC, userUC)
-	orderHandler := orderDev.NewOrderHandler(orderUC, sessionUC)
-	productHandler := prodDev.NewProductHandler(productUC)
-	authMW := middleware.NewSessionMiddleware(sessionUC)
+	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC, logger)
+	cartsHandler := cartDev.NewCartHandler(cartUC, logger)
+	sessionsHandler := sessionDev.NewSessionHandler(sessionUC, userUC, logger)
+	orderHandler := orderDev.NewOrderHandler(orderUC, sessionUC, logger)
+	productHandler := productDev.NewProductHandler(productUC, logger)
+	authMW := middleware.NewSessionMiddleware(sessionUC, logger)
 
 	router.PathPrefix("/api/login").Handler(corsRouter)
 	router.PathPrefix("/api/logout").Handler(authRouter)
 	router.PathPrefix("/api/auth").Handler(authRouter)
 	router.PathPrefix("/api/cart").Handler(authRouter)
-	router.PathPrefix("/api/me").Handler(authRouter)
+	router.PathPrefix("/api/users/me").Handler(authRouter)
 	router.PathPrefix("/api/orders").Handler(authRouter)
 	router.PathPrefix("/api/users").Handler(corsRouter)
 
+	router.Use(logger.ACLogMiddleware)
 	router.Use(middleware.PanicMiddleware)
 	router.Use(middleware.CorsMiddleware)
 	corsRouter.Use(middleware.CorsCredentionalsMiddleware)
 	authRouter.Use(authMW.AuthMiddleware)
 
 	restaurantsHandler.RegisterHandler(router)
+	productHandler.RegisterHandler(router)
 	cartsHandler.RegisterHandler(authRouter)
-	sessionsHandler.RegisterHandler(router)
 	sessionsHandler.RegisterCorsHandler(corsRouter)
 	sessionsHandler.RegisterAuthHandler(authRouter)
 	orderHandler.RegisterHandler(authRouter)

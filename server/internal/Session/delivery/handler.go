@@ -9,7 +9,7 @@ import (
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 	"time"
-
+	mw "server/internal/middleware"
 	"github.com/gorilla/mux"
 )
 
@@ -24,20 +24,22 @@ type RespError struct {
 type SessionHandler struct {
 	sessions sessionUsecase.UsecaseI
 	users    userUsecase.UsecaseI
+	logger *mw.ACLog
 }
 
-func NewSessionHandler(sessions sessionUsecase.UsecaseI, users userUsecase.UsecaseI) *SessionHandler {
+func NewSessionHandler(sessions sessionUsecase.UsecaseI, users userUsecase.UsecaseI, logger *mw.ACLog) *SessionHandler {
 	return &SessionHandler{
 		sessions: sessions,
 		users:    users,
+		logger: logger,
 	}
 }
 
 func (handler *SessionHandler) RegisterAuthHandler(router *mux.Router) {
 	router.HandleFunc("/api/logout", handler.Logout).Methods(http.MethodDelete)
 	router.HandleFunc("/api/auth", handler.Auth).Methods(http.MethodGet)
-	router.HandleFunc("/api/me", handler.Profile).Methods(http.MethodGet)
-	router.HandleFunc("/api/me", handler.UpdateProfile).Methods(http.MethodPatch)
+	router.HandleFunc("/api/users/me", handler.Profile).Methods(http.MethodGet)
+	router.HandleFunc("/api/users/me", handler.UpdateProfile).Methods(http.MethodPatch)
 }
 
 func (handler *SessionHandler) RegisterCorsHandler(router *mux.Router) {
@@ -45,9 +47,6 @@ func (handler *SessionHandler) RegisterCorsHandler(router *mux.Router) {
 	router.HandleFunc("/api/users", handler.SignUp).Methods(http.MethodPost)
 }
 
-func (handler *SessionHandler) RegisterHandler(router *mux.Router) {
-
-}
 
 // SignUp godoc
 // @Summary      Signing up a user
@@ -62,16 +61,18 @@ func (handler *SessionHandler) RegisterHandler(router *mux.Router) {
 // @Router   /api/users [post]
 func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("content-type", "application/json")
-
+	w.Header().Set("Content-Type", "application/json")
+	if r.Header.Get("Content-Type") != "application/json"{
+		handler.logger.LogError("bad content-type", entity.ErrBadContentType,  w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	
 	jsonbody, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
+		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrProblemsReadingData.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
 		return
 	}
 
@@ -79,30 +80,34 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(jsonbody, &reqUser)
 
 	if err != nil {
+		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnmarshalingJson.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
 		return
 	}
 
 	id, err := handler.users.CreateUser(dto.ToEntityCreateUser(&reqUser))
-
-	if err != nil {
-		if err == entity.ErrInternalServerError {
+	switch err {
+		case entity.ErrInternalServerError:
+			handler.logger.LogError("problems with creating user", err, w.Header().Get("request-id"), r.URL.Path)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&RespError{Err: err.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
+		case entity.ErrInvalidBirthday, entity.ErrInvalidPassword, entity.ErrInvalidEmail, entity.ErrInvalidUsername, entity.ErrInvalidPhoneNumber:
+			handler.logger.LogError("invalid field", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		case entity.ErrConflictEmail:
+			handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(entity.StatusConflicEmail)
+			return
+		case entity.ErrConflictUsername:
+			handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(entity.StatusConflicUsername)
+			return
+		case entity.ErrConflictPhoneNumber:
+			handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(entity.StatusConflicPhoneNumber)
 			return
 		}
-
-		return
-	}
 
 	w.WriteHeader(http.StatusCreated)
 	body := map[string]interface{}{
@@ -111,6 +116,7 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(&Result{Body: body})
 	if err != nil {
+		handler.logger.LogError("problems marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -130,16 +136,20 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 // @Router   /api/login [post]
 func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("content-type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
+	
+	w.Header().Set("Content-Type", "application/json")
+	if r.Header.Get("Content-Type") != "application/json"{
+		handler.logger.LogError("bad content-type", entity.ErrBadContentType,  w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
+		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrProblemsReadingData.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
 		return
 	}
 
@@ -147,11 +157,8 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(jsonbody, &reqUser)
 
 	if err != nil {
+		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrProblemsReadingData.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
 		return
 	}
 
@@ -159,11 +166,12 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		if err == entity.ErrInternalServerError {
+			handler.logger.LogError("problems with creating cookie", err, w.Header().Get("request-id"), r.URL.Path)
 			w.WriteHeader(http.StatusInternalServerError)
 		} else {
-			w.WriteHeader(http.StatusBadRequest)
+			handler.logger.LogError("incorrect data", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(http.StatusUnauthorized)
 		}
-
 		return
 	}
 
@@ -172,20 +180,24 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Value:    cookieUC.SessionToken,
 		Expires:  time.Now().Add(cookieUC.MaxAge),
 		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
 	}
 
 	http.SetCookie(w, cookie)
-	body := map[string]interface{}{
-		"Username": reqUser.Username,
-	}
 
-	err = json.NewEncoder(w).Encode(&Result{Body: body})
-	if err != nil {
+	user, err := handler.sessions.GetUserProfile(cookie.Value)
+	if err == entity.ErrInternalServerError{
+		handler.logger.LogError("problems with getting profile", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
+	err = json.NewEncoder(w).Encode(&Result{Body: user})
+	if err != nil {
+		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 // Logout godoc
@@ -200,24 +212,13 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} error "unauthorized"
 // @Router   /api/logout [delete]
 func (handler *SessionHandler) Logout(w http.ResponseWriter, r *http.Request) {
-
-	// w.Header().Set("content-type", "application/json")
-	cookie, err := r.Cookie("session_id")
-	// if err == http.ErrNoCookie {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 	}
-	// 	return
-	// } else if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// }
-
-	err = handler.sessions.Logout(&entity.Cookie{
+	cookie, _ := r.Cookie("session_id")
+	err := handler.sessions.Logout(&entity.Cookie{
 		SessionToken: cookie.Value,
 	})
+
 	if err != nil {
+		handler.logger.LogError("problems with deleting cookie", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -238,51 +239,40 @@ func (handler *SessionHandler) Logout(w http.ResponseWriter, r *http.Request) {
 // @Router   /api/auth [get]
 func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("content-type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 
-	oldCookie, err := r.Cookie("session_id")
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 	}
-	// 	return
-	// }
-
-	username, err := handler.sessions.Check(oldCookie.Value)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
-
-	// if username == nil {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err := json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 	}
-	// 	return
-	// }
+	oldCookie, _ := r.Cookie("session_id")
+	userId, err := handler.sessions.Check(oldCookie.Value)
+	if userId == 0 {
+		handler.logger.LogError("unauthorized", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusUnauthorized)
+		oldCookie.Expires = time.Now().AddDate(0, 0, -1)
+		http.SetCookie(w, oldCookie)
+		return
+	}
 
 	cookie := &http.Cookie{
 		Name:     "session_id",
 		Value:    oldCookie.Value,
 		Expires:  time.Now().Add(150 * time.Hour),
 		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
-		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
 	}
 
 	http.SetCookie(w, cookie)
 
-	body := map[string]interface{}{
-		"Username": username,
-	}
-	err = json.NewEncoder(w).Encode(&Result{Body: body})
-
+	user, err := handler.sessions.CreateCookieAuth(&entity.Cookie{
+		UserID: userId,
+		SessionToken: cookie.Value,
+	})
 	if err != nil {
+		handler.logger.LogError("problems with auth cookie", err, w.Header().Get("request-id"), r.URL.Path)
+	}
+	err = json.NewEncoder(w).Encode(&Result{Body: user})
+	if err != nil {
+		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -297,37 +287,19 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} error "unauthorized"
 // @Router   /api/me [get]
 func (handler *SessionHandler) Profile(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
-
-	cookie, err := r.Cookie("session_id")
-	// if err == http.ErrNoCookie {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 	}
-	// 	return
-	// } else if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// }
-
+	
+	w.Header().Set("Content-Type", "application/json")
+	cookie, _ := r.Cookie("session_id")
 	user, err := handler.sessions.GetUserProfile(cookie.Value)
-	// if err == entity.ErrInternalServerError{
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
-
-	// if user == nil {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 	}
-	// 	return
-	// }
+	if err == entity.ErrInternalServerError{
+		handler.logger.LogError("problems with getting profile", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	err = json.NewEncoder(w).Encode(&Result{Body: user})
 	if err != nil {
+		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -335,66 +307,57 @@ func (handler *SessionHandler) Profile(w http.ResponseWriter, r *http.Request) {
 
 func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 
-	cookie, err := r.Cookie("session_id")
-	// if err == http.ErrNoCookie {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 	}
-	// 	return
-	// } else if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// }
+	w.Header().Set("Content-Type", "application/json")
+	if r.Header.Get("Content-Type") != "application/json"{
+		handler.logger.LogError("bad content-type", entity.ErrBadContentType,  w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
-	id, err := handler.sessions.GetIdByCookie(cookie.Value)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
-
-	// if id == 0 {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	err := json.NewEncoder(w).Encode(&RespError{Err: entity.ErrUnauthorized.Error()})
-	// 	if err != nil {
-	// 		w.WriteHeader(http.StatusInternalServerError)
-	// 	}
-	// 	return
-	// }
+	cookie, _ := r.Cookie("session_id")
+	id, _ := handler.sessions.GetIdByCookie(cookie.Value)
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&RespError{Err: entity.ErrProblemsReadingData.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
 		return
 	}
 
 	updatedUser := &dto.ReqUpdateUser{}
 	err = json.Unmarshal(jsonbody, &updatedUser)
 	if err != nil {
+		handler.logger.LogError("prbolems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	err = handler.users.UpdateUser(dto.ToEntityUpdateUser(updatedUser, id))
-	if err != nil {
-		if err == entity.ErrInternalServerError {
+	switch err {
+		case entity.ErrInternalServerError:
+			handler.logger.LogError("problems with updating user", err, w.Header().Get("request-id"), r.URL.Path)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
-		} else if err == entity.ErrNotFound {
+		case entity.ErrInvalidEmail, entity.ErrInvalidUsername, entity.ErrInvalidPhoneNumber:
+			handler.logger.LogError("invalid field", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		case entity.ErrConflictEmail:
+			handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(entity.StatusConflicEmail)
+			return
+		case entity.ErrConflictUsername:
+			handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(entity.StatusConflicUsername)
+			return
+		case entity.ErrConflictPhoneNumber:
+			handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(entity.StatusConflicPhoneNumber)
+			return
+		case entity.ErrNotFound:
+			handler.logger.LogError("user not found", err, w.Header().Get("request-id"), r.URL.Path)
 			w.WriteHeader(http.StatusNotFound)
 			return
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&RespError{Err: err.Error()})
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		return
 	}
 }
+
