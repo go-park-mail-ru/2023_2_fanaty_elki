@@ -6,7 +6,11 @@ import (
 	"net/http"
 
 	"flag"
+	"github.com/gomodule/redigo/redis"
+	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
 	"log"
+	"server/config"
 	"server/db"
 	cartDev "server/internal/Cart/delivery"
 	cartRep "server/internal/Cart/repository/postgres"
@@ -14,7 +18,9 @@ import (
 	orderDev "server/internal/Order/delivery"
 	orderRep "server/internal/Order/repository/postgres"
 	orderUsecase "server/internal/Order/usecase"
+	productDev "server/internal/Product/delivery"
 	productRep "server/internal/Product/repository/postgres"
+	productUsecase "server/internal/Product/usecase"
 	restaurantDev "server/internal/Restaurant/delivery"
 	restaurantRep "server/internal/Restaurant/repository/postgres"
 	restaurantUsecase "server/internal/Restaurant/usecase"
@@ -24,11 +30,7 @@ import (
 	userRep "server/internal/User/repository/postgres"
 	userUsecase "server/internal/User/usecase"
 	"server/internal/middleware"
-	"server/config"
-	"github.com/gomodule/redigo/redis"
-	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
-//	"go.uber.org/zap"
+	//	"go.uber.org/zap"
 )
 
 // @title Prinesi-Poday API
@@ -84,11 +86,11 @@ func main() {
 	}
 	defer errorLogger.Sync()
 	logger := middleware.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
-	
+
 	userRepo := userRep.NewUserRepo(db)
 	restaurantRepo := restaurantRep.NewRestaurantRepo(db)
 	productRepo := productRep.NewProductRepo(db)
-	cartRepo := cartRep.NewCartRepo(db) 
+	cartRepo := cartRep.NewCartRepo(db)
 	sessionRepo := sessionRep.NewSessionManager(redisConn)
 	orderRepo := orderRep.NewOrderRepo(db)
 
@@ -97,11 +99,13 @@ func main() {
 	cartUC := cartUsecase.NewCartUsecase(cartRepo, productRepo, sessionRepo)
 	sessionUC := sessionUsecase.NewSessionUsecase(sessionRepo, userRepo)
 	orderUC := orderUsecase.NewOrderUsecase(orderRepo)
+	productUC := productUsecase.NewProductUsecase(productRepo)
 
 	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC, logger)
 	cartsHandler := cartDev.NewCartHandler(cartUC, logger)
 	sessionsHandler := sessionDev.NewSessionHandler(sessionUC, userUC, logger)
 	orderHandler := orderDev.NewOrderHandler(orderUC, sessionUC, logger)
+	productHandler := productDev.NewProductHandler(productUC, logger)
 	authMW := middleware.NewSessionMiddleware(sessionUC, logger)
 
 	router.PathPrefix("/api/login").Handler(corsRouter)
@@ -112,14 +116,14 @@ func main() {
 	router.PathPrefix("/api/orders").Handler(authRouter)
 	router.PathPrefix("/api/users").Handler(corsRouter)
 
-	
 	router.Use(logger.ACLogMiddleware)
 	router.Use(middleware.PanicMiddleware)
 	router.Use(middleware.CorsMiddleware)
 	corsRouter.Use(middleware.CorsCredentionalsMiddleware)
 	authRouter.Use(authMW.AuthMiddleware)
-	
+
 	restaurantsHandler.RegisterHandler(router)
+	productHandler.RegisterHandler(router)
 	cartsHandler.RegisterHandler(authRouter)
 	sessionsHandler.RegisterCorsHandler(corsRouter)
 	sessionsHandler.RegisterAuthHandler(authRouter)

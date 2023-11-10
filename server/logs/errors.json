@@ -71,3 +71,22 @@
 {"time":"2023-11-10T00:25:46.296+0300","message":"bad request","error":"username already exists","request-id":"b67c71f7-ee1c-4095-9523-77ad1020286c","url":"/api/users"}
 {"time":"2023-11-10T00:43:45.949+0300","message":"problems with adding product to cart","error":"internal server error","request-id":"1bb008e0-fde4-4241-89c2-5b7df4ef0938","url":"/api/cart/add"}
 {"time":"2023-11-10T00:44:59.335+0300","message":"problems with adding product to cart","error":"internal server error","request-id":"0ebc1732-f83f-49d8-978a-a66fb3770a59","url":"/api/cart/add"}
+{"time":"2023-11-10T13:51:08.901+0300","message":"problems with adding product to cart","error":"item is not found","request-id":"2b6f873f-080b-49f2-9c84-d499acb5b1a0","url":"/api/cart/add"}
+{"time":"2023-11-10T13:57:18.620+0300","message":"problems with adding product to cart","error":"sql: Scan called without calling Next","request-id":"e7e9a021-f1e6-448d-b3af-d988d9d20cf5","url":"/api/cart/add"}
+{"time":"2023-11-10T13:59:39.556+0300","message":"problems restaurants id","error":"item is not found","request-id":"d0c4d938-e3f9-4b8d-bf2e-fdf4073d0a60","url":"/api/restaurants/50"}
+{"time":"2023-11-10T14:00:03.038+0300","message":"problems with adding product to cart","error":"sql: Scan called without calling Next","request-id":"b914c13b-ff97-40c2-96b1-adc6f4f625d8","url":"/api/cart/add"}
+{"time":"2023-11-10T14:13:16.159+0300","message":"problems with adding product to cart","error":"item is not found","request-id":"eeda3d72-ef40-4111-8935-653a410e3018","url":"/api/cart/add"}
+{"time":"2023-11-10T14:21:22.300+0300","message":"problems restaurants id","error":"item is not found","request-id":"620c4c67-133e-4d2a-8c1a-070f99d77074","url":"/api/cart"}
+{"time":"2023-11-10T14:34:20.301+0300","message":"problems with unmarshalling json","error":"json: cannot unmarshal number into Go value of type dto.ReqProductID","request-id":"2bc59836-525c-484c-ae23-f91b39d607c6","url":"/api/cart"}
+{"time":"2023-11-10T14:35:26.240+0300","message":"problems with unmarshalling json","error":"json: cannot unmarshal number into Go value of type dto.ReqProductID","request-id":"d9c8a04c-5368-409e-a55d-261481086fc9","url":"/api/cart"}
+{"time":"2023-11-10T14:41:32.297+0300","message":"problems with unmarshalling json","error":"invalid character 'u' looking for beginning of value","request-id":"321c1fdd-5e9f-4b7a-ba52-bd7bc5c7e859","url":"/api/cart"}
+{"time":"2023-11-10T14:41:50.852+0300","message":"problems restaurants id","error":"item is not found","request-id":"851caea7-4a7d-48de-87ab-004e920160ee","url":"/api/cart"}
+{"time":"2023-11-10T14:43:08.627+0300","message":"no cookie","error":"http: named cookie not present","request-id":"287f0b94-a496-46bf-87be-f2e65b36705c","url":"/api/cart"}
+{"time":"2023-11-10T15:38:04.267+0300","message":"no cookie","error":"http: named cookie not present","request-id":"4b429bb2-57f2-4a47-843d-8628664214f9","url":"/api/cart/4"}
+{"time":"2023-11-10T15:38:52.424+0300","message":"bad request","error":"username already exists","request-id":"cde94f67-9f01-4110-a2a5-4090d9353e40","url":"/api/users"}
+{"time":"2023-11-10T15:55:49.406+0300","message":"problems deleting product from cart","error":"item is not found","request-id":"46ccbcaa-d221-476a-95b0-0950b100a29c","url":"/api/cart/65"}
+{"time":"2023-11-10T15:56:31.523+0300","message":"problems restaurants id","error":"item is not found","request-id":"9f8420ef-4dab-4c84-b542-b8546efa9db3","url":"/api/cart/65"}
+{"time":"2023-11-10T15:56:38.180+0300","message":"problems restaurants id","error":"item is not found","request-id":"ee4ae66c-bb11-4db2-b1ce-6b897c5ca444","url":"/api/cart/12"}
+{"time":"2023-11-10T15:56:50.435+0300","message":"problems with parameters","error":"id is not number","request-id":"a4a1e3ef-7125-4a24-87fa-2683301d86cd","url":"/api/cart/uu"}
+{"time":"2023-11-10T16:16:38.780+0300","message":"problems with parameters","error":"id is not number","request-id":"3cd3c797-abd7-42f0-ac06-0ec7f93a12f4","url":"/api/cart/clear"}
+{"time":"2023-11-10T16:49:04.670+0300","message":"product not found","error":"item is not found","request-id":"1b0514f8-1ac0-45cf-af54-c2f5bd22eae4","url":"/api/products/23"}
