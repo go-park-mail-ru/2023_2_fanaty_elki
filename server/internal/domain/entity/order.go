@@ -9,4 +9,5 @@ type Order struct {
 	Status string
 	UserId uint
 	Date time.Time
+	Address *Address
 }

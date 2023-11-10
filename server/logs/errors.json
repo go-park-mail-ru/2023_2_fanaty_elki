@@ -90,3 +90,23 @@
 {"time":"2023-11-10T15:56:50.435+0300","message":"problems with parameters","error":"id is not number","request-id":"a4a1e3ef-7125-4a24-87fa-2683301d86cd","url":"/api/cart/uu"}
 {"time":"2023-11-10T16:16:38.780+0300","message":"problems with parameters","error":"id is not number","request-id":"3cd3c797-abd7-42f0-ac06-0ec7f93a12f4","url":"/api/cart/clear"}
 {"time":"2023-11-10T16:49:04.670+0300","message":"product not found","error":"item is not found","request-id":"1b0514f8-1ac0-45cf-af54-c2f5bd22eae4","url":"/api/products/23"}
+{"time":"2023-11-10T17:21:22.402+0300","message":"no cookie","error":"http: named cookie not present","request-id":"931c1542-c42e-45b8-9e0f-18dc3e500cbc","url":"/api/orders"}
+{"time":"2023-11-10T17:22:48.476+0300","message":"invalid field","error":"invalid phone number","request-id":"f3004cda-3ab0-497f-a99c-573b538b4d3d","url":"/api/users"}
+{"time":"2023-11-10T17:53:48.529+0300","message":"problems with unmarshalling json","error":"json: cannot unmarshal number into Go struct field ReqCreateOrderAddress.Address.House of type string","request-id":"f2018acc-d602-4235-aca6-ceaea0a20f06","url":"/api/orders"}
+{"time":"2023-11-10T17:54:03.002+0300","message":"problems with creating order","error":"internal server error","request-id":"2c56bfec-9e04-4c2f-ac61-f9fdb73e6e31","url":"/api/orders"}
+{"time":"2023-11-10T17:54:58.157+0300","message":"problems with creating order","error":"internal server error","request-id":"724ba09d-7196-4fb1-83e0-7af1fa543ed1","url":"/api/orders"}
+{"time":"2023-11-10T17:59:42.399+0300","message":"unauthorized","request-id":"e84776dc-9631-4f99-afd6-8d00c191f795","url":"/api/auth"}
+{"time":"2023-11-10T18:01:14.608+0300","message":"unauthorized","request-id":"12361cf1-d5fe-4f23-ba21-d7fbc6f25de2","url":"/api/auth"}
+{"time":"2023-11-10T18:01:40.155+0300","message":"user not found","request-id":"69711f19-2ee9-4864-a464-d06cc9650741","url":"/api/auth"}
+{"time":"2023-11-10T18:01:56.640+0300","message":"user not found","request-id":"81121df4-ece6-4adb-b686-366ee95f3f05","url":"/api/users/me"}
+{"time":"2023-11-10T18:02:19.220+0300","message":"user not found","request-id":"d99d79e9-38a8-4f94-821d-29ee022f4927","url":"/api/users/me"}
+{"time":"2023-11-10T18:02:49.450+0300","message":"problems with creating user","error":"internal server error","request-id":"8d776e7b-57f4-4848-bf7c-13fe958dadd6","url":"/api/users"}
+{"time":"2023-11-10T18:04:10.041+0300","message":"problems with creating user","error":"internal server error","request-id":"54070e91-1f04-4173-af81-01f01fa1eeb6","url":"/api/users"}
+{"time":"2023-11-10T18:05:20.259+0300","message":"invalid field","error":"invalid password","request-id":"05f6f68f-66ec-4bc7-a9ce-31c3c78a6ebe","url":"/api/users"}
+{"time":"2023-11-10T18:06:11.031+0300","message":"user not found","request-id":"a981adf1-61c2-4193-b5a8-46dea09b13e3","url":"/api/auth"}
+{"time":"2023-11-10T18:08:31.312+0300","message":"problems with unmarshalling json","error":"json: cannot unmarshal number into Go struct field ReqCreateOrderAddress.Address.House of type string","request-id":"e0c15962-3139-4684-b8dc-3e9d56397e28","url":"/api/orders"}
+{"time":"2023-11-10T18:09:32.238+0300","message":"no cookie","error":"http: named cookie not present","request-id":"5565b00c-3d20-415f-8f0e-c2151b5c03d7","url":"/api/orders"}
+{"time":"2023-11-10T18:33:18.436+0300","message":"no cookie","error":"http: named cookie not present","request-id":"ced58729-7739-49db-9e72-983fba2bce8a","url":"/api/auth"}
+{"time":"2023-11-10T18:33:33.792+0300","message":"no cookie","error":"http: named cookie not present","request-id":"254c56ea-10d3-4e5e-b725-ed03e943f747","url":"/api/orders"}
+{"time":"2023-11-10T18:34:28.325+0300","message":"no cookie","error":"http: named cookie not present","request-id":"81649307-06d1-413f-9ed8-fdd4ee58e7cf","url":"/api/orders"}
+{"time":"2023-11-10T18:39:19.673+0300","message":"no cookie","error":"http: named cookie not present","request-id":"430964a3-c42a-4a58-8352-18fe2ee9e66a","url":"/api/orders"}

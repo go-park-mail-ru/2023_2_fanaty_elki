@@ -154,7 +154,7 @@ func (us userUsecase) checkUserFieldsCreate(user *entity.User) error {
 		return entity.ErrInvalidUsername
 	}
 
-	if len(user.Password) == 0 {
+	if len(user.Password) < 8 {
 		return entity.ErrInvalidPassword
 	}
 

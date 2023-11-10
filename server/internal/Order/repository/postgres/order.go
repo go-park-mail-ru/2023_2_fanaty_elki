@@ -2,6 +2,7 @@ package order
 
 import (
 	"database/sql"
+	"fmt"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 )
@@ -22,6 +23,7 @@ func (repo *orderRepo) CreateOrder(order *dto.DBReqCreateOrder) (*dto.RespCreate
 					RETURNING ID`
 	var orderId uint
 	err := repo.DB.QueryRow(insertOrder, order.UserId, order.Date, order.Status).Scan(&orderId)
+	fmt.Println(err)
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}
@@ -34,6 +36,24 @@ func (repo *orderRepo) CreateOrder(order *dto.DBReqCreateOrder) (*dto.RespCreate
 		}
 	}
 
+	//Надо будет потом сделать так, чтобы не всгда инсертился, а селектил сначала
+
+	insertAddress := `INSERT INTO address (city, street, house_number, flat_number)
+				      VALUES ($1, $2, $3, $4)
+					  RETURNING ID`
+	var addressId uint 
+	err = repo.DB.QueryRow(insertAddress, order.Address.City, order.Address.Street, order.Address.House, order.Address.Flat).Scan(&addressId)
+	if err != nil {
+		return nil, entity.ErrInternalServerError
+	}
+	
+	insertOrderAddress := `INSERT INTO orders_address (orders_id, address_id)
+				      	   VALUES ($1, $2)`
+	_, err = repo.DB.Exec(insertOrderAddress, orderId, addressId)
+	if err != nil {
+		return nil, entity.ErrInternalServerError
+	}
+	
 	return &dto.RespCreateOrder{
 		Id:orderId,
 		Status: order.Status,
@@ -53,10 +73,12 @@ func (repo *orderRepo) UpdateOrder(order *dto.ReqUpdateOrder) (error) {
 }
 
 func (repo *orderRepo) GetOrders(userId uint) ([]*dto.RespGetOrder, error) {
-	getOrders := `SELECT id, status, created_at, updated_at
-			 	 FROM orders
-				 WHERE user_id = $1
-				 ORDER BY created_at DESC`
+	getOrders := `SELECT o.id, o.status, o.created_at, a.city, a.street, a.house_number, a.flat_number
+			 	 FROM orders o
+				 JOIN orders_address oa on o.id = oa.orders_id
+				 JOIN address a on a.id = oa.address_id
+				 WHERE o.user_id = $1
+				 ORDER BY o.created_at DESC`
 
 	rows, err := repo.DB.Query(getOrders, userId)
 	if err != nil {
@@ -66,12 +88,18 @@ func (repo *orderRepo) GetOrders(userId uint) ([]*dto.RespGetOrder, error) {
 	var orders = []*dto.RespGetOrder{}
 	for rows.Next() {
 		order := &dto.RespGetOrder{}
+		address := &dto.RespOrderAddress{}
 		err = rows.Scan(
 			&order.Id,
 			&order.Status,
 			&order.Date,
-			&order.UpdatedDate,
+			&address.City,
+			&address.Street,
+			&address.House,
+			&address.Flat,
+		//	&order.UpdatedDate,
 		)
+		order.Address = address
 		if err != nil {
 			return nil, entity.ErrInternalServerError
 		}

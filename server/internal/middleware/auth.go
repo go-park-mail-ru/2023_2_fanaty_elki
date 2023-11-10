@@ -22,6 +22,7 @@ func (mw *SessionMiddleware) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
 		w.Header().Add("Access-Control-Allow-Credentials", "true")
 		cookie, err := r.Cookie("session_id")
+		
 		if err == http.ErrNoCookie {
 			mw.logger.LogError("no cookie", err, w.Header().Get("request-id"), r.URL.Path)
 			w.WriteHeader(http.StatusUnauthorized)
@@ -31,7 +32,7 @@ func (mw *SessionMiddleware) AuthMiddleware(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
-		userId, err := mw.sessionUC.GetIdByCookie(cookie.Value)
+		userId, err := mw.sessionUC.Check(cookie.Value)
 		if err != nil {
 			mw.logger.LogError("problems with getting user by cookie", err, w.Header().Get("request-id"), r.URL.Path)
 			w.WriteHeader(http.StatusInternalServerError)

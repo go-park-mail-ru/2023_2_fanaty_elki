@@ -10,6 +10,7 @@ import (
 	"server/internal/domain/entity"
 	mw "server/internal/middleware"
 	"strconv"
+	"fmt"
 	"github.com/gorilla/mux"
 )
 
@@ -43,7 +44,13 @@ func (handler *OrderHandler) RegisterHandler(router *mux.Router) {
 }
 
 func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Header.Get("Content-Type") != "application/json"{
+		handler.logger.LogError("bad content-type", entity.ErrBadContentType,  w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	cookie, _ := r.Cookie("session_id")
 
@@ -63,7 +70,7 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
+	
 	respOrder, err := handler.orderUC.CreateOrder(&reqOrder)
 	if err != nil {
 		handler.logger.LogError("problems with creating order", err, w.Header().Get("request-id"), r.URL.Path)
@@ -81,7 +88,7 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 }
 
 func (handler *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
-	//w.Header().Set("content-type", "application/json")
+	//w.Header().Set("Content-Type", "application/json")
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -108,21 +115,12 @@ func (handler *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request)
 }
 
 func (handler *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
 
-	cookie, err := r.Cookie("session_id")
-	userId, err := handler.sessionUC.GetIdByCookie(cookie.Value)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
-	// if userId == 0 {
-	// 	w.WriteHeader(http.StatusUnauthorized)
-	// 	return
-	// }
-
+	cookie, _ := r.Cookie("session_id")
+	userId, _ := handler.sessionUC.GetIdByCookie(cookie.Value)
+	
 	respOrders, err := handler.orderUC.GetOrders(userId)
-
+	fmt.Println("hey")
 	if err != nil {
 		handler.logger.LogError("order: problems while getting orders json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -138,7 +136,7 @@ func (handler *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
 }
 
 func (handler *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
 	strid, ok := vars["id"]
