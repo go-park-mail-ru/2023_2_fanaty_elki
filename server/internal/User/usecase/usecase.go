@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	//"fmt"
 	"regexp"
 	cartRep "server/internal/Cart/repository"
 	userRep "server/internal/User/repository"
@@ -31,19 +32,19 @@ func (us userUsecase) GetUserById(id uint) (*entity.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	return dto.ToEntityGetUser(user), nil	
+	return dto.ToEntityGetUser(user), nil
 }
 
 func (us userUsecase) CreateUser(newUser *entity.User) (uint, error) {
 	
 	err := us.checkUserFieldsCreate(newUser)
-	
+
 	if err != nil {
 		return 0, err
 	}
 
 	_, err = us.checkUser(newUser)
-	
+
 	if err != nil {
 		return 0, err
 	}
@@ -52,7 +53,7 @@ func (us userUsecase) CreateUser(newUser *entity.User) (uint, error) {
 		newUser.Icon = "img/defaultIcon.png"
 	}
 	user, err := us.userRepo.CreateUser(dto.ToRepoCreateUser(newUser))
-	
+
 	if err != nil {
 		return 0, entity.ErrInternalServerError
 	}

@@ -13,7 +13,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-
 type Result struct {
 	Body interface{}
 }
@@ -79,13 +78,13 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	reqUser := dto.ReqCreateUser{}
 	err = json.Unmarshal(jsonbody, &reqUser)
-	
+
 	if err != nil {
 		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	
+
 	id, err := handler.users.CreateUser(dto.ToEntityCreateUser(&reqUser))
 	switch err {
 		case entity.ErrInternalServerError:
@@ -156,7 +155,7 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	reqUser := dto.ReqLoginUser{}
 	err = json.Unmarshal(jsonbody, &reqUser)
-	
+
 	if err != nil {
 		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
@@ -164,7 +163,7 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookieUC, err := handler.sessions.Login(dto.ToEntityLoginUser(&reqUser))
-	
+
 	if err != nil {
 		if err == entity.ErrInternalServerError {
 			handler.logger.LogError("problems with creating cookie", err, w.Header().Get("request-id"), r.URL.Path)
@@ -305,7 +304,6 @@ func (handler *SessionHandler) Profile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-
 
 func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 
