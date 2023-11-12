@@ -118,7 +118,7 @@ func main() {
 	router.PathPrefix("/api/cart").Handler(authRouter)
 	router.PathPrefix("/api/users/me").Handler(authRouter)
 	router.PathPrefix("/api/orders").Handler(authRouter)
-	router.PathPrefix("/api/users").Handler(corsRouter)
+	//router.PathPrefix("/api/users").Handler(corsRouter)
 
 	router.Use(logger.ACLogMiddleware)
 	router.Use(middleware.PanicMiddleware)
@@ -129,6 +129,7 @@ func main() {
 	restaurantsHandler.RegisterHandler(router)
 	productHandler.RegisterHandler(router)
 	cartsHandler.RegisterHandler(authRouter)
+	sessionsHandler.RegisterHandler(router)
 	sessionsHandler.RegisterCorsHandler(corsRouter)
 	sessionsHandler.RegisterAuthHandler(authRouter)
 	orderHandler.RegisterHandler(authRouter)

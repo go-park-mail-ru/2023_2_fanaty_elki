@@ -10,7 +10,6 @@ import (
 	"server/internal/domain/entity"
 	mw "server/internal/middleware"
 	"strconv"
-	"fmt"
 	"github.com/gorilla/mux"
 )
 
@@ -72,9 +71,14 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 	}
 	
 	respOrder, err := handler.orderUC.CreateOrder(&reqOrder)
-	if err != nil {
+	switch err {
+	case entity.ErrInternalServerError:
 		handler.logger.LogError("problems with creating order", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
+		return
+	case entity.ErrBadRequest:
+		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -120,7 +124,6 @@ func (handler *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
 	userId, _ := handler.sessionUC.GetIdByCookie(cookie.Value)
 	
 	respOrders, err := handler.orderUC.GetOrders(userId)
-	fmt.Println("hey")
 	if err != nil {
 		handler.logger.LogError("order: problems while getting orders json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
