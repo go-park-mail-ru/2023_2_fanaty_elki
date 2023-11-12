@@ -1,144 +1,190 @@
-CREATE TABLE IF NOT EXISTS public.USERS
+CREATE OR REPLACE FUNCTION trigger_set_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TABLE IF NOT EXISTS public.users
 (
-    ID serial NOT NULL,
-    USERNAME text UNIQUE NOT NULL  ,
-	PASSWORD text NOT NULL,
-	BIRTHDAY date,
-	PHONE_NUMBER text UNIQUE NOT NULL,
-    EMAIL text UNIQUE NOT NULL,
-	ICON text default 'deficon',
-    PRIMARY KEY (ID),
-    CONSTRAINT VALID_USERNAME CHECK ( LENGTH(USERNAME) > 3 and LENGTH(USERNAME) < 20 ),
-    CONSTRAINT VALID_PASSWORD CHECK ( LENGTH(PASSWORD) > 8 and LENGTH(PASSWORD) < 30 ),
-    CONSTRAINT VALID_PHONE CHECK ( PHONE_NUMBER ~* '/\+7[0-9]{10}/'),
-    CONSTRAINT VALID_EMAIL CHECK ( EMAIL ~* '\S*@\S*' and LENGTH(EMAIL) < 40)
+    id SERIAL NOT NULL,
+    username TEXT UNIQUE NOT NULL  ,
+	password TEXT NOT NULL,
+	birthday DATE,
+	phone_number TEXT UNIQUE NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+	icon TEXT DEFAULT 'deficon',
+    CREATED_AT TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
+	UPDATED_AT TIMESTAMP WITH TIME ZONE default NOW(),
+    PRIMARY KEY (id),
+    CONSTRAINT valid_username CHECK ( LENGTH(username) > 3 and LENGTH(username) < 20 ),
+    CONSTRAINT valid_password CHECK ( LENGTH(password) > 8 and LENGTH(password) < 30 ),
+    CONSTRAINT valid_phone CHECK ( phone_number ~* '/\+7[0-9]{10}/'),
+    CONSTRAINT valid_email CHECK ( email ~* '\S*@\S*' and LENGTH(email) < 40)
 );
 
-CREATE TABLE IF NOT EXISTS public.RESTAURANT
+CREATE TRIGGER set_timestamp
+BEFORE UPDATE ON users
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+CREATE TABLE IF NOT EXISTS public.restaurant
 (
-    ID serial NOT NULL,
-    NAME text UNIQUE NOT NULL,
-	RATING numeric(2,1) default 0.0 NOT NULL,
-	COMMENTS_COUNT integer default 0 NOT NULL,
-	ICON text default 'deficon' NOT NULL,
-    PRIMARY KEY (ID),
-    CONSTRAINT VALID_RESTAURANT CHECK ( LENGTH(NAME) > 0 and LENGTH(NAME) < 40 ),
-    CONSTRAINT VALID_RATING CHECK ( RATING >= 0.0 AND RATING <= 5.0),
-    CONSTRAINT VALID_COMMENTS_COUNT CHECK (COMMENTS_COUNT >= 0)
+    id SERIAL NOT NULL,
+    name TEXT UNIQUE NOT NULL,
+	rating NUMERIC(2,1) DEFAULT 0.0 NOT NULL,
+	comments_count INT DEFAULT 0 NOT NULL,
+	icon TEXT DEFAULT 'deficon' NOT NULL,
+    CREATED_AT TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
+	UPDATED_AT TIMESTAMP WITH TIME ZONE default NOW(),
+    PRIMARY KEY (id),
+    CONSTRAINT valid_restaurant CHECK ( LENGTH(NAME) > 0 and LENGTH(NAME) < 40 ),
+    CONSTRAINT valid_rating CHECK ( rating >= 0.0 AND rating <= 5.0),
+    CONSTRAINT valid_comments_count CHECK (comments_count >= 0)
 );
 
-CREATE TABLE IF NOT EXISTS public.CATEGORY
+CREATE TRIGGER set_timestamp
+BEFORE UPDATE ON restaurant
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+
+CREATE TABLE IF NOT EXISTS public.category
 (
-    ID serial NOT NULL,
-    NAME text UNIQUE NOT NULL,
-    PRIMARY KEY (ID),
-    CONSTRAINT VALID_TEXT CHECK ( LENGTH(NAME) > 0 and LENGTH(NAME) < 40 )
+    id SERIAL NOT NULL,
+    name TEXT UNIQUE NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT valid_text CHECK ( LENGTH(name) > 0 and LENGTH(name) < 40 )
 );
 
-CREATE TABLE IF NOT EXISTS public.RESTAURANT_CATEGORY
+CREATE TABLE IF NOT EXISTS public.restaurant_category
 (
-    ID serial NOT NULL,
-    RESTAURANT_ID int REFERENCES public.RESTAURANT(ID) NOT NULL,
-    CATEGORY_ID int REFERENCES public.CATEGORY(ID) NOT NULL,
-    PRIMARY KEY (ID)
+    id SERIAL NOT NULL,
+    restaurant_id INT REFERENCES public.restaurant(id) NOT NULL,
+    category_id INT REFERENCES public.category(id) NOT NULL,
+    PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.MENU_TYPE
+CREATE TABLE IF NOT EXISTS public.menu_type
 (
-    ID serial NOT NULL,
-    NAME text default 'FOOD' NOT NULL,
-    RESTAURANT_ID int REFERENCES RESTAURANT(ID) NOT NULL,
-    PRIMARY KEY (ID),
-    CONSTRAINT VALID_MENU_TYPE CHECK ( LENGTH(NAME) > 0 and LENGTH(NAME) < 40 )
+    id SERIAL NOT NULL,
+    name TEXT DEFAULT 'FOOD' NOT NULL,
+    restaurant_id INT REFERENCES restaurant(id) NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT valid_menu_type CHECK ( LENGTH(name) > 0 and LENGTH(name) < 40 )
 );
 
-CREATE TABLE IF NOT EXISTS public.PRODUCT
+CREATE TABLE IF NOT EXISTS public.product
 (
-    ID serial NOT NULL,
-    NAME text NOT NULL, -- У блюда не может быть дефолтного значения, иначе как нам понять что это
-    RESTAURANT_ID INT REFERENCES RESTAURANT(ID) NOT NULL,
-    PRICE numeric(10,2) default '0.0' NOT NULL,
-    COOKING_TIME INT default '0' NOT NULL,
-    PRIMARY KEY (ID),
-    CONSTRAINT VALID_PRODUCT CHECK ( LENGTH(NAME) > 0 and LENGTH(NAME) < 40 ),
-    CONSTRAINT VALID_PRICE CHECK ( PRICE >= 0.0 ),
-    CONSTRAINT VALID_TIME CHECK ( COOKING_TIME >= 0 )
+    id SERIAL NOT NULL,
+    name TEXT NOT NULL, -- У блюда не может быть дефолтного значения, иначе как нам понять что это
+    restaurant_id INT REFERENCES RESTAURANT(ID) NOT NULL,
+    price NUMERIC(10,2) DEFAULT '0.0' NOT NULL,
+    cooking_time INT DEFAULT '0' NOT NULL,
+    CREATED_AT TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
+	UPDATED_AT TIMESTAMP WITH TIME ZONE default NOW(),
+    PRIMARY KEY (id),
+    CONSTRAINT valid_product CHECK ( LENGTH(name) > 0 and LENGTH(name) < 40 ),
+    CONSTRAINT valid_price CHECK ( price >= 0.0 ),
+    CONSTRAINT valid_time CHECK ( cooking_time >= 0 )
 );
 
-CREATE TABLE IF NOT EXISTS public.PRODUCT_MENU_TYPE
+CREATE TRIGGER set_timestamp
+BEFORE UPDATE ON product
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+CREATE TABLE IF NOT EXISTS public.product_menu_type
 (
-    ID serial NOT NULL,
-    MENU_TYPE_ID int REFERENCES public.MENU_TYPE(ID) NOT NULL,
-    PRODUCT_ID int REFERENCES public.PRODUCT(ID) NOT NULL,
-    PRIMARY KEY (ID)
+    id SERIAL NOT NULL,
+    menu_type_id INT REFERENCES public.menu_type(id) NOT NULL,
+    product_id INT REFERENCES public.product(id) NOT NULL,
+    PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.ORDER
+CREATE TABLE IF NOT EXISTS public.orders
 (
-    ID serial NOT NULL,
-    USER_ID int REFERENCES public.USERS(ID) NOT NULL,
-    ORDER_DATE TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
-    STATUS text default 'CREATED' NOT NULL,
-    PRIMARY KEY (ID),
-    CONSTRAINT VALID_STATUS CHECK (LENGTH(STATUS) >= 0 and LENGTH(STATUS) < 40 )
+    id SERIAL NOT NULL,
+    user_id INT REFERENCES public.users(id) NOT NULL,
+    order_date TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+    status TEXT DEFAULT 'CREATED' NOT NULL,
+    CREATED_AT TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
+	UPDATED_AT TIMESTAMP WITH TIME ZONE default NOW(),
+    PRIMARY KEY (id),
+    CONSTRAINT valid_status CHECK (LENGTH(status) >= 0 and LENGTH(status) < 40 )
 );
 
-CREATE TABLE IF NOT EXISTS public.ORDER_PRODUCT
+CREATE TRIGGER set_timestamp
+BEFORE UPDATE ON orders
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+
+CREATE TABLE IF NOT EXISTS public.orders_product
 (
-    ID serial NOT NULL,
-    PRODUCT_ID int REFERENCES public.PRODUCT(ID) NOT NULL,
-    ORDER_ID int REFERENCES public.ORDER(ID) NOT NULL,
-    ITEM_COUNT INT default 1 NOT NULL,
-    PRIMARY KEY (ID),
-    CONSTRAINT VALID_COUNT CHECK ( ITEM_COUNT > 0 )
+    id SERIAL NOT NULL,
+    product_id INT REFERENCES public.product(id) NOT NULL,
+    order_id INT REFERENCES public.orders(id) NOT NULL,
+    item_count INT DEFAULT 1 NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT valid_count CHECK ( item_count > 0 )
 );
 
-CREATE TABLE IF NOT EXISTS public.COMMENT
+CREATE TABLE IF NOT EXISTS public.comment
 (
-    ID serial NOT NULL,
-    COMMENT_TEXT TEXT,  -- бывают комментарии без текста
-    RESTAURANT_ID INT REFERENCES RESTAURANT(ID) NOT NULL,
-    USER_ID int REFERENCES public.USERS(ID) NOT NULL,
-    RATING numeric(2,1) default 0.0 NOT NULL,
-    PRIMARY KEY (ID),
-    CONSTRAINT VALID_COUNT CHECK ( RATING >= 0.0 AND RATING <= 5.0)
+    id SERIAL NOT NULL,
+    comment_text TEXT,  -- бывают комментарии без текста
+    restaurant_id INT REFERENCES restaurant(id) NOT NULL,
+    user_id INT REFERENCES public.users(id) NOT NULL,
+    rating NUMERIC(2,1) DEFAULT 0.0 NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT valid_count CHECK ( rating >= 0.0 AND rating <= 5.0)
 );
 
-CREATE TABLE IF NOT EXISTS public.ADDRESS
+CREATE TABLE IF NOT EXISTS public.address
 (
-    ID serial NOT NULL,
-    CITY text NOT NULL,
-    STREET text NOT NULL,
-    HOUSE_NUMBER INT NOT NULL,
-    FLAT_NUMBER INT, -- бывают ДОМА БЕЗ КВАРТИР
-    PRIMARY KEY (ID),
-    CONSTRAINT VALID_CITY CHECK (LENGTH(CITY) > 0 and LENGTH(CITY) < 40 ),
-    CONSTRAINT VALID_STREET CHECK (LENGTH(STREET) > 0 and LENGTH(STREET) < 40 ),
-    CONSTRAINT VALID_HOUSE_VALID CHECK (HOUSE_NUMBER > 0 ),
-    CONSTRAINT VALID_FLAT_NUMBER CHECK (FLAT_NUMBER > 0 )
+    id SERIAL NOT NULL,
+    city TEXT NOT NULL,
+    street TEXT NOT NULL,
+    house_number INT NOT NULL,
+    flat_number INT, -- бывают ДОМА БЕЗ КВАРТИР
+    PRIMARY KEY (id),
+    CONSTRAINT valid_city CHECK (LENGTH(city) > 0 and LENGTH(city) < 40 ),
+    CONSTRAINT valid_street CHECK (LENGTH(street) > 0 and LENGTH(street) < 40 ),
+    CONSTRAINT valid_house_number CHECK (house_number > 0 ),
+    CONSTRAINT valid_flat_number CHECK (flat_number > 0 )
 );
 
-CREATE TABLE IF NOT EXISTS public.RESTAURANT_ADDRESS
+CREATE TABLE IF NOT EXISTS public.restaurant_address
 (
-    ID serial NOT NULL,
-    RESTAURANT_ID INT REFERENCES RESTAURANT(ID) NOT NULL,
-    ADDRESS_ID INT REFERENCES ADDRESS(ID) NOT NULL,
-    PRIMARY KEY (ID)
+    id SERIAL NOT NULL,
+    restaurant_id INT REFERENCES restaurant(id) NOT NULL,
+    address_id INT REFERENCES address(id) NOT NULL,
+    PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.USER_ADDRESS
+CREATE TABLE IF NOT EXISTS public.user_address
 (
-    ID serial NOT NULL,
-    USER_ID int REFERENCES public.USERS(ID) NOT NULL,
-    ADDRESS_ID INT REFERENCES ADDRESS(ID) NOT NULL,
-    PRIMARY KEY (ID)
+    id SERIAL NOT NULL,
+    user_id INT REFERENCES public.USERS(id) NOT NULL,
+    address_id INT REFERENCES address(id) NOT NULL,
+    PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.CARD
+CREATE TABLE IF NOT EXISTS public.card
 (
-    ID serial NOT NULL,
-    CARD_NUMBER text NOT NULL, --ДЕФОЛТНЫЙ НОМЕР КАРТЫ ЭТО СТРАННО
-    USER_ID int REFERENCES public.USERS(ID) NOT NULL,
-    PRIMARY KEY (ID),
-    CONSTRAINT VALID_CARD CHECK (LENGTH(CARD_NUMBER) > 0 and LENGTH(CARD_NUMBER) < 40)
+    id SERIAL NOT NULL,
+    card_number TEXT UNIQUE NOT NULL, --ДЕФОЛТНЫЙ НОМЕР КАРТЫ ЭТО СТРАННО
+    user_id INT REFERENCES public.users(id) NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT valid_card CHECK (LENGTH(card_number) > 0 and LENGTH(card_number) < 40)
+);
+
+CREATE TABLE IF NOT EXISTS public.user_card
+(
+    id SERIAL NOT NULL,
+    user_id INT REFERENCES public.users(id) NOT NULL,
+    card_id INT REFERENCES card(id) NOT NULL,
+    PRIMARY KEY (id)
 );
