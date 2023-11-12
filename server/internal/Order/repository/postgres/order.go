@@ -2,7 +2,6 @@ package order
 
 import (
 	"database/sql"
-	"fmt"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 )
@@ -23,7 +22,6 @@ func (repo *orderRepo) CreateOrder(order *dto.DBReqCreateOrder) (*dto.RespCreate
 					RETURNING ID`
 	var orderId uint
 	err := repo.DB.QueryRow(insertOrder, order.UserId, order.Date, order.Status).Scan(&orderId)
-	fmt.Println(err)
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}

@@ -48,6 +48,10 @@ func (handler *SessionHandler) RegisterCorsHandler(router *mux.Router) {
 	router.HandleFunc("/api/users", handler.SignUp).Methods(http.MethodPost)
 }
 
+func (handler *SessionHandler) RegisterHandler(router *mux.Router) {
+	router.HandleFunc("/api/users", handler.SignUp).Methods(http.MethodPost)
+}
+
 
 // SignUp godoc
 // @Summary      Signing up a user

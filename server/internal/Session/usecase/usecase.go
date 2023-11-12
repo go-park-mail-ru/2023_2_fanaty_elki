@@ -1,8 +1,6 @@
 package usecase
 
 import (
-	//"fmt"
-	"fmt"
 	"math/rand"
 	sessionRep "server/internal/Session/repository"
 	userRep "server/internal/User/repository"
@@ -69,7 +67,6 @@ func (ss sessionUsecase) Login(user *entity.User) (*entity.Cookie, error) {
 	}
 
 	err = ss.sessionRepo.Create(cookie)
-	fmt.Println(err)
 	if err != nil {
 		return nil, err
 	}
