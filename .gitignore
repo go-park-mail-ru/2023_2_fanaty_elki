@@ -2,3 +2,5 @@ go.work
 c.out
 server/db/config.go
 server/cmd/dump.rdb
+dump.rdb
+logs

@@ -18,7 +18,11 @@ func NewRestaurantRepo(db *sql.DB) *restaurantRepo {
 func (repo *restaurantRepo) GetRestaurants() ([]*entity.Restaurant, error) {
 	rows, err := repo.DB.Query("SELECT id, name, rating, comments_count, category, icon FROM restaurant")
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, err
+		}
 	}
 	defer rows.Close()
 	var Restaurants = []*entity.Restaurant{}
@@ -37,14 +41,6 @@ func (repo *restaurantRepo) GetRestaurants() ([]*entity.Restaurant, error) {
 		}
 		Restaurants = append(Restaurants, restaurant)
 	}
-	err = rows.Err()
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		} else {
-			return nil, err
-		}
-	}
 	return Restaurants, nil
 }
 
@@ -61,7 +57,7 @@ func (repo *restaurantRepo) GetRestaurantById(id uint) (*entity.Restaurant, erro
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, entity.ErrNotFound
 		}
 		return nil, entity.ErrInternalServerError
 	}
@@ -75,7 +71,9 @@ func (repo *restaurantRepo) GetMenuTypesByRestaurantId(id uint) ([]*entity.MenuT
 	}
 	defer rows.Close()
 	var MenuTypes = []*entity.MenuType{}
+	var count = 0
 	for rows.Next() {
+		count++
 		menuType := &entity.MenuType{}
 		err = rows.Scan(
 			&menuType.ID,
@@ -83,17 +81,12 @@ func (repo *restaurantRepo) GetMenuTypesByRestaurantId(id uint) ([]*entity.MenuT
 			&menuType.RestaurantID,
 		)
 		if err != nil {
-			return nil, err
+			return nil, entity.ErrInternalServerError
 		}
 		MenuTypes = append(MenuTypes, menuType)
 	}
-	err = rows.Err()
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		} else {
-			return nil, err
-		}
+	if count == 0 {
+		return nil, entity.ErrNotFound
 	}
 	return MenuTypes, nil
 }

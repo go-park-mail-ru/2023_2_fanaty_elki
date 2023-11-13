@@ -12,43 +12,42 @@ type UsecaseI interface {
 	GetUserCart(SessionToken string) ([]*dto.CartProduct, error)
 	AddProductToCart(SessionToken string, productID uint) error
 	DeleteProductFromCart(SessionToken string, productID uint) error
-	UpdateItemCountUp(SessionToken string, productID uint) error
-	UpdateItemCountDown(SessionToken string, productID uint) error
+	CleanCart(SessionToken string) error
 }
 
 type cartUsecase struct {
-	CartRepo    cartRep.CartRepositoryI
-	ProductRepo productRep.ProductRepositoryI
-	SessionRepo sessionRep.SessionRepositoryI
+	cartRepo    cartRep.CartRepositoryI
+	productRepo productRep.ProductRepositoryI
+	sessionRepo sessionRep.SessionRepositoryI
 }
 
 func NewCartUsecase(cartRep cartRep.CartRepositoryI, productRep productRep.ProductRepositoryI, sessionRep sessionRep.SessionRepositoryI) *cartUsecase {
 	return &cartUsecase{
-		CartRepo:    cartRep,
-		ProductRepo: productRep,
-		SessionRepo: sessionRep,
+		cartRepo:    cartRep,
+		productRepo: productRep,
+		sessionRepo: sessionRep,
 	}
 }
 
 func (cu cartUsecase) GetUserCart(SessionToken string) ([]*dto.CartProduct, error) {
-	cookie, err := cu.SessionRepo.Check(SessionToken)
+	cookie, err := cu.sessionRepo.Check(SessionToken)
 	if err != nil {
 		return nil, err
 	}
 
 	userID := cookie.UserID
-	cart, err := cu.CartRepo.GetCartByUserID(userID)
+	cart, err := cu.cartRepo.GetCartByUserID(userID)
 	if err != nil {
 		return nil, err
 	}
 
-	cartProducts, err := cu.CartRepo.GetCartProductsByCartID(cart.ID)
+	cartProducts, err := cu.cartRepo.GetCartProductsByCartID(cart.ID)
 	if err != nil {
 		return nil, err
 	}
 	var CartProducts []*dto.CartProduct
 	for _, cartProduct := range cartProducts {
-		product, err := cu.ProductRepo.GetProductByID(cartProduct.ProductID)
+		product, err := cu.productRepo.GetProductByID(cartProduct.ProductID)
 		if err != nil {
 			return nil, entity.ErrInternalServerError
 		}
@@ -62,76 +61,103 @@ func (cu cartUsecase) GetUserCart(SessionToken string) ([]*dto.CartProduct, erro
 }
 
 func (cu cartUsecase) AddProductToCart(SessionToken string, productID uint) error {
-	cookie, err := cu.SessionRepo.Check(SessionToken)
+	cookie, err := cu.sessionRepo.Check(SessionToken)
 	if err != nil {
 		return err
+	}
+
+	product, err := cu.productRepo.GetProductByID(productID)
+
+	if product == nil {
+		return entity.ErrNotFound
 	}
 
 	userID := cookie.UserID
-	cart, err := cu.CartRepo.GetCartByUserID(userID)
+	cart, err := cu.cartRepo.GetCartByUserID(userID)
 	if err != nil {
 		return err
 	}
 
-	err = cu.CartRepo.AddProductToCart(cart.ID, productID)
+	hasproduct, err := cu.cartRepo.CheckProductInCart(cart.ID, productID)
+
 	if err != nil {
 		return err
+	}
+
+	if hasproduct {
+		err = cu.cartRepo.UpdateItemCountUp(cart.ID, productID)
+		if err != nil {
+			return err
+		}
+	} else {
+		err = cu.cartRepo.AddProductToCart(cart.ID, productID)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
 func (cu cartUsecase) DeleteProductFromCart(SessionToken string, productID uint) error {
-	cookie, err := cu.SessionRepo.Check(SessionToken)
+	cookie, err := cu.sessionRepo.Check(SessionToken)
 	if err != nil {
 		return err
+	}
+
+	product, err := cu.productRepo.GetProductByID(productID)
+
+	if product == nil {
+		return entity.ErrNotFound
 	}
 
 	userID := cookie.UserID
-	cart, err := cu.CartRepo.GetCartByUserID(userID)
+	cart, err := cu.cartRepo.GetCartByUserID(userID)
 	if err != nil {
 		return err
 	}
 
-	err = cu.CartRepo.DeleteProductFromCart(cart.ID, productID)
+	hasproduct, err := cu.cartRepo.CheckProductInCart(cart.ID, productID)
+
 	if err != nil {
 		return err
+	}
+
+	if hasproduct {
+		itemcount, err := cu.cartRepo.CheckProductCount(cart.ID, productID)
+		if err != nil {
+			return err
+		}
+
+		if itemcount == 1 {
+			err = cu.cartRepo.DeleteProductFromCart(cart.ID, productID)
+			if err != nil {
+				return err
+			}
+		}
+		err = cu.cartRepo.UpdateItemCountDown(cart.ID, productID)
+		if err != nil {
+			return err
+		}
+	} else {
+		return entity.ErrNotFound
 	}
 
 	return nil
 }
 
-func (cu cartUsecase) UpdateItemCountUp(SessionToken string, productID uint) error {
-	cookie, err := cu.SessionRepo.Check(SessionToken)
+func (cu cartUsecase) CleanCart(SessionToken string) error {
+	cookie, err := cu.sessionRepo.Check(SessionToken)
 	if err != nil {
 		return err
 	}
 
 	userID := cookie.UserID
-	cart, err := cu.CartRepo.GetCartByUserID(userID)
+	cart, err := cu.cartRepo.GetCartByUserID(userID)
 	if err != nil {
 		return err
 	}
-	err = cu.CartRepo.UpdateItemCountUp(cart.ID, productID)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (cu cartUsecase) UpdateItemCountDown(SessionToken string, productID uint) error {
-	cookie, err := cu.SessionRepo.Check(SessionToken)
-	if err != nil {
-		return err
-	}
-
-	userID := cookie.UserID
-	cart, err := cu.CartRepo.GetCartByUserID(userID)
-	if err != nil {
-		return err
-	}
-	err = cu.CartRepo.UpdateItemCountDown(cart.ID, productID)
+	err = cu.cartRepo.CleanCart(cart.ID)
 	if err != nil {
 		return err
 	}

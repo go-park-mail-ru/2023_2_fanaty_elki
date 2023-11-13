@@ -11,53 +11,63 @@ import (
 
 type UsecaseI interface {
 	GetRestaurants() ([]*entity.Restaurant, error)
-	GetRestaurantById(id uint) (*dto.RestaurantWithProducts, error)
+	GetRestaurantById(id uint) (*entity.Restaurant, error)
+	GetRestaurantProducts(id uint) ([]*dto.MenuTypeWithProducts, error)
 }
 
 type restaurantUsecase struct {
-	RestaurantRepo restRep.RestaurantRepositoryI
-	ProductRepo    productRep.ProductRepositoryI
+	restaurantRepo restRep.RestaurantRepositoryI
+	productRepo    productRep.ProductRepositoryI
 }
 
 func NewRestaurantUsecase(resRep restRep.RestaurantRepositoryI, productRep productRep.ProductRepositoryI) *restaurantUsecase {
 	return &restaurantUsecase{
-		RestaurantRepo: resRep,
-		ProductRepo:    productRep,
+		restaurantRepo: resRep,
+		productRepo:    productRep,
 	}
+
 }
 
 func (res restaurantUsecase) GetRestaurants() ([]*entity.Restaurant, error) {
-	rests, err := res.RestaurantRepo.GetRestaurants()
+	rests, err := res.restaurantRepo.GetRestaurants()
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}
 	for _, rest := range rests {
-		deltime := rand.Intn(60)
+		mindeltime := rand.Intn(60)
+		maxdeltime := mindeltime + rand.Intn(20)
 		delprice := rand.Float64() * 1000
 		delprice = math.Round(delprice*100) / 100
-		rest.DeliveryTime = deltime
+		rest.MinDeliveryTime = mindeltime
+		rest.MaxDeliveryTime = maxdeltime
 		rest.DeliveryPrice = float32(delprice)
 	}
 	return rests, nil
 }
 
-func (res restaurantUsecase) GetRestaurantById(id uint) (*dto.RestaurantWithProducts, error) {
-	rest, err := res.RestaurantRepo.GetRestaurantById(id)
+func (res restaurantUsecase) GetRestaurantById(id uint) (*entity.Restaurant, error) {
+	rest, err := res.restaurantRepo.GetRestaurantById(id)
 	if err != nil {
-		return nil, entity.ErrInternalServerError
+		return nil, err
 	}
-	deltime := rand.Intn(60)
+	mindeltime := rand.Intn(60)
+	maxdeltime := mindeltime + rand.Intn(20)
 	delprice := rand.Float64() * 1000
 	delprice = math.Round(delprice*100) / 100
-	rest.DeliveryTime = deltime
+	rest.MinDeliveryTime = mindeltime
+	rest.MaxDeliveryTime = maxdeltime
 	rest.DeliveryPrice = float32(delprice)
-	menuTypes, err := res.RestaurantRepo.GetMenuTypesByRestaurantId(id)
+	return rest, nil
+}
+
+func (res restaurantUsecase) GetRestaurantProducts(id uint) ([]*dto.MenuTypeWithProducts, error) {
+	menuTypes, err := res.restaurantRepo.GetMenuTypesByRestaurantId(id)
 	if err != nil {
-		return nil, entity.ErrInternalServerError
+		return nil, err
 	}
 	var menuTypesWithProducts []*dto.MenuTypeWithProducts
 	for _, menu := range menuTypes {
-		products, err := res.ProductRepo.GetProductsByMenuTypeId(menu.ID)
+		products, err := res.productRepo.GetProductsByMenuTypeId(menu.ID)
 		if err != nil {
 			return nil, entity.ErrInternalServerError
 		}
@@ -68,10 +78,5 @@ func (res restaurantUsecase) GetRestaurantById(id uint) (*dto.RestaurantWithProd
 		menuTypesWithProducts = append(menuTypesWithProducts, &menuTypeWithProducts)
 	}
 
-	restaurantWithProducts := dto.RestaurantWithProducts{
-		Restaurant:            rest,
-		MenuTypesWithProducts: menuTypesWithProducts,
-	}
-
-	return &restaurantWithProducts, nil
+	return menuTypesWithProducts, nil
 }

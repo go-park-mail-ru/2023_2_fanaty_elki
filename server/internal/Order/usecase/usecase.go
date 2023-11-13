@@ -2,8 +2,9 @@ package usecase
 
 import (
 	// "server/internal/domain/entity"
-	"server/internal/domain/dto"
 	orderRep "server/internal/Order/repository"
+	"server/internal/domain/dto"
+	"server/internal/domain/entity"
 )
 
 type UsecaseI interface {
@@ -24,6 +25,10 @@ func NewOrderUsecase(repI orderRep.OrderRepositoryI) *orderUsecase{
 }
 
 func (or *orderUsecase) CreateOrder(reqOrder *dto.ReqCreateOrder) (*dto.RespCreateOrder, error) {
+	if len(reqOrder.Address.City) == 0 || len(reqOrder.Address.Street) == 0 || len(reqOrder.Address.House) == 0 {
+		return nil, entity.ErrBadRequest
+	}
+	
 	order := dto.ToEntityCreateOrder(reqOrder)
 	
 	products := make(map[uint]int)

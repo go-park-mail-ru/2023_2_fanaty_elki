@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 	"server/internal/Cart/repository"
 	"server/internal/domain/entity"
 )
@@ -19,6 +20,7 @@ func NewCartRepo(db *sql.DB) repository.CartRepositoryI {
 func (repo *CartRepo) CreateCart(userID uint) (uint, error) {
 	insertCart := `INSERT INTO cart (user_id) VALUES ($1)`
 	_, err := repo.DB.Exec(insertCart, userID)
+	fmt.Println(err)
 	if err != nil {
 		return 0, entity.ErrInternalServerError
 	}
@@ -42,7 +44,7 @@ func (repo *CartRepo) GetCartByUserID(userID uint) (*entity.Cart, error) {
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, entity.ErrInternalServerError
 		}
 		return nil, entity.ErrInternalServerError
 	}
@@ -52,7 +54,11 @@ func (repo *CartRepo) GetCartByUserID(userID uint) (*entity.Cart, error) {
 func (repo *CartRepo) GetCartProductsByCartID(cartID uint) ([]*entity.CartProduct, error) {
 	rows, err := repo.DB.Query("SELECT id, product_id, cart_id, item_count FROM cart_product WHERE cart_id = $1", cartID)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, err
+		}
 	}
 	defer rows.Close()
 
@@ -69,14 +75,6 @@ func (repo *CartRepo) GetCartProductsByCartID(cartID uint) ([]*entity.CartProduc
 			return nil, err
 		}
 		CartProducts = append(CartProducts, cartProduct)
-	}
-	err = rows.Err()
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		} else {
-			return nil, err
-		}
 	}
 	return CartProducts, nil
 }
@@ -111,6 +109,53 @@ func (repo *CartRepo) UpdateItemCountUp(cartID uint, productID uint) error {
 func (repo *CartRepo) UpdateItemCountDown(cartID uint, productID uint) error {
 	updateProduct := `UPDATE cart_product SET item_count = item_count - 1 WHERE cart_id = $1 AND product_id = $2`
 	_, err := repo.DB.Exec(updateProduct, cartID, productID)
+	if err != nil {
+		return entity.ErrInternalServerError
+	}
+	return nil
+}
+
+func (repo *CartRepo) CheckProductInCart(cartID uint, productID uint) (bool, error) {
+	productCart := &entity.CartProduct{}
+	row := repo.DB.QueryRow("SELECT id, product_id, cart_id, item_count FROM cart_product WHERE cart_id = $1 and product_id = $2", cartID, productID)
+	err := row.Scan(
+		&productCart.ID,
+		&productCart.ProductID,
+		&productCart.CartID,
+		&productCart.ItemCount,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		} else {
+			return false, err
+		}
+	}
+	return true, nil
+}
+
+func (repo *CartRepo) CheckProductCount(cartID uint, productID uint) (uint, error) {
+	productCart := &entity.CartProduct{}
+	row := repo.DB.QueryRow("SELECT id, product_id, cart_id, item_count FROM cart_product WHERE cart_id = $1 and product_id = $2", cartID, productID)
+	err := row.Scan(
+		&productCart.ID,
+		&productCart.ProductID,
+		&productCart.CartID,
+		&productCart.ItemCount,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return 0, nil
+		} else {
+			return 0, err
+		}
+	}
+	return uint(productCart.ItemCount), nil
+}
+
+func (repo *CartRepo) CleanCart(cartID uint) error {
+	deleteProducts := `DELETE FROM cart_product WHERE cart_id = $1`
+	_, err := repo.DB.Exec(deleteProducts, cartID)
 	if err != nil {
 		return entity.ErrInternalServerError
 	}

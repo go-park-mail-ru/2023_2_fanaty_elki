@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
 	"server/internal/User/repository"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
@@ -73,6 +74,7 @@ func (repo *UserRepo) CreateUser(user *dto.DBCreateUser) (uint, error) {
 
 	insertUser := `INSERT INTO users (username, password, birthday, phone_number, email, icon) VALUES ($1, $2, $3, $4, $5, $6)`
 	_, err := repo.DB.Exec(insertUser, user.Username, user.Password, user.Birthday, user.PhoneNumber, user.Email, user.Icon)
+	fmt.Println(err)
 	if err != nil {
 		return 0, entity.ErrInternalServerError
 	}
