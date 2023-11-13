@@ -77,6 +77,70 @@ func TestGetRestaurantByIdSuccess(t *testing.T) {
 		Icon:          "img/burger_king.jpg",
 	}
 
+	var elemID = 1
+
+	mockRest.EXPECT().GetRestaurantById(uint(elemID)).Return(rest, nil)
+	actual, err := usecase.GetRestaurantById(uint(elemID))
+	assert.Equal(t, rest.Name, actual.Name)
+	assert.Nil(t, err)
+}
+
+func TestGetRestaurantByIdFail(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRest := mockR.NewMockRestaurantRepositoryI(ctrl)
+	mockProd := mockP.NewMockProductRepositoryI(ctrl)
+	usecase := NewRestaurantUsecase(mockRest, mockProd)
+
+	// rest := &entity.Restaurant{
+	// 	ID:            1,
+	// 	Name:          "Burger King",
+	// 	Rating:        3.7,
+	// 	CommentsCount: 60,
+	// 	Category:      "Fastfood",
+	// 	Icon:          "img/burger_king.jpg",
+	// }
+
+	// menutypes := []*entity.MenuType{
+	// 	{
+	// 		ID:           1,
+	// 		Name:         "Популярное",
+	// 		RestaurantID: 1,
+	// 	},
+	// }
+
+	testErr := errors.New("test")
+	var elemID = 1
+
+	mockRest.EXPECT().GetRestaurantById(uint(elemID)).Return(&entity.Restaurant{}, testErr)
+	actual, err := usecase.GetRestaurantById(uint(elemID))
+	assert.Empty(t, actual)
+	assert.Equal(t, testErr, err)
+
+	// mockRest.EXPECT().GetRestaurantById(uint(elemID)).Return(rest, nil)
+	// mockRest.EXPECT().GetMenuTypesByRestaurantId(uint(elemID)).Return([]*entity.MenuType{}, testErr)
+	// actual, err = usecase.GetRestaurantById(uint(elemID))
+	// assert.Empty(t, actual)
+	// assert.Equal(t, entity.ErrInternalServerError, err)
+
+	// mockRest.EXPECT().GetRestaurantById(uint(elemID)).Return(rest, nil)
+	// mockRest.EXPECT().GetMenuTypesByRestaurantId(uint(elemID)).Return(menutypes, nil)
+	// mockProd.EXPECT().GetProductsByMenuTypeId(uint(elemID)).Return([]*entity.Product{}, testErr)
+	// actual, err = usecase.GetRestaurantById(uint(elemID))
+	// assert.Empty(t, actual)
+	// assert.Equal(t, entity.ErrInternalServerError, err)
+
+}
+
+func TestGetRestaurantProductsSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRest := mockR.NewMockRestaurantRepositoryI(ctrl)
+	mockProd := mockP.NewMockProductRepositoryI(ctrl)
+	usecase := NewRestaurantUsecase(mockRest, mockProd)
+
 	menutypes := []*entity.MenuType{
 		{
 			ID:           1,
@@ -97,32 +161,22 @@ func TestGetRestaurantByIdSuccess(t *testing.T) {
 		},
 	}
 
-	res := &dto.RestaurantWithProducts{
-		Restaurant: &entity.Restaurant{
-			ID:            1,
-			Name:          "Burger King",
-			Rating:        3.7,
-			CommentsCount: 60,
-			Category:      "Fastfood",
-			Icon:          "img/burger_king.jpg",
-		},
-		MenuTypesWithProducts: []*dto.MenuTypeWithProducts{
-			{
-				MenuType: &entity.MenuType{
-					ID:           1,
-					Name:         "Популярное",
-					RestaurantID: 1,
-				},
-				Products: []*entity.Product{
-					{
-						ID:          1,
-						Name:        "Burger",
-						Price:       120.0,
-						CookingTime: 23,
-						Portion:     "160 г",
-						Description: "Nice burger",
-						Icon:        "deficon",
-					},
+	res := []*dto.MenuTypeWithProducts{
+		{
+			MenuType: &entity.MenuType{
+				ID:           1,
+				Name:         "Популярное",
+				RestaurantID: 1,
+			},
+			Products: []*entity.Product{
+				{
+					ID:          1,
+					Name:        "Burger",
+					Price:       120.0,
+					CookingTime: 23,
+					Portion:     "160 г",
+					Description: "Nice burger",
+					Icon:        "deficon",
 				},
 			},
 		},
@@ -130,31 +184,20 @@ func TestGetRestaurantByIdSuccess(t *testing.T) {
 
 	var elemID = 1
 
-	mockRest.EXPECT().GetRestaurantById(uint(elemID)).Return(rest, nil)
 	mockRest.EXPECT().GetMenuTypesByRestaurantId(uint(elemID)).Return(menutypes, nil)
 	mockProd.EXPECT().GetProductsByMenuTypeId(uint(elemID)).Return(products, nil)
-	actual, err := usecase.GetRestaurantById(uint(elemID))
-	assert.Equal(t, res.Restaurant.Name, actual.Restaurant.Name)
-	assert.Equal(t, res.MenuTypesWithProducts, actual.MenuTypesWithProducts)
+	actual, err := usecase.GetRestaurantProducts(uint(elemID))
+	assert.Equal(t, res, actual)
 	assert.Nil(t, err)
 }
 
-func TestGetRestaurantByIdFail(t *testing.T) {
+func TestGetRestaurantProductsFail(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	mockRest := mockR.NewMockRestaurantRepositoryI(ctrl)
 	mockProd := mockP.NewMockProductRepositoryI(ctrl)
 	usecase := NewRestaurantUsecase(mockRest, mockProd)
-
-	rest := &entity.Restaurant{
-		ID:            1,
-		Name:          "Burger King",
-		Rating:        3.7,
-		CommentsCount: 60,
-		Category:      "Fastfood",
-		Icon:          "img/burger_king.jpg",
-	}
 
 	menutypes := []*entity.MenuType{
 		{
@@ -167,22 +210,14 @@ func TestGetRestaurantByIdFail(t *testing.T) {
 	testErr := errors.New("test")
 	var elemID = 1
 
-	mockRest.EXPECT().GetRestaurantById(uint(elemID)).Return(&entity.Restaurant{}, testErr)
-	actual, err := usecase.GetRestaurantById(uint(elemID))
-	assert.Empty(t, actual)
-	assert.Equal(t, entity.ErrInternalServerError, err)
-
-	mockRest.EXPECT().GetRestaurantById(uint(elemID)).Return(rest, nil)
 	mockRest.EXPECT().GetMenuTypesByRestaurantId(uint(elemID)).Return([]*entity.MenuType{}, testErr)
-	actual, err = usecase.GetRestaurantById(uint(elemID))
+	actual, err := usecase.GetRestaurantProducts(uint(elemID))
 	assert.Empty(t, actual)
-	assert.Equal(t, entity.ErrInternalServerError, err)
+	assert.Equal(t, testErr, err)
 
-	mockRest.EXPECT().GetRestaurantById(uint(elemID)).Return(rest, nil)
 	mockRest.EXPECT().GetMenuTypesByRestaurantId(uint(elemID)).Return(menutypes, nil)
 	mockProd.EXPECT().GetProductsByMenuTypeId(uint(elemID)).Return([]*entity.Product{}, testErr)
-	actual, err = usecase.GetRestaurantById(uint(elemID))
+	actual, err = usecase.GetRestaurantProducts(uint(elemID))
 	assert.Empty(t, actual)
 	assert.Equal(t, entity.ErrInternalServerError, err)
-
 }

@@ -144,7 +144,7 @@ func TestGetRestaurantByIdSuccess(t *testing.T) {
 		WillReturnRows(emptyrows)
 
 	restaurant, err = repo.GetRestaurantById(uint(elemID))
-	if err != nil {
+	if err != entity.ErrNotFound {
 		t.Errorf("unexpected err: %s", err)
 		return
 	}
@@ -230,7 +230,7 @@ func TestGetMenuTypesByRestaurantIdSuccess(t *testing.T) {
 		WillReturnRows(emptyrows)
 
 	menu_types, err = repo.GetMenuTypesByRestaurantId(uint(elemID))
-	if err != nil {
+	if err != entity.ErrNotFound {
 		t.Errorf("unexpected err: %s", err)
 		return
 	}
