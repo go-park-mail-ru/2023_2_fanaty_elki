@@ -33,11 +33,11 @@ CREATE TABLE IF NOT EXISTS public.restaurant
 (
     id SERIAL NOT NULL,
     name TEXT UNIQUE NOT NULL,
-	rating NUMERIC(2,1) DEFAULT 0.0 NOT NULL,
-	comments_count INT DEFAULT 0 NOT NULL,
-	icon TEXT DEFAULT 'deficon' NOT NULL,
+    rating NUMERIC(2,1) DEFAULT 0.0 NOT NULL,
+    comments_count INT DEFAULT 0 NOT NULL,
+    icon TEXT DEFAULT 'deficon' NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
-	updated_at TIMESTAMP WITH TIME ZONE default NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE default NOW(),
     PRIMARY KEY (id),
     CONSTRAINT valid_restaurant CHECK ( LENGTH(NAME) > 0 and LENGTH(NAME) < 40 ),
     CONSTRAINT valid_rating CHECK ( rating >= 0.0 AND rating <= 5.0),
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS public.product
     price NUMERIC(10,2) DEFAULT '0.0' NOT NULL,
     cooking_time INT DEFAULT '0' NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
-	updated_at TIMESTAMP WITH TIME ZONE default NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE default NOW(),
     PRIMARY KEY (id),
     CONSTRAINT valid_product CHECK ( LENGTH(name) > 0 and LENGTH(name) < 40 ),
     CONSTRAINT valid_price CHECK ( price >= 0.0 ),
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS public.orders
     order_date TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
     status TEXT DEFAULT 'CREATED' NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
-	updated_at TIMESTAMP WITH TIME ZONE default NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE default NOW(),
     PRIMARY KEY (id),
     CONSTRAINT valid_status CHECK (LENGTH(status) >= 0 and LENGTH(status) < 40 )
 );
