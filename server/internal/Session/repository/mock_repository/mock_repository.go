@@ -77,3 +77,17 @@ func (mr *MockSessionRepositoryIMockRecorder) Delete(cookie interface{}) *gomock
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockSessionRepositoryI)(nil).Delete), cookie)
 }
+
+// Expire mocks base method.
+func (m *MockSessionRepositoryI) Expire(cookie *entity.Cookie) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Expire", cookie)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Expire indicates an expected call of Expire.
+func (mr *MockSessionRepositoryIMockRecorder) Expire(cookie interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Expire", reflect.TypeOf((*MockSessionRepositoryI)(nil).Expire), cookie)
+}

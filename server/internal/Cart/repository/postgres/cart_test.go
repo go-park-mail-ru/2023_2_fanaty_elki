@@ -394,3 +394,208 @@ func TestUpdateItemCountUpSuccess(t *testing.T) {
 	}
 
 }
+
+func TestUpdateItemCountUpFail(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("cant create mock: %s", err)
+	}
+	defer db.Close()
+
+	repo := &CartRepo{
+		DB: db,
+	}
+
+	var cartID, productID uint
+	cartID = 1
+	productID = 1
+
+	testErr := errors.New("test")
+
+	mock.
+		ExpectExec(`UPDATE cart_product SET`).
+		WithArgs(cartID, productID).
+		WillReturnError(testErr)
+
+	err = repo.UpdateItemCountUp(cartID, productID)
+	if err != entity.ErrInternalServerError {
+		t.Errorf("unexpected err: %s", err)
+		return
+	}
+}
+
+func TestUpdateItemCountDownSuccess(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("cant create mock: %s", err)
+	}
+	defer db.Close()
+
+	repo := &CartRepo{
+		DB: db,
+	}
+
+	var cartID, productID uint
+	cartID = 1
+	productID = 1
+
+	mock.
+		ExpectExec(`UPDATE cart_product SET`).
+		WithArgs(cartID, productID).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	err = repo.UpdateItemCountDown(cartID, productID)
+	if err != nil {
+		t.Errorf("unexpected err: %s", err)
+		return
+	}
+
+}
+
+func TestUpdateItemCountDownFail(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("cant create mock: %s", err)
+	}
+	defer db.Close()
+
+	repo := &CartRepo{
+		DB: db,
+	}
+
+	var cartID, productID uint
+	cartID = 1
+	productID = 1
+
+	testErr := errors.New("test")
+
+	mock.
+		ExpectExec(`UPDATE cart_product SET`).
+		WithArgs(cartID, productID).
+		WillReturnError(testErr)
+
+	err = repo.UpdateItemCountDown(cartID, productID)
+	if err != entity.ErrInternalServerError {
+		t.Errorf("unexpected err: %s", err)
+		return
+	}
+}
+
+func TestCheckProductInCartSuccess(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("cant create mock: %s", err)
+	}
+	defer db.Close()
+
+	repo := &CartRepo{
+		DB: db,
+	}
+
+	rows := sqlmock.
+		NewRows([]string{"id", "product_id", "cart_id", "item_count"})
+	expect := []*entity.CartProduct{
+		{
+			ID:        1,
+			ProductID: 1,
+			CartID:    1,
+			ItemCount: 6,
+		},
+	}
+
+	for _, product := range expect {
+		rows = rows.AddRow(product.ID, product.ProductID, product.CartID, product.ItemCount)
+	}
+
+	var cartID, productID uint
+	cartID = 1
+	productID = 1
+
+	mock.
+		ExpectQuery("SELECT id, product_id, cart_id, item_count FROM cart_product WHERE").WithArgs(cartID, productID).
+		WillReturnRows(rows)
+
+	hasproducts, err := repo.CheckProductInCart(cartID, productID)
+	if err != nil {
+		t.Errorf("unexpected err: %s", err)
+		return
+	}
+
+	if !reflect.DeepEqual(true, hasproducts) {
+		t.Errorf("results not match, want %v, have %v", true, hasproducts)
+		return
+	}
+
+}
+
+func TestCheckProductCountSuccess(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("cant create mock: %s", err)
+	}
+	defer db.Close()
+
+	repo := &CartRepo{
+		DB: db,
+	}
+
+	rows := sqlmock.
+		NewRows([]string{"id", "product_id", "cart_id", "item_count"})
+	expect := []*entity.CartProduct{
+		{
+			ID:        1,
+			ProductID: 1,
+			CartID:    1,
+			ItemCount: 6,
+		},
+	}
+
+	for _, product := range expect {
+		rows = rows.AddRow(product.ID, product.ProductID, product.CartID, product.ItemCount)
+	}
+
+	var cartID, productID uint
+	cartID = 1
+	productID = 1
+
+	mock.
+		ExpectQuery("SELECT id, product_id, cart_id, item_count FROM cart_product WHERE").WithArgs(cartID, productID).
+		WillReturnRows(rows)
+
+	productscount, err := repo.CheckProductCount(cartID, productID)
+	if err != nil {
+		t.Errorf("unexpected err: %s", err)
+		return
+	}
+
+	if !reflect.DeepEqual(uint(expect[0].ItemCount), productscount) {
+		t.Errorf("results not match, want %v, have %v", uint(expect[0].ItemCount), productscount)
+		return
+	}
+
+}
+
+func TestCleanCartSuccess(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("cant create mock: %s", err)
+	}
+	defer db.Close()
+
+	repo := &CartRepo{
+		DB: db,
+	}
+
+	var cartID uint
+	cartID = 1
+	mock.
+		ExpectExec(`DELETE FROM cart_product WHERE`).
+		WithArgs(cartID).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	err = repo.CleanCart(cartID)
+	if err != nil {
+		t.Errorf("unexpected err: %s", err)
+		return
+	}
+}

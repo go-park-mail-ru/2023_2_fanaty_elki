@@ -48,6 +48,50 @@ func (mr *MockCartRepositoryIMockRecorder) AddProductToCart(cartID, productID in
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddProductToCart", reflect.TypeOf((*MockCartRepositoryI)(nil).AddProductToCart), cartID, productID)
 }
 
+// CheckProductCount mocks base method.
+func (m *MockCartRepositoryI) CheckProductCount(cartID, productID uint) (uint, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckProductCount", cartID, productID)
+	ret0, _ := ret[0].(uint)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CheckProductCount indicates an expected call of CheckProductCount.
+func (mr *MockCartRepositoryIMockRecorder) CheckProductCount(cartID, productID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckProductCount", reflect.TypeOf((*MockCartRepositoryI)(nil).CheckProductCount), cartID, productID)
+}
+
+// CheckProductInCart mocks base method.
+func (m *MockCartRepositoryI) CheckProductInCart(cartID, productID uint) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckProductInCart", cartID, productID)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CheckProductInCart indicates an expected call of CheckProductInCart.
+func (mr *MockCartRepositoryIMockRecorder) CheckProductInCart(cartID, productID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckProductInCart", reflect.TypeOf((*MockCartRepositoryI)(nil).CheckProductInCart), cartID, productID)
+}
+
+// CleanCart mocks base method.
+func (m *MockCartRepositoryI) CleanCart(cartID uint) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CleanCart", cartID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CleanCart indicates an expected call of CleanCart.
+func (mr *MockCartRepositoryIMockRecorder) CleanCart(cartID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CleanCart", reflect.TypeOf((*MockCartRepositoryI)(nil).CleanCart), cartID)
+}
+
 // CreateCart mocks base method.
 func (m *MockCartRepositoryI) CreateCart(userID uint) (uint, error) {
 	m.ctrl.T.Helper()

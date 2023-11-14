@@ -112,9 +112,19 @@ func TestAddProductToCartSuccess(t *testing.T) {
 	UserID = 1
 
 	mockSes.EXPECT().Check(cookie.SessionToken).Return(cookie, nil)
+	mockProd.EXPECT().GetProductByID(prod.ID).Return(prod, nil)
 	mockCart.EXPECT().GetCartByUserID(UserID).Return(cart, nil)
+	mockCart.EXPECT().CheckProductInCart(cart.ID, prod.ID).Return(false, nil)
 	mockCart.EXPECT().AddProductToCart(cart.ID, prod.ID).Return(nil)
 	err := usecase.AddProductToCart(cookie.SessionToken, prod.ID)
+	assert.Nil(t, err)
+
+	mockSes.EXPECT().Check(cookie.SessionToken).Return(cookie, nil)
+	mockProd.EXPECT().GetProductByID(prod.ID).Return(prod, nil)
+	mockCart.EXPECT().GetCartByUserID(UserID).Return(cart, nil)
+	mockCart.EXPECT().CheckProductInCart(cart.ID, prod.ID).Return(true, nil)
+	mockCart.EXPECT().UpdateItemCountUp(cart.ID, prod.ID).Return(nil)
+	err = usecase.AddProductToCart(cookie.SessionToken, prod.ID)
 	assert.Nil(t, err)
 }
 
@@ -151,13 +161,94 @@ func TestDeleteProductFromCartSuccess(t *testing.T) {
 	UserID = 1
 
 	mockSes.EXPECT().Check(cookie.SessionToken).Return(cookie, nil)
+	mockProd.EXPECT().GetProductByID(prod.ID).Return(prod, nil)
 	mockCart.EXPECT().GetCartByUserID(UserID).Return(cart, nil)
-	mockCart.EXPECT().DeleteProductFromCart(cart.ID, prod.ID).Return(nil)
+	mockCart.EXPECT().CheckProductInCart(cart.ID, prod.ID).Return(true, nil)
+	mockCart.EXPECT().CheckProductCount(cart.ID, prod.ID).Return(uint(2), nil)
+	mockCart.EXPECT().UpdateItemCountDown(cart.ID, prod.ID).Return(nil)
 	err := usecase.DeleteProductFromCart(cookie.SessionToken, prod.ID)
 	assert.Nil(t, err)
 }
 
-func TestUpdateItemCountUpSuccess(t *testing.T) {
+// func TestUpdateItemCountUpSuccess(t *testing.T) {
+// 	ctrl := gomock.NewController(t)
+// 	defer ctrl.Finish()
+
+// 	mockCart := mockC.NewMockCartRepositoryI(ctrl)
+// 	mockProd := mockP.NewMockProductRepositoryI(ctrl)
+// 	mockSes := mockS.NewMockSessionRepositoryI(ctrl)
+// 	usecase := NewCartUsecase(mockCart, mockProd, mockSes)
+
+// 	cookie := &entity.Cookie{
+// 		UserID:       1,
+// 		SessionToken: "HJJvgsvd",
+// 	}
+
+// 	cart := &entity.Cart{
+// 		ID:     1,
+// 		UserID: 1,
+// 	}
+
+// 	prod := &entity.Product{
+// 		ID:          1,
+// 		Name:        "Burger",
+// 		Price:       120.0,
+// 		CookingTime: 23,
+// 		Portion:     "160 г",
+// 		Description: "Nice burger",
+// 		Icon:        "deficon",
+// 	}
+
+// 	var UserID uint
+// 	UserID = 1
+
+// 	mockSes.EXPECT().Check(cookie.SessionToken).Return(cookie, nil)
+// 	mockCart.EXPECT().GetCartByUserID(UserID).Return(cart, nil)
+// 	mockCart.EXPECT().UpdateItemCountUp(cart.ID, prod.ID).Return(nil)
+// 	err := usecase.UpdateItemCountUp(cookie.SessionToken, prod.ID)
+// 	assert.Nil(t, err)
+// }
+
+// func TestUpdateItemCountDownSuccess(t *testing.T) {
+// 	ctrl := gomock.NewController(t)
+// 	defer ctrl.Finish()
+
+// 	mockCart := mockC.NewMockCartRepositoryI(ctrl)
+// 	mockProd := mockP.NewMockProductRepositoryI(ctrl)
+// 	mockSes := mockS.NewMockSessionRepositoryI(ctrl)
+// 	usecase := NewCartUsecase(mockCart, mockProd, mockSes)
+
+// 	cookie := &entity.Cookie{
+// 		UserID:       1,
+// 		SessionToken: "HJJvgsvd",
+// 	}
+
+// 	cart := &entity.Cart{
+// 		ID:     1,
+// 		UserID: 1,
+// 	}
+
+// 	prod := &entity.Product{
+// 		ID:          1,
+// 		Name:        "Burger",
+// 		Price:       120.0,
+// 		CookingTime: 23,
+// 		Portion:     "160 г",
+// 		Description: "Nice burger",
+// 		Icon:        "deficon",
+// 	}
+
+// 	var UserID uint
+// 	UserID = 1
+
+// 	mockSes.EXPECT().Check(cookie.SessionToken).Return(cookie, nil)
+// 	mockCart.EXPECT().GetCartByUserID(UserID).Return(cart, nil)
+// 	mockCart.EXPECT().UpdateItemCountDown(cart.ID, prod.ID).Return(nil)
+// 	err := usecase.UpdateItemCountDown(cookie.SessionToken, prod.ID)
+// 	assert.Nil(t, err)
+// }
+
+func TestCleanCartSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -176,61 +267,13 @@ func TestUpdateItemCountUpSuccess(t *testing.T) {
 		UserID: 1,
 	}
 
-	prod := &entity.Product{
-		ID:          1,
-		Name:        "Burger",
-		Price:       120.0,
-		CookingTime: 23,
-		Portion:     "160 г",
-		Description: "Nice burger",
-		Icon:        "deficon",
-	}
-
 	var UserID uint
 	UserID = 1
 
 	mockSes.EXPECT().Check(cookie.SessionToken).Return(cookie, nil)
 	mockCart.EXPECT().GetCartByUserID(UserID).Return(cart, nil)
-	mockCart.EXPECT().UpdateItemCountUp(cart.ID, prod.ID).Return(nil)
-	err := usecase.UpdateItemCountUp(cookie.SessionToken, prod.ID)
+	mockCart.EXPECT().CleanCart(UserID).Return(nil)
+	err := usecase.CleanCart(cookie.SessionToken)
 	assert.Nil(t, err)
-}
 
-func TestUpdateItemCountDownSuccess(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	mockCart := mockC.NewMockCartRepositoryI(ctrl)
-	mockProd := mockP.NewMockProductRepositoryI(ctrl)
-	mockSes := mockS.NewMockSessionRepositoryI(ctrl)
-	usecase := NewCartUsecase(mockCart, mockProd, mockSes)
-
-	cookie := &entity.Cookie{
-		UserID:       1,
-		SessionToken: "HJJvgsvd",
-	}
-
-	cart := &entity.Cart{
-		ID:     1,
-		UserID: 1,
-	}
-
-	prod := &entity.Product{
-		ID:          1,
-		Name:        "Burger",
-		Price:       120.0,
-		CookingTime: 23,
-		Portion:     "160 г",
-		Description: "Nice burger",
-		Icon:        "deficon",
-	}
-
-	var UserID uint
-	UserID = 1
-
-	mockSes.EXPECT().Check(cookie.SessionToken).Return(cookie, nil)
-	mockCart.EXPECT().GetCartByUserID(UserID).Return(cart, nil)
-	mockCart.EXPECT().UpdateItemCountDown(cart.ID, prod.ID).Return(nil)
-	err := usecase.UpdateItemCountDown(cookie.SessionToken, prod.ID)
-	assert.Nil(t, err)
 }

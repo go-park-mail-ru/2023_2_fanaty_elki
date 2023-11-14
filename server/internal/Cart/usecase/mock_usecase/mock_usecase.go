@@ -48,6 +48,20 @@ func (mr *MockUsecaseIMockRecorder) AddProductToCart(SessionToken, productID int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddProductToCart", reflect.TypeOf((*MockUsecaseI)(nil).AddProductToCart), SessionToken, productID)
 }
 
+// CleanCart mocks base method.
+func (m *MockUsecaseI) CleanCart(SessionToken string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CleanCart", SessionToken)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CleanCart indicates an expected call of CleanCart.
+func (mr *MockUsecaseIMockRecorder) CleanCart(SessionToken interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CleanCart", reflect.TypeOf((*MockUsecaseI)(nil).CleanCart), SessionToken)
+}
+
 // DeleteProductFromCart mocks base method.
 func (m *MockUsecaseI) DeleteProductFromCart(SessionToken string, productID uint) error {
 	m.ctrl.T.Helper()
@@ -75,32 +89,4 @@ func (m *MockUsecaseI) GetUserCart(SessionToken string) ([]*dto.CartProduct, err
 func (mr *MockUsecaseIMockRecorder) GetUserCart(SessionToken interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserCart", reflect.TypeOf((*MockUsecaseI)(nil).GetUserCart), SessionToken)
-}
-
-// UpdateItemCountDown mocks base method.
-func (m *MockUsecaseI) UpdateItemCountDown(SessionToken string, productID uint) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateItemCountDown", SessionToken, productID)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateItemCountDown indicates an expected call of UpdateItemCountDown.
-func (mr *MockUsecaseIMockRecorder) UpdateItemCountDown(SessionToken, productID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateItemCountDown", reflect.TypeOf((*MockUsecaseI)(nil).UpdateItemCountDown), SessionToken, productID)
-}
-
-// UpdateItemCountUp mocks base method.
-func (m *MockUsecaseI) UpdateItemCountUp(SessionToken string, productID uint) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateItemCountUp", SessionToken, productID)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateItemCountUp indicates an expected call of UpdateItemCountUp.
-func (mr *MockUsecaseIMockRecorder) UpdateItemCountUp(SessionToken, productID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateItemCountUp", reflect.TypeOf((*MockUsecaseI)(nil).UpdateItemCountUp), SessionToken, productID)
 }

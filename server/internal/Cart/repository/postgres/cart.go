@@ -2,7 +2,6 @@ package repository
 
 import (
 	"database/sql"
-	"fmt"
 	"server/internal/Cart/repository"
 	"server/internal/domain/entity"
 )
@@ -20,7 +19,6 @@ func NewCartRepo(db *sql.DB) repository.CartRepositoryI {
 func (repo *CartRepo) CreateCart(userID uint) (uint, error) {
 	insertCart := `INSERT INTO cart (user_id) VALUES ($1)`
 	_, err := repo.DB.Exec(insertCart, userID)
-	fmt.Println(err)
 	if err != nil {
 		return 0, entity.ErrInternalServerError
 	}
