@@ -20,11 +20,20 @@ func TestCreateOrderSuccess(t *testing.T) {
 		DB: db,
 	}
 
+	var flat uint
+	flat = 1
+
 	order := &dto.DBReqCreateOrder{
 		Products: &map[uint]int{1: 2},
 		UserId:   1,
 		Status:   "CREATED",
 		Date:     time.Now(),
+		Address: &dto.DBCreateOrderAddress{
+			City:   "Moscow",
+			Street: "Tverskaya",
+			House:  "2",
+			Flat:   &flat,
+		},
 	}
 
 	respOrder := &dto.RespCreateOrder{
@@ -39,6 +48,9 @@ func TestCreateOrderSuccess(t *testing.T) {
 	var orderID uint
 	orderID = 1
 
+	var addressID uint
+	addressID = 1
+
 	rows := sqlmock.
 		NewRows([]string{"id"}).AddRow(1)
 
@@ -50,6 +62,19 @@ func TestCreateOrderSuccess(t *testing.T) {
 	mock.
 		ExpectExec("INSERT INTO orders_product ").
 		WithArgs(1, orderID, 2).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	rows = sqlmock.
+		NewRows([]string{"id"}).AddRow(1)
+
+	mock.
+		ExpectQuery("INSERT INTO address").
+		WithArgs(order.Address.City, order.Address.Street, order.Address.House, order.Address.Flat).
+		WillReturnRows(rows)
+
+	mock.
+		ExpectExec("INSERT INTO orders_address").
+		WithArgs(orderID, addressID).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	actual, err := repo.CreateOrder(order)
@@ -104,29 +129,42 @@ func TestGetOrdersSuccess(t *testing.T) {
 		DB: db,
 	}
 
+	var flat uint
+	flat = 1
+
 	rows := sqlmock.
-		NewRows([]string{"id", "status", "created_at", "updated_at"})
+		NewRows([]string{"id", "status", "created_at", "city", "street", "house_numbe", "flat_number"})
 	expect := []*dto.RespGetOrder{
 		{
-			Id:          1,
-			Status:      "CREATED",
-			Date:        time.Now(),
-			UpdatedDate: time.Now(),
+			Id:     1,
+			Status: "CREATED",
+			Date:   time.Now(),
+			Address: &dto.RespOrderAddress{
+				City:   "Moscow",
+				Street: "Tverskaya",
+				House:  "2",
+				Flat:   &flat,
+			},
 		},
 		{
-			Id:          2,
-			Status:      "CREATED",
-			Date:        time.Now(),
-			UpdatedDate: time.Now(),
+			Id:     2,
+			Status: "CREATED",
+			Date:   time.Now(),
+			Address: &dto.RespOrderAddress{
+				City:   "Moscow",
+				Street: "Tverskaya",
+				House:  "3",
+				Flat:   &flat,
+			},
 		},
 	}
 
 	for _, order := range expect {
-		rows = rows.AddRow(order.Id, order.Status, order.Date, order.UpdatedDate)
+		rows = rows.AddRow(order.Id, order.Status, order.Date, order.Address.City, order.Address.Street, order.Address.House, order.Address.Flat)
 	}
 
 	mock.
-		ExpectQuery("SELECT id, status, created_at, updated_at FROM orders").
+		ExpectQuery("SELECT o.id, o.status, o.created_at, a.city, a.street, a.house_number, a.flat_number FROM orders o JOIN orders_address oa on o.id = oa.orders_id JOIN address a on a.id = oa.address_id WHERE").
 		WillReturnRows(rows)
 
 	var userID uint
@@ -187,14 +225,13 @@ func TestGetOrderSuccess(t *testing.T) {
 		},
 	}
 
-	resporder := &dto.RespGetOrder{
-		Id:          1,
+	resporder := &dto.RespGetOneOrder{
 		Status:      "CREATED",
 		Date:        time.Now(),
 		UpdatedDate: time.Now(),
 	}
 
-	row = row.AddRow(resporder.Status, resporder.Date, resporder.UpdatedDate)
+	row = row.AddRow(resporder.Status, resporder.Date, resporder.Date)
 
 	mock.
 		ExpectQuery("SELECT status, order_date, updated_at FROM orders WHERE").WithArgs(reqorder.OrderId, reqorder.UserId).
