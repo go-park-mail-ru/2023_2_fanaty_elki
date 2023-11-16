@@ -1,4 +1,4 @@
-package postgres
+package repository
 
 import (
 	"encoding/json"
@@ -33,7 +33,7 @@ func (sm *sessionManager) Create(cookie *entity.Cookie) error {
 func (sm *sessionManager) Check(sessionToken string) (*entity.Cookie, error) {
 	mkey := "sessions:" + sessionToken
 	data, err := redis.Bytes(sm.redisConn.Do("GET", mkey))
-	
+
 	if err != nil {
 		if err != redis.ErrNil {
 			return nil, entity.ErrInternalServerError
@@ -58,7 +58,7 @@ func (sm *sessionManager) Delete(cookie *dto.DBDeleteCookie) error {
 		}
 		return nil
 	}
-	
+
 	return nil
 }
 

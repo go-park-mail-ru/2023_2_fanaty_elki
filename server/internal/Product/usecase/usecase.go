@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"fmt"
 	productRep "server/internal/Product/repository"
 	"server/internal/domain/entity"
 )
@@ -26,7 +25,6 @@ func (pu productUsecase) GetProductByID(id uint) (*entity.Product, error) {
 		return nil, entity.ErrInternalServerError
 	}
 	if product == nil {
-		fmt.Println("no product")
 		return nil, entity.ErrNotFound
 	}
 	return product, nil
