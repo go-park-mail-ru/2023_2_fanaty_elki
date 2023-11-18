@@ -26,7 +26,7 @@ import (
 	userRep "server/internal/User/repository/postgres"
 	userUsecase "server/internal/User/usecase"
 	"server/internal/middleware"
-
+	"time"
 	"github.com/gomodule/redigo/redis"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -37,16 +37,17 @@ import (
 // @license.name Apache 2.0
 // @host http://84.23.53.216:8001/
 
-const PORT = ":3333"
+const PORT = ":8080"
 
 var (
-	redisAddr = flag.String("addr", "redis://user:@localhost:6379/0", "redis addr")
+	redisAddr = flag.String("addr", "redis://redis-session:6379/0", "redis addr")
 
-	host     = "localhost"
+	host     = "test_postgres"
 	port     = 5432
 	user     = db.User.Username
 	password = db.User.Password
 	dbname   = "prinesy-poday"
+
 	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
@@ -62,6 +63,8 @@ func main() {
 	if err != nil {
 		log.Fatal("can`t connect to redis", err)
 	}
+
+	time.Sleep(5 * time.Second)
 
 	db, err := db.GetPostgres(psqlInfo)
 	if err != nil {
@@ -113,7 +116,6 @@ func main() {
 	router.PathPrefix("/api/cart").Handler(authRouter)
 	router.PathPrefix("/api/users/me").Handler(authRouter)
 	router.PathPrefix("/api/orders").Handler(authRouter)
-	router.PathPrefix("/api/csrf").Handler(authRouter)
 	router.PathPrefix("/api/users").Handler(corsRouter)
 
 	router.Use(logger.ACLogMiddleware)
