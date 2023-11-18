@@ -7,6 +7,9 @@ import (
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 	"time"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 )
 
 const sessKeyLen = 10
@@ -135,8 +138,9 @@ func (ss sessionUsecase) CreateCookieAuth(cookie *entity.Cookie) (*dto.ReqGetUse
 }
 
 func (ss sessionUsecase) CreateCsrf(sessionToken string) (string, error) {
-	csrfToken := "tipahashtoken"
-	err := ss.sessionRepo.CreateCsrf(sessionToken, csrfToken)
+	csrfToken := randStringRunes(10)
+	redisCSRFToken := ss.getCSRFHash(csrfToken) 
+	err := ss.sessionRepo.CreateCsrf(sessionToken, redisCSRFToken)
 	if err != nil {
 		return "", err
 	}
@@ -145,14 +149,24 @@ func (ss sessionUsecase) CreateCsrf(sessionToken string) (string, error) {
 
 func (ss sessionUsecase) CheckCsrf(sessionToken string, csrfToken string) error {
 	redisCsrfToken, err := ss.sessionRepo.GetCsrf(sessionToken)
+	hash := ss.getCSRFHash(csrfToken)
+
 	if err != nil {
 		return err
 	} 
 
-	if redisCsrfToken == "" || csrfToken != redisCsrfToken {
+	if redisCsrfToken == "" || hash != redisCsrfToken {
 		return entity.ErrFailCSRF
 	}
 
 	return nil
 }
 
+func (ss sessionUsecase) getCSRFHash(csrfToken string) string {
+	salt := "KOCTbILbSalt"
+	hash := hmac.New(sha256.New, []byte(salt))
+	hash.Write([]byte(csrfToken))
+	hashInBytes := hash.Sum(nil)
+
+	return hex.EncodeToString(hashInBytes)
+}
