@@ -71,7 +71,9 @@ func (repo *restaurantRepo) GetMenuTypesByRestaurantId(id uint) ([]*entity.MenuT
 	}
 	defer rows.Close()
 	var MenuTypes = []*entity.MenuType{}
+	var count = 0
 	for rows.Next() {
+		count++
 		menuType := &entity.MenuType{}
 		err = rows.Scan(
 			&menuType.ID,
@@ -82,6 +84,9 @@ func (repo *restaurantRepo) GetMenuTypesByRestaurantId(id uint) ([]*entity.MenuT
 			return nil, entity.ErrInternalServerError
 		}
 		MenuTypes = append(MenuTypes, menuType)
+	}
+	if count == 0 {
+		return nil, entity.ErrNotFound
 	}
 	return MenuTypes, nil
 }

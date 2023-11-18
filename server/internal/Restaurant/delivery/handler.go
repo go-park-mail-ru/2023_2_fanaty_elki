@@ -150,6 +150,11 @@ func (handler *RestaurantHandler) GetRestaurantProducts(w http.ResponseWriter, r
 	menu, err := handler.restaurants.GetRestaurantProducts(id)
 
 	if err != nil {
+		if err == entity.ErrNotFound {
+			handler.logger.LogError("problems restaurants id", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
 		handler.logger.LogError("problems restaurants id", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
