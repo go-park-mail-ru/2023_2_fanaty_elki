@@ -40,6 +40,7 @@ func (handler *SessionHandler) RegisterAuthHandler(router *mux.Router) {
 	router.HandleFunc("/api/auth", handler.Auth).Methods(http.MethodGet)
 	router.HandleFunc("/api/users/me", handler.Profile).Methods(http.MethodGet)
 	router.HandleFunc("/api/users/me", handler.UpdateProfile).Methods(http.MethodPatch)
+	router.HandleFunc("/api/csrf", handler.CreateCsrf).Methods(http.MethodPost)
 }
 
 func (handler *SessionHandler) RegisterCorsHandler(router *mux.Router) {
@@ -261,7 +262,7 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, cookie)
-
+	w.Header().Set("X-CSRF-Token", "trap")
 	user, err := handler.sessions.CreateCookieAuth(&entity.Cookie{
 		UserID: userId,
 		SessionToken: cookie.Value,
@@ -362,3 +363,15 @@ func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Requ
 	}
 }
 
+func (handler *SessionHandler) CreateCsrf(w http.ResponseWriter, r *http.Request) {
+	cookie, _ := r.Cookie("session_id")
+	token, err := handler.sessions.CreateCsrf(cookie.Value)
+	if err != nil {
+		handler.logger.LogError("problems with creating csrf-token", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	
+	w.Header().Set("X-CSRF-Token", token)
+	w.WriteHeader(http.StatusCreated)
+}

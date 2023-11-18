@@ -25,7 +25,7 @@ func NewRestaurantUsecase(resRep restRep.RestaurantRepositoryI, productRep produ
 		restaurantRepo: resRep,
 		productRepo:    productRep,
 	}
-	
+
 }
 
 func (res restaurantUsecase) GetRestaurants() ([]*entity.Restaurant, error) {
@@ -63,7 +63,7 @@ func (res restaurantUsecase) GetRestaurantById(id uint) (*entity.Restaurant, err
 func (res restaurantUsecase) GetRestaurantProducts(id uint) ([]*dto.MenuTypeWithProducts, error) {
 	menuTypes, err := res.restaurantRepo.GetMenuTypesByRestaurantId(id)
 	if err != nil {
-		return nil, entity.ErrInternalServerError
+		return nil, err
 	}
 	var menuTypesWithProducts []*dto.MenuTypeWithProducts
 	for _, menu := range menuTypes {

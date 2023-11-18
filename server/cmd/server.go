@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
-
 	"flag"
 	"log"
 	"server/config"
@@ -39,17 +37,16 @@ import (
 // @license.name Apache 2.0
 // @host http://84.23.53.216:8001/
 
-const PORT = ":8080"
+const PORT = ":3333"
 
 var (
-	redisAddr = flag.String("addr", "redis://redis-session:6379/0", "redis addr")
+	redisAddr = flag.String("addr", "redis://user:@localhost:6379/0", "redis addr")
 
-	host     = "test_postgres"
+	host     = "localhost"
 	port     = 5432
 	user     = db.User.Username
 	password = db.User.Password
 	dbname   = "prinesy-poday"
-
 	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
@@ -65,8 +62,6 @@ func main() {
 	if err != nil {
 		log.Fatal("can`t connect to redis", err)
 	}
-
-	time.Sleep(5 * time.Second)
 
 	db, err := db.GetPostgres(psqlInfo)
 	if err != nil {
@@ -118,6 +113,7 @@ func main() {
 	router.PathPrefix("/api/cart").Handler(authRouter)
 	router.PathPrefix("/api/users/me").Handler(authRouter)
 	router.PathPrefix("/api/orders").Handler(authRouter)
+	router.PathPrefix("/api/csrf").Handler(authRouter)
 	router.PathPrefix("/api/users").Handler(corsRouter)
 
 	router.Use(logger.ACLogMiddleware)

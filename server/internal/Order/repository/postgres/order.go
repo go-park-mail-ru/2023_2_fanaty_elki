@@ -1,7 +1,8 @@
-package order
+package repository
 
 import (
 	"database/sql"
+
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 )
@@ -25,7 +26,7 @@ func (repo *orderRepo) CreateOrder(order *dto.DBReqCreateOrder) (*dto.RespCreate
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}
-	
+
 	for product, count := range *order.Products {
 		insertProduct := `INSERT INTO orders_product (product_id, order_id, item_count) VALUES ($1, $2, $3)`
 		_, err := repo.DB.Exec(insertProduct, product, orderId, count)
@@ -39,27 +40,27 @@ func (repo *orderRepo) CreateOrder(order *dto.DBReqCreateOrder) (*dto.RespCreate
 	insertAddress := `INSERT INTO address (city, street, house_number, flat_number)
 				      VALUES ($1, $2, $3, $4)
 					  RETURNING ID`
-	var addressId uint 
+	var addressId uint
 	err = repo.DB.QueryRow(insertAddress, order.Address.City, order.Address.Street, order.Address.House, order.Address.Flat).Scan(&addressId)
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}
-	
+
 	insertOrderAddress := `INSERT INTO orders_address (orders_id, address_id)
 				      	   VALUES ($1, $2)`
 	_, err = repo.DB.Exec(insertOrderAddress, orderId, addressId)
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}
-	
+
 	return &dto.RespCreateOrder{
-		Id:orderId,
+		Id:     orderId,
 		Status: order.Status,
-		Date: order.Date,
+		Date:   order.Date,
 	}, nil
 }
 
-func (repo *orderRepo) UpdateOrder(order *dto.ReqUpdateOrder) (error) {
+func (repo *orderRepo) UpdateOrder(order *dto.ReqUpdateOrder) error {
 	updateOrder := `UPDATE orders
 					SET status = $1
 					WHERE id = $2`
@@ -102,12 +103,12 @@ func (repo *orderRepo) GetOrders(userId uint) ([]*dto.RespGetOrder, error) {
 			return nil, entity.ErrInternalServerError
 		}
 		orders = append(orders, order)
-	}	
+	}
 	err = rows.Err()
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
-		} 
+		}
 		return nil, entity.ErrInternalServerError
 	}
 	return orders, nil
@@ -120,8 +121,8 @@ func (repo *orderRepo) GetOrder(reqOrder *dto.ReqGetOneOrder) (*dto.RespGetOneOr
 	order := dto.RespGetOneOrder{}
 	err := repo.DB.QueryRow(getOrder, reqOrder.OrderId, reqOrder.UserId).Scan(&order.Status, &order.Date, &order.UpdatedDate)
 	if err != nil {
-		if err == sql.ErrNoRows{
-			
+		if err == sql.ErrNoRows {
+
 			return nil, entity.ErrNotFound
 		}
 		return nil, entity.ErrInternalServerError
@@ -152,12 +153,12 @@ func (repo *orderRepo) GetOrder(reqOrder *dto.ReqGetOneOrder) (*dto.RespGetOneOr
 			return nil, entity.ErrInternalServerError
 		}
 		products = append(products, product)
-	}	
+	}
 	err = rows.Err()
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, entity.ErrNotFound
-		} 
+		}
 		return nil, entity.ErrInternalServerError
 	}
 

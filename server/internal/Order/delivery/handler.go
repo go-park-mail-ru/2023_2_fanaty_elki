@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"encoding/json"
+
 	"io/ioutil"
 	"net/http"
 	orderUsecase "server/internal/Order/usecase"
@@ -10,6 +11,7 @@ import (
 	"server/internal/domain/entity"
 	mw "server/internal/middleware"
 	"strconv"
+
 	"github.com/gorilla/mux"
 )
 
@@ -24,14 +26,14 @@ type RespError struct {
 type OrderHandler struct {
 	orderUC   orderUsecase.UsecaseI
 	sessionUC sessionUsecase.UsecaseI
-	logger *mw.ACLog
+	logger    *mw.ACLog
 }
 
 func NewOrderHandler(orderUC orderUsecase.UsecaseI, sessionUC sessionUsecase.UsecaseI, logger *mw.ACLog) *OrderHandler {
 	return &OrderHandler{
 		orderUC:   orderUC,
 		sessionUC: sessionUC,
-		logger: logger,
+		logger:    logger,
 	}
 }
 
@@ -45,8 +47,8 @@ func (handler *OrderHandler) RegisterHandler(router *mux.Router) {
 func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	if r.Header.Get("Content-Type") != "application/json"{
-		handler.logger.LogError("bad content-type", entity.ErrBadContentType,  w.Header().Get("request-id"), r.URL.Path)
+	if r.Header.Get("Content-Type") != "application/json" {
+		handler.logger.LogError("bad content-type", entity.ErrBadContentType, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -69,7 +71,7 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	
+
 	respOrder, err := handler.orderUC.CreateOrder(&reqOrder)
 	switch err {
 	case entity.ErrInternalServerError:
@@ -96,7 +98,7 @@ func (handler *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request)
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		
+
 		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -122,7 +124,7 @@ func (handler *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
 
 	cookie, _ := r.Cookie("session_id")
 	userId, _ := handler.sessionUC.GetIdByCookie(cookie.Value)
-	
+
 	respOrders, err := handler.orderUC.GetOrders(userId)
 	if err != nil {
 		handler.logger.LogError("order: problems while getting orders json", err, w.Header().Get("request-id"), r.URL.Path)

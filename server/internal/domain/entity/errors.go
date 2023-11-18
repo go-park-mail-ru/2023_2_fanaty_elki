@@ -22,6 +22,8 @@ var (
 	ErrBadContentType	     = errors.New("bad content-type")
 	ErrCreatingCookie		 = errors.New("problems with creating cookie")
 	ErrDeletingCookie		 = errors.New("problems with deleting cookie")
+	ErrFailCSRF				 = errors.New("csrf failed")
+	StatusFailCSRF			 = 419
 	StatusConflicUsername    = 491
 	StatusConflicEmail 	     = 492
 	StatusConflicPhoneNumber = 493
