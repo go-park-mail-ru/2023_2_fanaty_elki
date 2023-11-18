@@ -22,6 +22,8 @@ type UsecaseI interface {
 	GetUserProfile(sessionToken string) (*dto.ReqGetUserProfile, error)
 	GetIdByCookie(SessionToken string) (uint, error)
 	CreateCookieAuth(cookie *entity.Cookie) (*dto.ReqGetUserProfile, error)
+	CheckCsrf(sessionToken string, csrfToken string) error 
+	CreateCsrf(sessionToken string) (string, error)
 }
 
 type sessionUsecase struct {
@@ -130,5 +132,27 @@ func (ss sessionUsecase) CreateCookieAuth(cookie *entity.Cookie) (*dto.ReqGetUse
 		return nil, err
 	}
 	return ss.GetUserProfile(cookie.SessionToken)
+}
+
+func (ss sessionUsecase) CreateCsrf(sessionToken string) (string, error) {
+	csrfToken := "tipahashtoken"
+	err := ss.sessionRepo.CreateCsrf(sessionToken, csrfToken)
+	if err != nil {
+		return "", err
+	}
+	return csrfToken, nil
+}
+
+func (ss sessionUsecase) CheckCsrf(sessionToken string, csrfToken string) error {
+	redisCsrfToken, err := ss.sessionRepo.GetCsrf(sessionToken)
+	if err != nil {
+		return err
+	} 
+
+	if redisCsrfToken == "" || csrfToken != redisCsrfToken {
+		return entity.ErrFailCSRF
+	}
+
+	return nil
 }
 

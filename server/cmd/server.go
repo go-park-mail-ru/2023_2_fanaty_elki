@@ -37,7 +37,7 @@ import (
 // @license.name Apache 2.0
 // @host http://84.23.53.216:8001/
 
-const PORT = ":8080"
+const PORT = ":3333"
 
 var (
 	redisAddr = flag.String("addr", "redis://user:@localhost:6379/0", "redis addr")
@@ -113,6 +113,7 @@ func main() {
 	router.PathPrefix("/api/cart").Handler(authRouter)
 	router.PathPrefix("/api/users/me").Handler(authRouter)
 	router.PathPrefix("/api/orders").Handler(authRouter)
+	router.PathPrefix("/api/csrf").Handler(authRouter)
 	router.PathPrefix("/api/users").Handler(corsRouter)
 
 	router.Use(logger.ACLogMiddleware)
