@@ -2,16 +2,19 @@ package delivery
 
 import (
 	"encoding/json"
-	"fmt"
-	"github.com/gorilla/mux"
+
 	"io/ioutil"
+
 	"net/http"
+
 	sessionUsecase "server/internal/Session/usecase"
 	userUsecase "server/internal/User/usecase"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 	mw "server/internal/middleware"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 type Result struct {
@@ -364,31 +367,26 @@ func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Requ
 }
 
 func (handler *SessionHandler) UpdateAvatar(w http.ResponseWriter, r *http.Request) {
+
+	cookie, _ := r.Cookie("session_id")
+	id, _ := handler.sessions.GetIdByCookie(cookie.Value)
+
 	r.ParseMultipartForm(10 << 20)
 	file, filehandler, err := r.FormFile("image")
 	if err != nil {
-		fmt.Println("Error Retrieving the File")
-		fmt.Println(err)
+		handler.logger.LogError("prbolems receving image", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	defer file.Close()
-	fmt.Printf("Uploaded File: %+v\n", filehandler.Filename)
-	fmt.Printf("File Size: %+v\n", filehandler.Size)
-	fmt.Printf("MIME Header: %+v\n", filehandler.Header)
-	tempFile, err := ioutil.TempFile("temp-images", "upload-*.png")
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer tempFile.Close()
 
-	fileBytes, err := ioutil.ReadAll(file)
+	err = handler.users.UpdateAvatar(file, filehandler, id)
 	if err != nil {
-		fmt.Println(err)
+		handler.logger.LogError("prbolems creating foto", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
-	tempFile.Write(fileBytes)
-
-	fmt.Fprintf(w, "Successfully Uploaded File\n")
 }
 
 func (handler *SessionHandler) CreateCsrf(w http.ResponseWriter, r *http.Request) {

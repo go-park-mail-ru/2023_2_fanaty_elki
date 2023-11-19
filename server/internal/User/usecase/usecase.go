@@ -2,16 +2,21 @@ package usecase
 
 import (
 	//"fmt"
+	"github.com/minio/minio-go/v6"
+	"mime/multipart"
+	"net/url"
 	"regexp"
 	cartRep "server/internal/Cart/repository"
 	userRep "server/internal/User/repository"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
+	"time"
 )
 
 type UsecaseI interface {
 	CreateUser(new_user *entity.User) (uint, error)
 	UpdateUser(newUser *entity.User) error
+	UpdateAvatar(file multipart.File, filehandler *multipart.FileHeader, id uint) error
 }
 
 type userUsecase struct {
@@ -26,7 +31,6 @@ func NewUserUsecase(userRepI userRep.UserRepositoryI, cartRepI cartRep.CartRepos
 	}
 }
 
-
 func (us userUsecase) GetUserById(id uint) (*entity.User, error) {
 	user, err := us.userRepo.FindUserById(id)
 	if err != nil {
@@ -36,7 +40,7 @@ func (us userUsecase) GetUserById(id uint) (*entity.User, error) {
 }
 
 func (us userUsecase) CreateUser(newUser *entity.User) (uint, error) {
-	
+
 	err := us.checkUserFieldsCreate(newUser)
 
 	if err != nil {
@@ -191,8 +195,62 @@ func (us userUsecase) checkUserFieldsUpdate(user *entity.User) error {
 	}
 
 	re = regexp.MustCompile(`^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{6,10}$`)
-	if !re.MatchString(user.PhoneNumber) && len(user.PhoneNumber) != 0{
+	if !re.MatchString(user.PhoneNumber) && len(user.PhoneNumber) != 0 {
 		return entity.ErrInvalidPhoneNumber
 	}
+	return nil
+}
+
+func (us userUsecase) UpdateAvatar(file multipart.File, filehandler *multipart.FileHeader, id uint) error {
+	endpoint := "bring-give.hb.ru-msk.vkcs.cloud"
+	location := "bring-give"
+	accessKeyID := "s7X63TovV3DHPNCcsuhM5H"
+	secretAccessKey := "fUxGkBzPBRdvfxuQWJ1urt1BFdfq85V9gfoE65drMLe"
+	useSSL := true
+
+	bucketName := "bring-give"
+	objectName := filehandler.Filename
+	minioClient, err := minio.New(endpoint, accessKeyID, secretAccessKey, useSSL)
+	if err != nil {
+		return entity.ErrInternalServerError
+	}
+
+	err = us.uploadFile(minioClient, bucketName, location, objectName, file, filehandler.Size)
+	if err != nil {
+		return entity.ErrInternalServerError
+	}
+
+	reqParams := make(url.Values)
+	reqParams.Set("response-content-disposition", "attachment; filename=\""+objectName+"\"")
+
+	presignedURL, err := minioClient.PresignedGetObject(bucketName, objectName, time.Duration(1000)*time.Second, reqParams)
+	if err != nil {
+		return entity.ErrInternalServerError
+	}
+
+	user, err := us.GetUserById(id)
+	if err != nil {
+		return err
+	}
+
+	user.Icon = presignedURL.String()
+
+	return us.userRepo.UpdateUser(dto.ToRepoUpdateUser(user))
+}
+
+func (us userUsecase) uploadFile(minioClient *minio.Client, bucketName string, location string, objectName string, file multipart.File, filesize int64) error {
+	err := minioClient.MakeBucket(bucketName, location)
+	if err != nil {
+		exists, errBucketExists := minioClient.BucketExists(bucketName)
+		if !(errBucketExists == nil && exists) {
+			return err
+		}
+	}
+
+	_, err = minioClient.PutObject(bucketName, objectName, file, filesize, minio.PutObjectOptions{})
+	if err != nil {
+		return entity.ErrInternalServerError
+	}
+
 	return nil
 }
