@@ -2,15 +2,16 @@ package delivery
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
 	sessionUsecase "server/internal/Session/usecase"
 	userUsecase "server/internal/User/usecase"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
-	"time"
 	mw "server/internal/middleware"
-	"github.com/gorilla/mux"
+	"time"
 )
 
 type Result struct {
@@ -24,14 +25,14 @@ type RespError struct {
 type SessionHandler struct {
 	sessions sessionUsecase.UsecaseI
 	users    userUsecase.UsecaseI
-	logger *mw.ACLog
+	logger   *mw.ACLog
 }
 
 func NewSessionHandler(sessions sessionUsecase.UsecaseI, users userUsecase.UsecaseI, logger *mw.ACLog) *SessionHandler {
 	return &SessionHandler{
 		sessions: sessions,
 		users:    users,
-		logger: logger,
+		logger:   logger,
 	}
 }
 
@@ -40,6 +41,7 @@ func (handler *SessionHandler) RegisterAuthHandler(router *mux.Router) {
 	router.HandleFunc("/api/auth", handler.Auth).Methods(http.MethodGet)
 	router.HandleFunc("/api/users/me", handler.Profile).Methods(http.MethodGet)
 	router.HandleFunc("/api/users/me", handler.UpdateProfile).Methods(http.MethodPatch)
+	router.HandleFunc("/api/users/me/icon", handler.UpdateAvatar).Methods(http.MethodPatch)
 	router.HandleFunc("/api/csrf", handler.CreateCsrf).Methods(http.MethodPost)
 }
 
@@ -47,8 +49,6 @@ func (handler *SessionHandler) RegisterCorsHandler(router *mux.Router) {
 	router.HandleFunc("/api/login", handler.Login).Methods(http.MethodPost)
 	router.HandleFunc("/api/users", handler.SignUp).Methods(http.MethodPost)
 }
-
-
 
 // SignUp godoc
 // @Summary      Signing up a user
@@ -64,12 +64,12 @@ func (handler *SessionHandler) RegisterCorsHandler(router *mux.Router) {
 func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
-	if r.Header.Get("Content-Type") != "application/json"{
-		handler.logger.LogError("bad content-type", entity.ErrBadContentType,  w.Header().Get("request-id"), r.URL.Path)
+	if r.Header.Get("Content-Type") != "application/json" {
+		handler.logger.LogError("bad content-type", entity.ErrBadContentType, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	
+
 	jsonbody, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
@@ -89,27 +89,27 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	id, err := handler.users.CreateUser(dto.ToEntityCreateUser(&reqUser))
 	switch err {
-		case entity.ErrInternalServerError:
-			handler.logger.LogError("problems with creating user", err, w.Header().Get("request-id"), r.URL.Path)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		case entity.ErrInvalidBirthday, entity.ErrInvalidPassword, entity.ErrInvalidEmail, entity.ErrInvalidUsername, entity.ErrInvalidPhoneNumber:
-			handler.logger.LogError("invalid field", err, w.Header().Get("request-id"), r.URL.Path)
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		case entity.ErrConflictEmail:
-			handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
-			w.WriteHeader(entity.StatusConflicEmail)
-			return
-		case entity.ErrConflictUsername:
-			handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
-			w.WriteHeader(entity.StatusConflicUsername)
-			return
-		case entity.ErrConflictPhoneNumber:
-			handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
-			w.WriteHeader(entity.StatusConflicPhoneNumber)
-			return
-		}
+	case entity.ErrInternalServerError:
+		handler.logger.LogError("problems with creating user", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	case entity.ErrInvalidBirthday, entity.ErrInvalidPassword, entity.ErrInvalidEmail, entity.ErrInvalidUsername, entity.ErrInvalidPhoneNumber:
+		handler.logger.LogError("invalid field", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	case entity.ErrConflictEmail:
+		handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(entity.StatusConflicEmail)
+		return
+	case entity.ErrConflictUsername:
+		handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(entity.StatusConflicUsername)
+		return
+	case entity.ErrConflictPhoneNumber:
+		handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(entity.StatusConflicPhoneNumber)
+		return
+	}
 
 	w.WriteHeader(http.StatusCreated)
 	body := map[string]interface{}{
@@ -139,10 +139,10 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
-	
+
 	w.Header().Set("Content-Type", "application/json")
-	if r.Header.Get("Content-Type") != "application/json"{
-		handler.logger.LogError("bad content-type", entity.ErrBadContentType,  w.Header().Get("request-id"), r.URL.Path)
+	if r.Header.Get("Content-Type") != "application/json" {
+		handler.logger.LogError("bad content-type", entity.ErrBadContentType, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -188,7 +188,7 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, cookie)
 
 	user, err := handler.sessions.GetUserProfile(cookie.Value)
-	if err == entity.ErrInternalServerError{
+	if err == entity.ErrInternalServerError {
 		handler.logger.LogError("problems with getting profile", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -264,7 +264,7 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, cookie)
 	w.Header().Set("X-CSRF-Token", "trap")
 	user, err := handler.sessions.CreateCookieAuth(&entity.Cookie{
-		UserID: userId,
+		UserID:       userId,
 		SessionToken: cookie.Value,
 	})
 	if err != nil {
@@ -289,11 +289,11 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} error "unauthorized"
 // @Router   /api/me [get]
 func (handler *SessionHandler) Profile(w http.ResponseWriter, r *http.Request) {
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	cookie, _ := r.Cookie("session_id")
 	user, err := handler.sessions.GetUserProfile(cookie.Value)
-	if err == entity.ErrInternalServerError{
+	if err == entity.ErrInternalServerError {
 		handler.logger.LogError("problems with getting profile", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -310,8 +310,8 @@ func (handler *SessionHandler) Profile(w http.ResponseWriter, r *http.Request) {
 func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
-	if r.Header.Get("Content-Type") != "application/json"{
-		handler.logger.LogError("bad content-type", entity.ErrBadContentType,  w.Header().Get("request-id"), r.URL.Path)
+	if r.Header.Get("Content-Type") != "application/json" {
+		handler.logger.LogError("bad content-type", entity.ErrBadContentType, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -336,31 +336,59 @@ func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Requ
 
 	err = handler.users.UpdateUser(dto.ToEntityUpdateUser(updatedUser, id))
 	switch err {
-		case entity.ErrInternalServerError:
-			handler.logger.LogError("problems with updating user", err, w.Header().Get("request-id"), r.URL.Path)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		case entity.ErrInvalidEmail, entity.ErrInvalidUsername, entity.ErrInvalidPhoneNumber:
-			handler.logger.LogError("invalid field", err, w.Header().Get("request-id"), r.URL.Path)
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		case entity.ErrConflictEmail:
-			handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
-			w.WriteHeader(entity.StatusConflicEmail)
-			return
-		case entity.ErrConflictUsername:
-			handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
-			w.WriteHeader(entity.StatusConflicUsername)
-			return
-		case entity.ErrConflictPhoneNumber:
-			handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
-			w.WriteHeader(entity.StatusConflicPhoneNumber)
-			return
-		case entity.ErrNotFound:
-			handler.logger.LogError("user not found", err, w.Header().Get("request-id"), r.URL.Path)
-			w.WriteHeader(http.StatusNotFound)
-			return
+	case entity.ErrInternalServerError:
+		handler.logger.LogError("problems with updating user", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	case entity.ErrInvalidEmail, entity.ErrInvalidUsername, entity.ErrInvalidPhoneNumber:
+		handler.logger.LogError("invalid field", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	case entity.ErrConflictEmail:
+		handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(entity.StatusConflicEmail)
+		return
+	case entity.ErrConflictUsername:
+		handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(entity.StatusConflicUsername)
+		return
+	case entity.ErrConflictPhoneNumber:
+		handler.logger.LogError("conflcit", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(entity.StatusConflicPhoneNumber)
+		return
+	case entity.ErrNotFound:
+		handler.logger.LogError("user not found", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusNotFound)
+		return
 	}
+}
+
+func (handler *SessionHandler) UpdateAvatar(w http.ResponseWriter, r *http.Request) {
+	r.ParseMultipartForm(10 << 20)
+	file, filehandler, err := r.FormFile("image")
+	if err != nil {
+		fmt.Println("Error Retrieving the File")
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+	fmt.Printf("Uploaded File: %+v\n", filehandler.Filename)
+	fmt.Printf("File Size: %+v\n", filehandler.Size)
+	fmt.Printf("MIME Header: %+v\n", filehandler.Header)
+	tempFile, err := ioutil.TempFile("temp-images", "upload-*.png")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer tempFile.Close()
+
+	fileBytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	tempFile.Write(fileBytes)
+
+	fmt.Fprintf(w, "Successfully Uploaded File\n")
 }
 
 func (handler *SessionHandler) CreateCsrf(w http.ResponseWriter, r *http.Request) {
@@ -371,7 +399,7 @@ func (handler *SessionHandler) CreateCsrf(w http.ResponseWriter, r *http.Request
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	
+
 	w.Header().Set("X-CSRF-Token", token)
 	w.Header().Set("Access-Control-Expose-Headers", "X-CSRF-Token")
 	w.WriteHeader(http.StatusCreated)

@@ -2,10 +2,13 @@ package main
 
 import (
 	"errors"
-	"fmt"
-	"net/http"
 	"flag"
+	"fmt"
+	"github.com/gomodule/redigo/redis"
+	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
 	"log"
+	"net/http"
 	"server/config"
 	"server/db"
 	cartDev "server/internal/Cart/delivery"
@@ -27,9 +30,6 @@ import (
 	userUsecase "server/internal/User/usecase"
 	"server/internal/middleware"
 	"time"
-	"github.com/gomodule/redigo/redis"
-	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
 )
 
 // @title Prinesi-Poday API
@@ -38,6 +38,19 @@ import (
 // @host http://84.23.53.216:8001/
 
 const PORT = ":8080"
+
+// var (
+// 	redisAddr = flag.String("addr", "redis://user:@localhost:6379/0", "redis addr")
+
+// 	host     = "localhost"
+// 	port     = 5432
+// 	user     = db.User.Username
+// 	password = db.User.Password
+// 	dbname   = "prinesy-poday"
+// 	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
+// 		"password=%s dbname=%s sslmode=disable",
+// 		host, port, user, password, dbname)
+// )
 
 var (
 	redisAddr = flag.String("addr", "redis://redis-session:6379/0", "redis addr")
