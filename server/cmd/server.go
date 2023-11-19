@@ -2,10 +2,10 @@ package main
 
 import (
 	"errors"
-	"fmt"
-	"net/http"
 	"flag"
+	"fmt"
 	"log"
+	"net/http"
 	"server/config"
 	"server/db"
 	cartDev "server/internal/Cart/delivery"
@@ -39,14 +39,28 @@ import (
 
 const PORT = ":8080"
 
-var (
-	redisAddr = flag.String("addr", "redis://user:@localhost:6379/0", "redis addr")
+// var (
+// 	redisAddr = flag.String("addr", "redis://user:@localhost:6379/0", "redis addr")
 
-	host     = "localhost"
+// 	host     = "localhost"
+// 	port     = 5432
+// 	user     = db.User.Username
+// 	password = db.User.Password
+// 	dbname   = "prinesy-poday"
+// 	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
+// 		"password=%s dbname=%s sslmode=disable",
+// 		host, port, user, password, dbname)
+// )
+
+var (
+	redisAddr = flag.String("addr", "redis://redis-session:6379/0", "redis addr")
+
+	host     = "test_postgres"
 	port     = 5432
 	user     = db.User.Username
 	password = db.User.Password
 	dbname   = "prinesy-poday"
+
 	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
