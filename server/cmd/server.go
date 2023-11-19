@@ -116,6 +116,7 @@ func main() {
 	router.PathPrefix("/api/cart").Handler(authRouter)
 	router.PathPrefix("/api/users/me").Handler(authRouter)
 	router.PathPrefix("/api/orders").Handler(authRouter)
+	router.PathPrefix("/api/csrf").Handler(authRouter)
 	router.PathPrefix("/api/users").Handler(corsRouter)
 
 	router.Use(logger.ACLogMiddleware)
