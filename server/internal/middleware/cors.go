@@ -15,7 +15,7 @@ func CorsMiddleware(next http.Handler) http.Handler {
 				w.Header().Add("Access-Control-Allow-Credentials", "true")
 			}
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, PATCH, OPTIONS")
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-CSRF-Token")
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
