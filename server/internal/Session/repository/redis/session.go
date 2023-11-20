@@ -2,14 +2,16 @@ package repository
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/gomodule/redigo/redis"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
-
-	"github.com/gomodule/redigo/redis"
+	"sync"
 )
 
 type sessionManager struct {
 	redisConn redis.Conn
+	mu        sync.Mutex
 }
 
 func NewSessionManager(conn redis.Conn) *sessionManager {
@@ -32,8 +34,9 @@ func (sm *sessionManager) Create(cookie *entity.Cookie) error {
 
 func (sm *sessionManager) Check(sessionToken string) (*entity.Cookie, error) {
 	mkey := "sessions:" + sessionToken
+	sm.mu.Lock()
 	data, err := redis.Bytes(sm.redisConn.Do("GET", mkey))
-
+	sm.mu.Unlock()
 	if err != nil {
 		if err != redis.ErrNil {
 			return nil, entity.ErrInternalServerError
@@ -73,4 +76,34 @@ func (sm *sessionManager) Expire(cookie *entity.Cookie) error {
 		return entity.ErrCreatingCookie
 	}
 	return nil
+}
+
+func (sm *sessionManager) CreateCsrf(sessionToken string, csrfToken string) error {
+	dataSerialized, _ := json.Marshal(csrfToken)
+	mkey := "csrf:" + sessionToken
+	result, err := redis.String(sm.redisConn.Do("SET", mkey, dataSerialized, "EX", 540000))
+	if err != nil || result != "OK" {
+		return entity.ErrInternalServerError
+	}
+	fmt.Println(result)
+	return nil
+}
+
+func (sm *sessionManager) GetCsrf(sessionToken string) (string, error) {
+	mkey := "csrf:" + sessionToken
+	data, err := redis.Bytes(sm.redisConn.Do("GET", mkey))
+
+	if err != nil {
+		if err != redis.ErrNil {
+			return "", entity.ErrInternalServerError
+		}
+		return "", nil
+	}
+
+	var csrfToken string
+	err = json.Unmarshal(data, &csrfToken)
+	if err != nil {
+		return "", entity.ErrInternalServerError
+	}
+	return csrfToken, nil
 }

@@ -7,6 +7,9 @@ import (
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 	"time"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 )
 
 const sessKeyLen = 10
@@ -22,6 +25,8 @@ type UsecaseI interface {
 	GetUserProfile(sessionToken string) (*dto.ReqGetUserProfile, error)
 	GetIdByCookie(SessionToken string) (uint, error)
 	CreateCookieAuth(cookie *entity.Cookie) (*dto.ReqGetUserProfile, error)
+	CheckCsrf(sessionToken string, csrfToken string) error 
+	CreateCsrf(sessionToken string) (string, error)
 }
 
 type sessionUsecase struct {
@@ -132,3 +137,36 @@ func (ss sessionUsecase) CreateCookieAuth(cookie *entity.Cookie) (*dto.ReqGetUse
 	return ss.GetUserProfile(cookie.SessionToken)
 }
 
+func (ss sessionUsecase) CreateCsrf(sessionToken string) (string, error) {
+	csrfToken := randStringRunes(10)
+	redisCSRFToken := ss.getCSRFHash(csrfToken) 
+	err := ss.sessionRepo.CreateCsrf(sessionToken, redisCSRFToken)
+	if err != nil {
+		return "", err
+	}
+	return csrfToken, nil
+}
+
+func (ss sessionUsecase) CheckCsrf(sessionToken string, csrfToken string) error {
+	redisCsrfToken, err := ss.sessionRepo.GetCsrf(sessionToken)
+	hash := ss.getCSRFHash(csrfToken)
+
+	if err != nil {
+		return err
+	} 
+
+	if redisCsrfToken == "" || hash != redisCsrfToken {
+		return entity.ErrFailCSRF
+	}
+
+	return nil
+}
+
+func (ss sessionUsecase) getCSRFHash(csrfToken string) string {
+	salt := "KOCTbILbSalt"
+	hash := hmac.New(sha256.New, []byte(salt))
+	hash.Write([]byte(csrfToken))
+	hashInBytes := hash.Sum(nil)
+
+	return hex.EncodeToString(hashInBytes)
+}

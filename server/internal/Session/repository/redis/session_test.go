@@ -130,3 +130,51 @@ func TestExpireSuccess(t *testing.T) {
 	}
 
 }
+
+func TestCreateCsrfSuccess(t *testing.T) {
+	redisConn, err := redis.DialURL(*redisAddr)
+	if err != nil {
+		log.Fatal("can`t connect to redis", err)
+	}
+
+	repo := &sessionManager{
+		redisConn: redisConn,
+	}
+
+	cookie := entity.Cookie{
+		UserID:       1,
+		SessionToken: "TYebbYudb",
+		MaxAge:       50 * time.Hour,
+	}
+
+	err = repo.CreateCsrf(cookie.SessionToken, "HBBGFCCDFG")
+	if err != nil {
+		t.Errorf("unexpected err: %s", err)
+		return
+	}
+
+}
+
+func TestGetCsrfSuccess(t *testing.T) {
+	redisConn, err := redis.DialURL(*redisAddr)
+	if err != nil {
+		log.Fatal("can`t connect to redis", err)
+	}
+
+	repo := &sessionManager{
+		redisConn: redisConn,
+	}
+
+	cookie := entity.Cookie{
+		UserID:       1,
+		SessionToken: "TYebbYudb",
+		MaxAge:       50 * time.Hour,
+	}
+
+	_, err = repo.GetCsrf(cookie.SessionToken)
+	if err != nil {
+		t.Errorf("unexpected err: %s", err)
+		return
+	}
+
+}

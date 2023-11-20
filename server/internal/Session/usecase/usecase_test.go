@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	//"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -172,5 +173,45 @@ func TestCreateCookieAuthSuccess(t *testing.T) {
 	mockUs.EXPECT().FindUserById(cookie.UserID).Return(dbuser, nil)
 	actual, err := usecase.CreateCookieAuth(&cookie)
 	assert.Equal(t, profile, actual)
+	assert.Nil(t, err)
+}
+
+func TestCreateCsrfSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockSes := mockS.NewMockSessionRepositoryI(ctrl)
+	mockUs := mockU.NewMockUserRepositoryI(ctrl)
+	usecase := NewSessionUsecase(mockSes, mockUs)
+
+	cookie := entity.Cookie{
+		UserID:       1,
+		SessionToken: "TYebbYudb",
+		MaxAge:       50 * time.Hour,
+	}
+
+	mockSes.EXPECT().CreateCsrf(cookie.SessionToken, gomock.Any()).Return(nil)
+	_, err := usecase.CreateCsrf(cookie.SessionToken)
+	assert.Nil(t, err)
+}
+
+func TestCheckCsrfSuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockSes := mockS.NewMockSessionRepositoryI(ctrl)
+	mockUs := mockU.NewMockUserRepositoryI(ctrl)
+	usecase := NewSessionUsecase(mockSes, mockUs)
+
+	cookie := entity.Cookie{
+		UserID:       1,
+		SessionToken: "TYebbYudb",
+		MaxAge:       50 * time.Hour,
+	}
+
+	rediscsfr := usecase.getCSRFHash("HBBGFCCDFG")
+
+	mockSes.EXPECT().GetCsrf(cookie.SessionToken).Return(rediscsfr, nil)
+	err := usecase.CheckCsrf(cookie.SessionToken, "HBBGFCCDFG")
 	assert.Nil(t, err)
 }

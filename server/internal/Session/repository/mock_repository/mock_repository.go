@@ -64,6 +64,20 @@ func (mr *MockSessionRepositoryIMockRecorder) Create(cookie interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockSessionRepositoryI)(nil).Create), cookie)
 }
 
+// CreateCsrf mocks base method.
+func (m *MockSessionRepositoryI) CreateCsrf(sessionToken, csrfToken string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateCsrf", sessionToken, csrfToken)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateCsrf indicates an expected call of CreateCsrf.
+func (mr *MockSessionRepositoryIMockRecorder) CreateCsrf(sessionToken, csrfToken interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCsrf", reflect.TypeOf((*MockSessionRepositoryI)(nil).CreateCsrf), sessionToken, csrfToken)
+}
+
 // Delete mocks base method.
 func (m *MockSessionRepositoryI) Delete(cookie *dto.DBDeleteCookie) error {
 	m.ctrl.T.Helper()
@@ -90,4 +104,19 @@ func (m *MockSessionRepositoryI) Expire(cookie *entity.Cookie) error {
 func (mr *MockSessionRepositoryIMockRecorder) Expire(cookie interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Expire", reflect.TypeOf((*MockSessionRepositoryI)(nil).Expire), cookie)
+}
+
+// GetCsrf mocks base method.
+func (m *MockSessionRepositoryI) GetCsrf(sessionToken string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCsrf", sessionToken)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCsrf indicates an expected call of GetCsrf.
+func (mr *MockSessionRepositoryIMockRecorder) GetCsrf(sessionToken interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCsrf", reflect.TypeOf((*MockSessionRepositoryI)(nil).GetCsrf), sessionToken)
 }

@@ -4,6 +4,9 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/gomodule/redigo/redis"
+	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
 	"log"
 	"net/http"
 	"server/config"
@@ -26,10 +29,7 @@ import (
 	userRep "server/internal/User/repository/postgres"
 	userUsecase "server/internal/User/usecase"
 	"server/internal/middleware"
-
-	"github.com/gomodule/redigo/redis"
-	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
+	"time"
 )
 
 // @title Prinesi-Poday API
@@ -76,6 +76,8 @@ func main() {
 	if err != nil {
 		log.Fatal("can`t connect to redis", err)
 	}
+
+	time.Sleep(5 * time.Second)
 
 	db, err := db.GetPostgres(psqlInfo)
 	if err != nil {
@@ -127,6 +129,7 @@ func main() {
 	router.PathPrefix("/api/cart").Handler(authRouter)
 	router.PathPrefix("/api/users/me").Handler(authRouter)
 	router.PathPrefix("/api/orders").Handler(authRouter)
+	router.PathPrefix("/api/csrf").Handler(authRouter)
 	router.PathPrefix("/api/users").Handler(corsRouter)
 
 	router.Use(logger.ACLogMiddleware)
