@@ -5,6 +5,7 @@
 package mock_usecase
 
 import (
+	multipart "mime/multipart"
 	reflect "reflect"
 	entity "server/internal/domain/entity"
 
@@ -47,6 +48,20 @@ func (m *MockUsecaseI) CreateUser(new_user *entity.User) (uint, error) {
 func (mr *MockUsecaseIMockRecorder) CreateUser(new_user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockUsecaseI)(nil).CreateUser), new_user)
+}
+
+// UpdateAvatar mocks base method.
+func (m *MockUsecaseI) UpdateAvatar(file multipart.File, filehandler *multipart.FileHeader, id uint) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAvatar", file, filehandler, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateAvatar indicates an expected call of UpdateAvatar.
+func (mr *MockUsecaseIMockRecorder) UpdateAvatar(file, filehandler, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAvatar", reflect.TypeOf((*MockUsecaseI)(nil).UpdateAvatar), file, filehandler, id)
 }
 
 // UpdateUser mocks base method.
