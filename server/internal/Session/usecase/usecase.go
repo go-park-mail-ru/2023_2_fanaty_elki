@@ -10,6 +10,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"github.com/microcosm-cc/bluemonday"
 )
 
 const sessKeyLen = 10
@@ -32,12 +33,15 @@ type UsecaseI interface {
 type sessionUsecase struct {
 	sessionRepo sessionRep.SessionRepositoryI
 	userRepo    userRep.UserRepositoryI
+	sanitizer   *bluemonday.Policy
 }
 
 func NewSessionUsecase(sessionRep sessionRep.SessionRepositoryI, userRep userRep.UserRepositoryI) *sessionUsecase {
+	sanitizer := bluemonday.UGCPolicy()
 	return &sessionUsecase{
 		sessionRepo: sessionRep,
 		userRepo:    userRep,
+		sanitizer: sanitizer,
 	}
 }
 
@@ -114,8 +118,15 @@ func (ss sessionUsecase) GetUserProfile(sessionToken string) (*dto.ReqGetUserPro
 	if err != nil{
 		return nil, err
 	}
+
+	reqUser := dto.ToReqGetUserProfile(user)
+	reqUser.Email = ss.sanitizer.Sanitize(reqUser.Email)
+	reqUser.Birthday = ss.sanitizer.Sanitize(reqUser.Birthday)
+	reqUser.Icon = ss.sanitizer.Sanitize(reqUser.Icon)
+	reqUser.Username = ss.sanitizer.Sanitize(reqUser.Username)
+	reqUser.PhoneNumber = ss.sanitizer.Sanitize(reqUser.PhoneNumber)
 	
-	return dto.ToReqGetUserProfile(user), nil
+	return reqUser, nil
 }
 
 func (ss sessionUsecase) GetIdByCookie(SessionToken string) (uint, error) {
