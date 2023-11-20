@@ -223,7 +223,7 @@ func (us userUsecase) UpdateAvatar(file multipart.File, filehandler *multipart.F
 	reqParams := make(url.Values)
 	reqParams.Set("response-content-disposition", "attachment; filename=\""+objectName+"\"")
 
-	presignedURL, err := minioClient.PresignedGetObject(bucketName, objectName, time.Duration(1000)*time.Second, reqParams)
+	presignedURL, err := minioClient.PresignedGetObject(bucketName, objectName, time.Duration(168)*time.Hour, reqParams)
 	if err != nil {
 		return entity.ErrInternalServerError
 	}

@@ -2,14 +2,16 @@ package repository
 
 import (
 	"encoding/json"
-	"server/internal/domain/dto"
-	"server/internal/domain/entity"
 	"fmt"
 	"github.com/gomodule/redigo/redis"
+	"server/internal/domain/dto"
+	"server/internal/domain/entity"
+	"sync"
 )
 
 type sessionManager struct {
 	redisConn redis.Conn
+	mu        sync.Mutex
 }
 
 func NewSessionManager(conn redis.Conn) *sessionManager {
@@ -32,8 +34,9 @@ func (sm *sessionManager) Create(cookie *entity.Cookie) error {
 
 func (sm *sessionManager) Check(sessionToken string) (*entity.Cookie, error) {
 	mkey := "sessions:" + sessionToken
+	sm.mu.Lock()
 	data, err := redis.Bytes(sm.redisConn.Do("GET", mkey))
-
+	sm.mu.Unlock()
 	if err != nil {
 		if err != redis.ErrNil {
 			return nil, entity.ErrInternalServerError
@@ -74,7 +77,6 @@ func (sm *sessionManager) Expire(cookie *entity.Cookie) error {
 	}
 	return nil
 }
-
 
 func (sm *sessionManager) CreateCsrf(sessionToken string, csrfToken string) error {
 	dataSerialized, _ := json.Marshal(csrfToken)
