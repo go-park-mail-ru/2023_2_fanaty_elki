@@ -263,7 +263,6 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, cookie)
-	w.Header().Set("X-CSRF-Token", "trap")
 	user, err := handler.sessions.CreateCookieAuth(&entity.Cookie{
 		UserID: userId,
 		SessionToken: cookie.Value,
