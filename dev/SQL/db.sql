@@ -111,6 +111,37 @@ CREATE TABLE IF NOT EXISTS public.restaurant_category
     PRIMARY KEY (id)
 );
 
+insert into restaurant_category(restaurant_id, category_id)
+values(1,1);
+insert into restaurant_category(restaurant_id, category_id)
+values(1,4);
+insert into restaurant_category(restaurant_id, category_id)
+values(2,2);
+insert into restaurant_category(restaurant_id, category_id)
+values(3,1);
+insert into restaurant_category(restaurant_id, category_id)
+values(3,4);
+insert into restaurant_category(restaurant_id, category_id)
+values(4,1);
+insert into restaurant_category(restaurant_id, category_id)
+values(4,3);
+insert into restaurant_category(restaurant_id, category_id)
+values(4,6);
+insert into restaurant_category(restaurant_id, category_id)
+values(5,1);
+insert into restaurant_category(restaurant_id, category_id)
+values(5,3);
+insert into restaurant_category(restaurant_id, category_id)
+values(5,6);
+insert into restaurant_category(restaurant_id, category_id)
+values(6,4);
+insert into restaurant_category(restaurant_id, category_id)
+values(6,5);
+insert into restaurant_category(restaurant_id, category_id)
+values(7,4);
+insert into restaurant_category(restaurant_id, category_id)
+values(8,2);
+
 
 
 CREATE TABLE IF NOT EXISTS public.PRODUCT
