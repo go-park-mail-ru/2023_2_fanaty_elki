@@ -38,6 +38,7 @@ func (handler *RestaurantHandler) RegisterHandler(router *mux.Router) {
 	router.HandleFunc("/api/restaurants/{id}/products", handler.GetRestaurantProducts).Methods(http.MethodGet)
 	router.HandleFunc("/api/restaurants/{category}", handler.GetRestaurantListByCategory).Methods(http.MethodGet)
 	router.HandleFunc("/api/categories", handler.GetCategoryList).Methods(http.MethodGet)
+	router.HandleFunc("/api/restaurants/", handler.Search).Methods(http.MethodGet)
 }
 
 // GetRestaurantsList godoc
@@ -224,6 +225,41 @@ func (handler *RestaurantHandler) GetCategoryList(w http.ResponseWriter, r *http
 	}
 
 	body := cats
+
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(&Result{Body: body})
+
+	if err != nil {
+		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func (handler *RestaurantHandler) Search(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json")
+
+	search := r.URL.Query().Get("search")
+	if search == "" {
+		handler.logger.LogError("problems with parameters", errors.New("missing parameters"), w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	rests, err := handler.restaurants.Search(search)
+	if err != nil {
+		if err == entity.ErrNotFound {
+			handler.logger.LogError("problems restaurants id", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		handler.logger.LogError("problems with searching", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	body := rests
 
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(&Result{Body: body})

@@ -183,3 +183,40 @@ func (repo *restaurantRepo) GetCategories() ([]*entity.Category, error) {
 	}
 	return Categories, nil
 }
+
+func (repo *restaurantRepo) SearchRestaurants(word string) ([]*entity.Restaurant, error) {
+	rows, err := repo.DB.Query(`SELECT id, name, rating, comments_count, icon FROM restaurant WHERE LOWER(name) LIKE LOWER('%' || $1 || '%');`, word)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, err
+		}
+	}
+	defer rows.Close()
+	var Restaurants = []*entity.Restaurant{}
+	var count = 0
+	for rows.Next() {
+		count++
+		restaurant := &entity.Restaurant{}
+		err = rows.Scan(
+			&restaurant.ID,
+			&restaurant.Name,
+			&restaurant.Rating,
+			&restaurant.CommentsCount,
+			&restaurant.Icon,
+		)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return nil, nil
+			} else {
+				return nil, err
+			}
+		}
+		Restaurants = append(Restaurants, restaurant)
+	}
+	if count == 0 {
+		return nil, entity.ErrNotFound
+	}
+	return Restaurants, nil
+}
