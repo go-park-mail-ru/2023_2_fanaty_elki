@@ -10,4 +10,5 @@ type RestaurantRepositoryI interface {
 	GetRestaurantsByCategory(name string) ([]*entity.Restaurant, error)
 	GetCategories() ([]*entity.Category, error)
 	SearchRestaurants(word string) ([]*entity.Restaurant, error)
+	SearchCategories(word string) ([]*entity.Restaurant, error)
 }

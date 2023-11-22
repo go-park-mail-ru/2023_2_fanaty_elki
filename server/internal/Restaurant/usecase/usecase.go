@@ -141,9 +141,40 @@ func (res restaurantUsecase) GetCategories() (*[]string, error) {
 func (res restaurantUsecase) Search(word string) ([]*dto.RestaurantWithCategoriesAndProducts, error) {
 	rests, err := res.restaurantRepo.SearchRestaurants(word)
 	if err != nil {
-		if err == entity.ErrNotFound {
-			return nil, entity.ErrNotFound
+		return nil, entity.ErrInternalServerError
+	}
+	restsbycategory, err := res.restaurantRepo.SearchCategories(word)
+	if err != nil {
+		return nil, entity.ErrInternalServerError
+	}
+	restset := make(map[uint]bool)
+	for _, rest := range rests {
+		restset[rest.ID] = true
+	}
+	for i, rest := range restsbycategory {
+		if restset[rest.ID] {
+			restsbycategory = append(restsbycategory[:i], restsbycategory[i+1:]...)
+		} else {
+			restset[rest.ID] = true
 		}
+	}
+	rests = append(rests, restsbycategory...)
+	products, err := res.productRepo.SearchProducts(word)
+	for _, prod := range products {
+		restId, err := res.productRepo.GetRestaurantIdByProduct(prod.ID)
+		if err != nil {
+			return nil, entity.ErrInternalServerError
+		}
+		if !restset[restId] {
+			restById, err := res.restaurantRepo.GetRestaurantById(restId)
+			if err != nil {
+				return nil, entity.ErrInternalServerError
+			}
+			restset[restId] = true
+			rests = append(rests, restById)
+		}
+	}
+	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}
 	restsWithCategoriesAndProducts := []*dto.RestaurantWithCategoriesAndProducts{}
@@ -164,6 +195,17 @@ func (res restaurantUsecase) Search(word string) ([]*dto.RestaurantWithCategorie
 		restWithCat := dto.ToRestaurantWithCategories(rest, cats)
 		restWithCatsAndProducts := dto.ToRestaurantWithCategoriesAndProducts(restWithCat, []*entity.Product{})
 		restsWithCategoriesAndProducts = append(restsWithCategoriesAndProducts, restWithCatsAndProducts)
+	}
+	for _, prod := range products {
+		restId, err := res.productRepo.GetRestaurantIdByProduct(prod.ID)
+		if err != nil {
+			return nil, entity.ErrInternalServerError
+		}
+		for _, rest := range restsWithCategoriesAndProducts {
+			if rest.ID == restId {
+				rest.Products = append(rest.Products, prod)
+			}
+		}
 	}
 	return restsWithCategoriesAndProducts, nil
 }

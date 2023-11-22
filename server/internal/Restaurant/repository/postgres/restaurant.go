@@ -185,7 +185,7 @@ func (repo *restaurantRepo) GetCategories() ([]*entity.Category, error) {
 }
 
 func (repo *restaurantRepo) SearchRestaurants(word string) ([]*entity.Restaurant, error) {
-	rows, err := repo.DB.Query(`SELECT id, name, rating, comments_count, icon FROM restaurant WHERE LOWER(name) LIKE LOWER('%' || $1 || '%');`, word)
+	rows, err := repo.DB.Query(`SELECT id, name, rating, comments_count, icon FROM restaurant WHERE LOWER(name) LIKE LOWER('%' || $1 || '%')`, word)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -195,9 +195,7 @@ func (repo *restaurantRepo) SearchRestaurants(word string) ([]*entity.Restaurant
 	}
 	defer rows.Close()
 	var Restaurants = []*entity.Restaurant{}
-	var count = 0
 	for rows.Next() {
-		count++
 		restaurant := &entity.Restaurant{}
 		err = rows.Scan(
 			&restaurant.ID,
@@ -215,8 +213,39 @@ func (repo *restaurantRepo) SearchRestaurants(word string) ([]*entity.Restaurant
 		}
 		Restaurants = append(Restaurants, restaurant)
 	}
-	if count == 0 {
-		return nil, entity.ErrNotFound
+	return Restaurants, nil
+}
+
+func (repo *restaurantRepo) SearchCategories(word string) ([]*entity.Restaurant, error) {
+	rows, err := repo.DB.Query(`select restaurant.id, restaurant.name, rating, comments_count, icon from restaurant_category rc 
+	inner join restaurant on rc.restaurant_id=restaurant.id inner join category on rc.category_id=category.id 
+	where lower(category.name) like lower('%' || $1 || '%')`, word)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, err
+		}
+	}
+	defer rows.Close()
+	var Restaurants = []*entity.Restaurant{}
+	for rows.Next() {
+		restaurant := &entity.Restaurant{}
+		err = rows.Scan(
+			&restaurant.ID,
+			&restaurant.Name,
+			&restaurant.Rating,
+			&restaurant.CommentsCount,
+			&restaurant.Icon,
+		)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return nil, nil
+			} else {
+				return nil, err
+			}
+		}
+		Restaurants = append(Restaurants, restaurant)
 	}
 	return Restaurants, nil
 }
