@@ -126,9 +126,8 @@ func (repo *orderRepo) GetOrder(reqOrder *dto.ReqGetOneOrder) (*dto.RespGetOneOr
    				WHERE o.user_id = $1 AND o.id = $2` 
 	order := dto.RespGetOneOrder{}
 	address := dto.RespOrderAddress{}
-	err := repo.DB.QueryRow(getOrder, reqOrder.OrderId, reqOrder.UserId).Scan(&order.Id, &order.Status, &order.Date,
+	err := repo.DB.QueryRow(getOrder, reqOrder.UserId, reqOrder.OrderId).Scan(&order.Id, &order.Status, &order.Date,
 							&order.Price, &order.DeliveryTime, &address.City, &address.Street, &address.House, &address.Flat)
-	
 	if err != nil {
 		if err == sql.ErrNoRows {
 

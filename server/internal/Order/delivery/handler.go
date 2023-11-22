@@ -185,6 +185,7 @@ func (handler *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respOrder, err := handler.orderUC.GetOrder(&reqOrder)
+	
 	if err != nil {
 		if err == entity.ErrNotFound {
 			handler.logger.LogError("order: not found order", err, w.Header().Get("request-id"), r.URL.Path)
