@@ -2,7 +2,6 @@ package repository
 
 import (
 	"database/sql"
-	"fmt"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 )
@@ -26,10 +25,9 @@ func (repo *orderRepo) CreateOrder(order *dto.DBReqCreateOrder) (*dto.RespCreate
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}
-
 	for _, product := range order.Products {
 		insertProduct := `INSERT INTO orders_product (product_id, order_id, item_count) VALUES ($1, $2, $3)`
-		_, err := repo.DB.Exec(insertProduct, product.ID, orderId, product.ItemCount)
+		_, err := repo.DB.Exec(insertProduct, product.ProductID, orderId, product.ItemCount)
 		if err != nil {
 			return nil, entity.ErrInternalServerError
 		}
@@ -42,7 +40,6 @@ func (repo *orderRepo) CreateOrder(order *dto.DBReqCreateOrder) (*dto.RespCreate
 					  RETURNING ID`
 	var addressId uint
 	err = repo.DB.QueryRow(insertAddress, order.Address.City, order.Address.Street, order.Address.House, order.Address.Flat).Scan(&addressId)
-	fmt.Println(err)
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}
