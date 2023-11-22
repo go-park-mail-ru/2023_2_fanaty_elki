@@ -113,7 +113,7 @@ func main() {
 	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo, productRepo)
 	cartUC := cartUsecase.NewCartUsecase(cartRepo, productRepo, sessionRepo)
 	sessionUC := sessionUsecase.NewSessionUsecase(sessionRepo, userRepo)
-	orderUC := orderUsecase.NewOrderUsecase(orderRepo)
+	orderUC := orderUsecase.NewOrderUsecase(orderRepo, cartRepo, productRepo)
 	productUC := productUsecase.NewProductUsecase(productRepo)
 
 	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC, logger)

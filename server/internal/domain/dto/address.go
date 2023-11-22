@@ -15,7 +15,7 @@ type RespOrderAddress struct {
 	City   string `json:"City"`
 	Street string `json:"Street"`
 	House  string `json:"House"`
-	Flat   *uint  `json:"Flat"`
+	Flat   uint  `json:"Flat"`
 }
 
 
@@ -23,7 +23,7 @@ type DBCreateOrderAddress struct {
 	City   string 
 	Street string 
 	House  string   
-	Flat   *uint  
+	Flat   uint  
 }
 
 func ToEntityCreateOrderAddress(address *ReqCreateOrderAddress) *entity.Address{
@@ -37,15 +37,12 @@ func ToEntityCreateOrderAddress(address *ReqCreateOrderAddress) *entity.Address{
 
 
 func ToDBCreateOrderAddress(address *entity.Address) *DBCreateOrderAddress{
-	result := &DBCreateOrderAddress{}
-	if address.Flat == 0 {
-		result.Flat = nil
-	} else {
-		result.Flat = &address.Flat
+	return &DBCreateOrderAddress{
+		Flat: address.Flat,
+		City: address.City,
+		Street: address.Street,
+		House: address.House,
 	}
-	result.City = address.City
-	result.Street = address.Street
-	result.House = address.House
-	return result
+	
 }
 

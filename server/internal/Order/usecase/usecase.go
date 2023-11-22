@@ -1,8 +1,9 @@
 package usecase
 
 import (
-	// "server/internal/domain/entity"
+	cartRep "server/internal/Cart/repository"
 	orderRep "server/internal/Order/repository"
+	productRep "server/internal/Product/repository"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 )
@@ -16,11 +17,16 @@ type UsecaseI interface {
 
 type orderUsecase struct {
 	orderRepo orderRep.OrderRepositoryI
+	cartRepo  cartRep.CartRepositoryI
+	prodRepo  productRep.ProductRepositoryI
 }
 
-func NewOrderUsecase(repI orderRep.OrderRepositoryI) *orderUsecase{
+func NewOrderUsecase(orderRepI orderRep.OrderRepositoryI, cartRepI cartRep.CartRepositoryI, 
+					 prodRepI  productRep.ProductRepositoryI) *orderUsecase{
 	return &orderUsecase{
-		orderRepo: repI,
+		orderRepo: orderRepI,
+		cartRepo: cartRepI,
+		prodRepo: prodRepI,
 	}
 }
 
@@ -31,12 +37,33 @@ func (or *orderUsecase) CreateOrder(reqOrder *dto.ReqCreateOrder) (*dto.RespCrea
 	
 	order := dto.ToEntityCreateOrder(reqOrder)
 	
-	products := make(map[uint]int)
-	for _, product := range reqOrder.Products {
-		products[product]++
+	cart, err := or.cartRepo.GetCartByUserID(reqOrder.UserId)
+	if err != nil {
+		return nil, err
 	}
 
-	respOrder, err := or.orderRepo.CreateOrder(dto.ToDBReqCreateOrder(order, &products))
+	products, err := or.cartRepo.GetCartProductsByCartID(cart.ID)
+	if err != nil {
+		return nil, entity.ErrInternalServerError
+	}
+	if len(products) == 0 {
+		return nil, entity.ErrNotFound
+	}
+	
+	for _, product := range products {
+		pr, err := or.prodRepo.GetProductByID(product.ProductID)
+		if err != nil {
+			return nil, err
+		}
+		if pr != nil {
+			order.Price += uint(pr.Price) * uint(product.ItemCount)
+		}
+	}
+	
+	order.DeliveryTime = 30
+	respOrder, err := or.orderRepo.CreateOrder(dto.ToDBReqCreateOrder(order, products))
+	respOrder.Address = order.Address
+	
 	if err != nil {
 		return nil, err
 	}

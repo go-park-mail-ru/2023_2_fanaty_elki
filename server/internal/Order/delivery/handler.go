@@ -79,8 +79,12 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	case entity.ErrBadRequest:
-		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
+		handler.logger.LogError("problems with address", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
+		return
+	case entity.ErrNotFound:
+		handler.logger.LogError("Cart is empty", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
@@ -127,7 +131,7 @@ func (handler *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
 
 	respOrders, err := handler.orderUC.GetOrders(userId)
 	if err != nil {
-		handler.logger.LogError("order: problems while getting orders json", err, w.Header().Get("request-id"), r.URL.Path)
+		handler.logger.LogError("order: problems while getting orders", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

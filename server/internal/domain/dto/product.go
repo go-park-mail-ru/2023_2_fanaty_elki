@@ -1,10 +1,9 @@
 package dto
 
 type RespGetOrderProduct struct {
+	Id 			uint 	`json:"Id"`
 	Name        string  `json:"Name"`
 	Price       float32 `json:"Price"`
-	CookingTime int		`json:"CookingTime"`
-	Portion     string	`json:"Portion"`
 	Icon        string	`json:"Icon"`
 	Count 		int 	`json:"Count"`
 }

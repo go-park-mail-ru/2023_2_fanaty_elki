@@ -41,9 +41,6 @@ func (repo *CartRepo) GetCartByUserID(userID uint) (*entity.Cart, error) {
 		&cart.UserID,
 	)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, entity.ErrInternalServerError
-		}
 		return nil, entity.ErrInternalServerError
 	}
 	return cart, nil
