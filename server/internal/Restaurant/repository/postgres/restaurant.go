@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 	"server/internal/domain/entity"
 )
 
@@ -18,6 +19,7 @@ func NewRestaurantRepo(db *sql.DB) *restaurantRepo {
 func (repo *restaurantRepo) GetRestaurants() ([]*entity.Restaurant, error) {
 	rows, err := repo.DB.Query(`SELECT id, name, rating, comments_count, icon FROM restaurant`)
 	if err != nil {
+		fmt.Println(err)
 		if err == sql.ErrNoRows {
 			return nil, nil
 		} else {
@@ -93,6 +95,7 @@ func (repo *restaurantRepo) GetCategoriesByRestaurantId(id uint) ([]*entity.Cate
 	rows, err := repo.DB.Query(`SELECT category.id, category.name FROM restaurant_category rc 
 	INNER JOIN category ON rc.category_id=category.id WHERE restaurant_id = $1`, id)
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 	defer rows.Close()

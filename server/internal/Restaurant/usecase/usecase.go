@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	productRep "server/internal/Product/repository"
@@ -34,6 +35,7 @@ func NewRestaurantUsecase(resRep restRep.RestaurantRepositoryI, productRep produ
 func (res restaurantUsecase) GetRestaurants() ([]*dto.RestaurantWithCategories, error) {
 	rests, err := res.restaurantRepo.GetRestaurants()
 	if err != nil {
+		fmt.Println(err)
 		return nil, entity.ErrInternalServerError
 	}
 	restswithcategories := []*dto.RestaurantWithCategories{}
@@ -48,6 +50,7 @@ func (res restaurantUsecase) GetRestaurants() ([]*dto.RestaurantWithCategories, 
 		cats, err := res.restaurantRepo.GetCategoriesByRestaurantId(rest.ID)
 		if err != nil {
 			if err != entity.ErrNotFound {
+				fmt.Println(err)
 				return nil, entity.ErrInternalServerError
 			}
 		}
