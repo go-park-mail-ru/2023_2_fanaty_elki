@@ -29,6 +29,7 @@ import (
 	userRep "server/internal/User/repository/postgres"
 	userUsecase "server/internal/User/usecase"
 	"server/internal/middleware"
+	"time"
 	//"time"
 )
 
@@ -77,7 +78,7 @@ func main() {
 		log.Fatal("can`t connect to redis", err)
 	}
 
-	//time.Sleep(5 * time.Second)
+	time.Sleep(5 * time.Second)
 
 	db, err := db.GetPostgres(psqlInfo)
 	if err != nil {
