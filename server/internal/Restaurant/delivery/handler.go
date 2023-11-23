@@ -3,6 +3,7 @@ package delivery
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	restaurantUsecase "server/internal/Restaurant/usecase"
 	"server/internal/domain/entity"
@@ -34,8 +35,11 @@ func NewRestaurantHandler(restaurants restaurantUsecase.UsecaseI, logger *mw.ACL
 
 func (handler *RestaurantHandler) RegisterHandler(router *mux.Router) {
 	router.HandleFunc("/api/restaurants", handler.GetRestaurantList).Methods(http.MethodGet)
-	router.HandleFunc("/api/restaurants/{id}", handler.GetRestaurantById).Methods(http.MethodGet)
+	router.HandleFunc("/api/restaurants/{id:[0-9]+}", handler.GetRestaurantById).Methods(http.MethodGet)
 	router.HandleFunc("/api/restaurants/{id}/products", handler.GetRestaurantProducts).Methods(http.MethodGet)
+	router.HandleFunc("/api/restaurants/{category}", handler.GetRestaurantListByCategory).Methods(http.MethodGet)
+	router.HandleFunc("/api/categories", handler.GetCategoryList).Methods(http.MethodGet)
+	router.HandleFunc("/api/restaurants/", handler.Search).Methods(http.MethodGet)
 }
 
 // GetRestaurantsList godoc
@@ -54,6 +58,7 @@ func (handler *RestaurantHandler) GetRestaurantList(w http.ResponseWriter, r *ht
 	rests, err := handler.restaurants.GetRestaurants()
 
 	if err != nil {
+		fmt.Println(err)
 		handler.logger.LogError("problems with getting restauratns", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -168,6 +173,102 @@ func (handler *RestaurantHandler) GetRestaurantProducts(w http.ResponseWriter, r
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
+		return
+	}
+}
+
+func (handler *RestaurantHandler) GetRestaurantListByCategory(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json")
+
+	vars := mux.Vars(r)
+	categoryname, ok := vars["category"]
+	if !ok {
+		handler.logger.LogError("problems with parameters", errors.New("category is missing in parameters"), w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	rests, err := handler.restaurants.GetRestaurantsByCategory(categoryname)
+
+	if err != nil {
+		if err == entity.ErrNotFound {
+			handler.logger.LogError("problems restaurants id", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		handler.logger.LogError("problems with getting restauratns by category", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	body := rests
+
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(&Result{Body: body})
+
+	if err != nil {
+		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func (handler *RestaurantHandler) GetCategoryList(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json")
+
+	cats, err := handler.restaurants.GetCategories()
+
+	if err != nil {
+		handler.logger.LogError("problems with getting categories", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	body := cats
+
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(&Result{Body: body})
+
+	if err != nil {
+		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func (handler *RestaurantHandler) Search(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json")
+
+	search := r.URL.Query().Get("search")
+	if search == "" {
+		handler.logger.LogError("problems with parameters", errors.New("missing parameters"), w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	rests, err := handler.restaurants.Search(search)
+	if err != nil {
+		if err == entity.ErrNotFound {
+			handler.logger.LogError("problems restaurants id", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		handler.logger.LogError("problems with searching", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	body := rests
+
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(&Result{Body: body})
+
+	if err != nil {
+		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 }

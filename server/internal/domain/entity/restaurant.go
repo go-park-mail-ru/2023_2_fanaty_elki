@@ -6,7 +6,6 @@ type Restaurant struct {
 	Rating          float32
 	CommentsCount   int
 	Icon            string
-	Category        string
 	MinDeliveryTime int
 	MaxDeliveryTime int
 	DeliveryPrice   float32
