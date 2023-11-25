@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strings"
 )
 
 //const allowedOrigin = "*"
@@ -11,8 +12,12 @@ const allowedOriginCsat = "http://84.23.53.216:8030"
 
 func CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
-		w.Header().Add("Access-Control-Allow-Origin", allowedOriginCsat)
+		if strings.HasPrefix(r.URL.Path, "/api/csat") {
+			w.Header().Add("Access-Control-Allow-Origin", allowedOriginCsat)
+		} else {
+			w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
+		}
+		
 		if r.Method == http.MethodOptions {
 			if r.URL.Path != "/api/users" {
 				w.Header().Add("Access-Control-Allow-Credentials", "true")
