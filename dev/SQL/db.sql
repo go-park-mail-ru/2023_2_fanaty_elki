@@ -571,4 +571,4 @@ insert into QUESTION(QUESTIONNAIRE_ID, text, ANSWER_TYPE)
 VALUES(3, 'Напишите что Вам понравилось, а что нет', 1);
 
 insert into ADMIN(USERNAME, PASSWORD) 
-VALUES("admin", "admin");
+VALUES('admin', 'admin');
