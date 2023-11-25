@@ -55,3 +55,6 @@ VALUES(1, 'Насколько удобно вам было регистриро�
 
 insert into QUESTION(QUESTIONNAIRE_ID, text, ANSWER_TYPE)
 VALUES(1, 'Напишите что Вам понравилось, а что нет', 1);
+
+insert into ADMIN(USERNAME, PASSWORD) 
+VALUES("admin", "admin");
