@@ -11,6 +11,9 @@ import (
 	"net/http"
 	"server/config"
 	"server/db"
+	adminDev "server/internal/Admin/delivery"
+	adminRep "server/internal/Admin/repository/redis"
+	adminUsecase "server/internal/Admin/usecase"
 	cartDev "server/internal/Cart/delivery"
 	cartRep "server/internal/Cart/repository/postgres"
 	cartUsecase "server/internal/Cart/usecase"
@@ -32,7 +35,7 @@ import (
 	userRep "server/internal/User/repository/postgres"
 	userUsecase "server/internal/User/usecase"
 	"server/internal/middleware"
-	"time"
+	//"time"
 )
 
 // @title Prinesi-Poday API
@@ -74,13 +77,14 @@ func main() {
 	router := mux.NewRouter()
 	authRouter := mux.NewRouter()
 	corsRouter := mux.NewRouter()
+	adminRouter := mux.NewRouter()
 
 	redisConn, err := redis.DialURL(*redisAddr)
 	if err != nil {
 		log.Fatal("can`t connect to redis", err)
 	}
 
-	time.Sleep(5 * time.Second)
+	//	time.Sleep(5 * time.Second)
 
 	db, err := db.GetPostgres(psqlInfo)
 	if err != nil {
@@ -112,6 +116,7 @@ func main() {
 	sessionRepo := sessionRep.NewSessionManager(redisConn)
 	orderRepo := orderRep.NewOrderRepo(db)
 	csatRepo := csatRep.NewCsatRepo(db)
+	adminRepo := adminRep.NewadminManager(redisConn)
 
 	userUC := userUsecase.NewUserUsecase(userRepo, cartRepo)
 	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo, productRepo)
@@ -120,6 +125,7 @@ func main() {
 	orderUC := orderUsecase.NewOrderUsecase(orderRepo, cartRepo, productRepo)
 	productUC := productUsecase.NewProductUsecase(productRepo)
 	csatUC := csatUsecase.NewCsatUsecase(csatRepo)
+	adminUC := adminUsecase.NewadminUsecase(adminRepo, userRepo)
 
 	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC, logger)
 	cartsHandler := cartDev.NewCartHandler(cartUC, logger)
@@ -127,7 +133,9 @@ func main() {
 	orderHandler := orderDev.NewOrderHandler(orderUC, sessionUC, logger)
 	productHandler := productDev.NewProductHandler(productUC, logger)
 	csatHandler := csatDev.NewCsatHandler(csatUC, logger)
+	adminHandler := adminDev.NewAdminHandler(adminUC, userUC, logger)
 	authMW := middleware.NewSessionMiddleware(sessionUC, logger)
+	adminMW := middleware.NewAdminMiddleware(adminUC, logger)
 
 	router.PathPrefix("/api/login").Handler(corsRouter)
 	router.PathPrefix("/api/logout").Handler(authRouter)
@@ -137,12 +145,14 @@ func main() {
 	router.PathPrefix("/api/orders").Handler(authRouter)
 	router.PathPrefix("/api/csrf").Handler(authRouter)
 	router.PathPrefix("/api/users").Handler(corsRouter)
+	router.PathPrefix("/api/csat").Handler(adminRouter)
 
 	router.Use(logger.ACLogMiddleware)
 	router.Use(middleware.PanicMiddleware)
 	router.Use(middleware.CorsMiddleware)
 	corsRouter.Use(middleware.CorsCredentionalsMiddleware)
 	authRouter.Use(authMW.AuthMiddleware)
+	adminRouter.Use(adminMW.AuthMiddleware)
 
 	restaurantsHandler.RegisterHandler(router)
 	productHandler.RegisterHandler(router)
@@ -152,6 +162,8 @@ func main() {
 	orderHandler.RegisterHandler(authRouter)
 	productHandler.RegisterHandler(router)
 	csatHandler.RegisterHandler(router)
+	adminHandler.RegisterAdminHandler(adminRouter)
+	adminHandler.RegisterCorsHandler(adminRouter)
 
 	server := &http.Server{
 		Addr:    PORT,

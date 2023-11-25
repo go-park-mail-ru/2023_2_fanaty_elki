@@ -5,6 +5,7 @@ import (
 	sessionUsecase "server/internal/Session/usecase"
 	"server/internal/domain/entity"
 	"time"
+	"regexp"
 )
 
 type SessionMiddleware struct {
@@ -46,7 +47,7 @@ func (mw *SessionMiddleware) AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		if r.Method != http.MethodGet && r.URL.Path != "/api/csrf"{
+		if r.Method != http.MethodGet && r.URL.Path != "/api/csrf" && !checkCsat(r.URL.Path){
 			csrfToken := r.Header.Get("X-CSRF-Token")
 			err = mw.sessionUC.CheckCsrf(cookie.Value, csrfToken)
 			if err != nil {
@@ -64,3 +65,15 @@ func (mw *SessionMiddleware) AuthMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
+func checkCsat(url string) bool {
+	pattern := `/api/csat`
+
+	match, err := regexp.MatchString(pattern, url)
+	if err != nil {
+		return false
+	}
+
+	return match
+}
+
