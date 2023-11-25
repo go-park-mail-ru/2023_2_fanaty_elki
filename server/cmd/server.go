@@ -35,7 +35,7 @@ import (
 	userRep "server/internal/User/repository/postgres"
 	userUsecase "server/internal/User/usecase"
 	"server/internal/middleware"
-	"time"
+	//"time"
 )
 
 // @title Prinesi-Poday API
@@ -45,32 +45,32 @@ import (
 
 const PORT = ":8080"
 
-// var (
-// 	redisAddr = flag.String("addr", "redis://user:@localhost:6379/0", "redis addr")
-
-// 	host     = "localhost"
-// 	port     = 5432
-// 	user     = db.User.Username
-// 	password = db.User.Password
-// 	dbname   = "prinesy-poday"
-// 	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
-// 		"password=%s dbname=%s sslmode=disable",
-// 		host, port, user, password, dbname)
-// )
-
 var (
-	redisAddr = flag.String("addr", "redis://redis-session:6379/0", "redis addr")
+	redisAddr = flag.String("addr", "redis://user:@localhost:6379/0", "redis addr")
 
-	host     = "test_postgres"
+	host     = "localhost"
 	port     = 5432
 	user     = db.User.Username
 	password = db.User.Password
 	dbname   = "prinesy-poday"
-
 	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
 )
+
+// var (
+// 	redisAddr = flag.String("addr", "redis://redis-session:6379/0", "redis addr")
+
+// 	host     = "test_postgres"
+// 	port     = 5432
+// 	user     = db.User.Username
+// 	password = db.User.Password
+// 	dbname   = "prinesy-poday"
+
+// 	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
+// 		"password=%s dbname=%s sslmode=disable",
+// 		host, port, user, password, dbname)
+// )
 
 func main() {
 	flag.Parse()
@@ -84,7 +84,7 @@ func main() {
 		log.Fatal("can`t connect to redis", err)
 	}
 
-	time.Sleep(5 * time.Second)
+	//time.Sleep(5 * time.Second)
 
 	db, err := db.GetPostgres(psqlInfo)
 	if err != nil {
@@ -145,8 +145,8 @@ func main() {
 	router.PathPrefix("/api/orders").Handler(authRouter)
 	router.PathPrefix("/api/csrf").Handler(authRouter)
 	router.PathPrefix("/api/users").Handler(corsRouter)
-	router.PathPrefix("/api/csat").Handler(adminRouter)
-
+	router.PathPrefix("/api/csat/admin").Handler(adminRouter)
+	
 	router.Use(logger.ACLogMiddleware)
 	router.Use(middleware.PanicMiddleware)
 	router.Use(middleware.CorsMiddleware)
@@ -162,9 +162,10 @@ func main() {
 	orderHandler.RegisterHandler(authRouter)
 	productHandler.RegisterHandler(router)
 	csatHandler.RegisterHandler(router)
+	csatHandler.RegisterAdminHandler(adminRouter)
 	adminHandler.RegisterAdminHandler(adminRouter)
 	adminHandler.RegisterCorsHandler(adminRouter)
-
+	
 	server := &http.Server{
 		Addr:    PORT,
 		Handler: router,

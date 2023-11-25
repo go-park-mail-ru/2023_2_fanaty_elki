@@ -38,12 +38,12 @@ func NewAdminHandler(admins adminUsecase.UsecaseI, users userUsecase.UsecaseI, l
 }
 
 func (handler *AdminHandler) RegisterAdminHandler(router *mux.Router) {
-	router.HandleFunc("/api/csat/logout", handler.Logout).Methods(http.MethodDelete)
-	router.HandleFunc("/api/csat/auth", handler.Auth).Methods(http.MethodGet)
+	router.HandleFunc("/api/csat/admin/logout", handler.Logout).Methods(http.MethodDelete)
+	router.HandleFunc("/api/csat/admin/auth", handler.Auth).Methods(http.MethodGet)
 }
 
 func (handler *AdminHandler) RegisterCorsHandler(router *mux.Router) {
-	router.HandleFunc("/api/csat/login", handler.Login).Methods(http.MethodPost)
+	router.HandleFunc("/api/csat/admin/login", handler.Login).Methods(http.MethodPost)
 }
 
 
