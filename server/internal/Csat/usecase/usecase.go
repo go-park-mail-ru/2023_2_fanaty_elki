@@ -2,53 +2,63 @@ package usecase
 
 import (
 	csatRep "server/internal/Csat/repository"
-	dto "server/internal/domain/dto"
+	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 )
 
 type UsecaseI interface {
-	GetQuestionnaireByID(id uint) ([]*entity.Question, error)
+	GetQuestionnaireByID(id uint) (*dto.Config, error)
+	AddAnswer(answer *entity.Answer) error
+	GetAnswersByQuestionId(id uint) (*dto.AnswerConfig, error)
 }
 
 type csatUsecase struct {
 	csatRepo csatRep.CsatRepositoryI
 }
 
-func NewCsatUsecase(csatRep csatRep.CsatRepositoryI) *cartUsecase {
-	return &cartUsecase{
-		cartRepo:    cartRep,
-		productRepo: productRep,
-		sessionRepo: sessionRep,
+func NewCsatUsecase(csatRep csatRep.CsatRepositoryI) *csatUsecase {
+	return &csatUsecase{
+		csatRepo: csatRep,
 	}
 }
 
-func (cu cartUsecase) GetUserCart(SessionToken string) ([]*dto.CartProduct, error) {
-	cookie, err := cu.sessionRepo.Check(SessionToken)
+func (cu csatUsecase) GetQuestionnaireByID(id uint) (*dto.Config, error) {
+	questionnaire, err := cu.csatRepo.GetQuestionnaireByID(id)
+	if err != nil {
+		return nil, err
+	}
+	questions, err := cu.csatRepo.GetQuestionsByQuestionnaireID(id)
 	if err != nil {
 		return nil, err
 	}
 
-	userID := cookie.UserID
-	cart, err := cu.cartRepo.GetCartByUserID(userID)
-	if err != nil {
-		return nil, err
+	config := dto.Config{
+		Title:     questionnaire.Name,
+		Questions: questions,
 	}
+	return &config, nil
+}
 
-	cartProducts, err := cu.cartRepo.GetCartProductsByCartID(cart.ID)
+func (cu csatUsecase) AddAnswer(answer *entity.Answer) error {
+	err := cu.csatRepo.AddAnswer(answer)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (cu csatUsecase) GetAnswersByQuestionId(id uint) (*dto.AnswerConfig, error) {
+	answerType, err := cu.csatRepo.GetAnswerTypeBYQuestionId(id)
 	if err != nil {
 		return nil, err
 	}
-	var CartProducts []*dto.CartProduct
-	for _, cartProduct := range cartProducts {
-		product, err := cu.productRepo.GetProductByID(cartProduct.ProductID)
-		if err != nil {
-			return nil, entity.ErrInternalServerError
-		}
-		CartProduct := dto.CartProduct{
-			Product:   product,
-			ItemCount: cartProduct.ItemCount,
-		}
-		CartProducts = append(CartProducts, &CartProduct)
+	answers, err := cu.csatRepo.GetAnswerByQuestionId(id)
+	if err != nil {
+		return nil, err
 	}
-	return CartProducts, nil
+	config := dto.AnswerConfig{
+		Type:    answerType,
+		Answers: answers,
+	}
+	return &config, nil
 }

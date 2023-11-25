@@ -14,6 +14,9 @@ import (
 	cartDev "server/internal/Cart/delivery"
 	cartRep "server/internal/Cart/repository/postgres"
 	cartUsecase "server/internal/Cart/usecase"
+	csatDev "server/internal/Csat/delivery"
+	csatRep "server/internal/Csat/repository/postgres"
+	csatUsecase "server/internal/Csat/usecase"
 	orderDev "server/internal/Order/delivery"
 	orderRep "server/internal/Order/repository/postgres"
 	orderUsecase "server/internal/Order/usecase"
@@ -39,32 +42,32 @@ import (
 
 const PORT = ":8080"
 
-// var (
-// 	redisAddr = flag.String("addr", "redis://user:@localhost:6379/0", "redis addr")
-
-// 	host     = "localhost"
-// 	port     = 5432
-// 	user     = db.User.Username
-// 	password = db.User.Password
-// 	dbname   = "prinesy-poday"
-// 	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
-// 		"password=%s dbname=%s sslmode=disable",
-// 		host, port, user, password, dbname)
-// )
-
 var (
-	redisAddr = flag.String("addr", "redis://redis-session:6379/0", "redis addr")
+	redisAddr = flag.String("addr", "redis://user:@localhost:6379/0", "redis addr")
 
-	host     = "test_postgres"
+	host     = "localhost"
 	port     = 5432
 	user     = db.User.Username
 	password = db.User.Password
 	dbname   = "prinesy-poday"
-
 	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
 )
+
+// var (
+// 	redisAddr = flag.String("addr", "redis://redis-session:6379/0", "redis addr")
+
+// 	host     = "test_postgres"
+// 	port     = 5432
+// 	user     = db.User.Username
+// 	password = db.User.Password
+// 	dbname   = "prinesy-poday"
+
+// 	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
+// 		"password=%s dbname=%s sslmode=disable",
+// 		host, port, user, password, dbname)
+// )
 
 func main() {
 	flag.Parse()
@@ -108,6 +111,7 @@ func main() {
 	cartRepo := cartRep.NewCartRepo(db)
 	sessionRepo := sessionRep.NewSessionManager(redisConn)
 	orderRepo := orderRep.NewOrderRepo(db)
+	csatRepo := csatRep.NewCsatRepo(db)
 
 	userUC := userUsecase.NewUserUsecase(userRepo, cartRepo)
 	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo, productRepo)
@@ -115,12 +119,14 @@ func main() {
 	sessionUC := sessionUsecase.NewSessionUsecase(sessionRepo, userRepo)
 	orderUC := orderUsecase.NewOrderUsecase(orderRepo, cartRepo, productRepo)
 	productUC := productUsecase.NewProductUsecase(productRepo)
+	csatUC := csatUsecase.NewCsatUsecase(csatRepo)
 
 	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC, logger)
 	cartsHandler := cartDev.NewCartHandler(cartUC, logger)
 	sessionsHandler := sessionDev.NewSessionHandler(sessionUC, userUC, logger)
 	orderHandler := orderDev.NewOrderHandler(orderUC, sessionUC, logger)
 	productHandler := productDev.NewProductHandler(productUC, logger)
+	csatHandler := csatDev.NewCsatHandler(csatUC, logger)
 	authMW := middleware.NewSessionMiddleware(sessionUC, logger)
 
 	router.PathPrefix("/api/login").Handler(corsRouter)
@@ -145,6 +151,7 @@ func main() {
 	sessionsHandler.RegisterAuthHandler(authRouter)
 	orderHandler.RegisterHandler(authRouter)
 	productHandler.RegisterHandler(router)
+	csatHandler.RegisterHandler(router)
 
 	server := &http.Server{
 		Addr:    PORT,

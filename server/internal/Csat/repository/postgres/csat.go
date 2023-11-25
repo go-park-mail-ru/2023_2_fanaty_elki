@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 import (
 	"database/sql"
@@ -54,4 +54,51 @@ func (repo *CsatRepo) GetQuestionsByQuestionnaireID(id uint) ([]*entity.Question
 		Questions = append(Questions, question)
 	}
 	return Questions, nil
+}
+
+func (repo *CsatRepo) AddAnswer(answer *entity.Answer) error {
+	insertProduct := `INSERT INTO answer (question_id, text) VALUES ($1, $2)`
+	_, err := repo.DB.Exec(insertProduct, answer.QuestionId, answer.Text)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repo *CsatRepo) GetAnswerTypeBYQuestionId(id uint) (uint, error) {
+	var answertype uint
+	row := repo.DB.QueryRow("SELECT answer_type FROM question WHERE id = $1", id)
+	err := row.Scan(
+		&answertype,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return answertype, nil
+}
+
+func (repo *CsatRepo) GetAnswerByQuestionId(id uint) ([]*entity.Answer, error) {
+	rows, err := repo.DB.Query("SELECT id, text FROM answer WHERE question_id = $1", id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, err
+		}
+	}
+	defer rows.Close()
+
+	var Answers = []*entity.Answer{}
+	for rows.Next() {
+		answer := &entity.Answer{}
+		err = rows.Scan(
+			&answer.Id,
+			&answer.Text,
+		)
+		if err != nil {
+			return nil, err
+		}
+		Answers = append(Answers, answer)
+	}
+	return Answers, nil
 }

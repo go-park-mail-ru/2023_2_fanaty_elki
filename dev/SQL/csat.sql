@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS QUESTIONNAIRE CASCADE;
+
 CREATE TABLE IF NOT EXISTS public.QUESTIONNAIRE
 (
     ID serial NOT NULL,
@@ -33,6 +35,6 @@ insert into QUESTIONNAIRE(name) VALUES('Общие вопросы');
 
 insert into QUESTION(QUESTIONNAIRE_ID, text, ANSWER_TYPE) VALUES(1, 'Оцените общее впечатление от сервиса', 2);
 
-insert into QUESTION(QUESTIONNAIRE_ID, text, ANSWER_TYPE) VALUES(1, 'Насколько сильно Вы хотите порекомендовать наш сервис знакомым', 3);
+insert into QUESTION(QUESTIONNAIRE_ID, text, ANSWER_TYPE) VALUES(1, 'Насколько сильно Вы хотите порекомендовать наш сервис знакомым', 1);
 
-insert into QUESTION(QUESTIONNAIRE_ID, text, ANSWER_TYPE) VALUES(1, 'Напишите что Вам понравилось, а что нет', 3);
+insert into QUESTION(QUESTIONNAIRE_ID, text, ANSWER_TYPE) VALUES(1, 'Напишите что Вам понравилось, а что нет', 1);
