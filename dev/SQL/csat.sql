@@ -1,4 +1,7 @@
 DROP TABLE IF EXISTS QUESTIONNAIRE CASCADE;
+DROP TABLE IF EXISTS QUESTION CASCADE;
+DROP TABLE IF EXISTS ANSWER CASCADE;
+DROP TABLE IF EXISTS ADMIN CASCADE;
 
 CREATE TABLE IF NOT EXISTS public.QUESTIONNAIRE
 (
@@ -33,8 +36,22 @@ CREATE TABLE IF NOT EXISTS public.ADMIN
 
 insert into QUESTIONNAIRE(name) VALUES('Общие вопросы');
 
-insert into QUESTION(QUESTIONNAIRE_ID, text, ANSWER_TYPE) VALUES(1, 'Оцените общее впечатление от сервиса', 2);
-
-insert into QUESTION(QUESTIONNAIRE_ID, text, ANSWER_TYPE) VALUES(1, 'Насколько сильно Вы хотите порекомендовать наш сервис знакомым', 1);
+insert into QUESTION(QUESTIONNAIRE_ID, text, ANSWER_TYPE) VALUES(1,'Насколько сильно Вы хотите порекомендовать наш сервис знакомым', 2);
 
 insert into QUESTION(QUESTIONNAIRE_ID, text, ANSWER_TYPE) VALUES(1, 'Напишите что Вам понравилось, а что нет', 1);
+
+insert into QUESTIONNAIRE(name) VALUES('Оформление заказа');
+
+insert into QUESTION(QUESTIONNAIRE_ID, text, ANSWER_TYPE)
+VALUES(1, 'Насколько удобно вам было оформлять заказ?', 2);
+
+insert into QUESTION(QUESTIONNAIRE_ID, text, ANSWER_TYPE)
+VALUES(1, 'Напишите что Вам понравилось, а что нет', 1);
+
+insert into QUESTIONNAIRE(name) VALUES('Регистрация');
+
+insert into QUESTION(QUESTIONNAIRE_ID, text, ANSWER_TYPE)
+VALUES(1, 'Насколько удобно вам было регистрироваться?', 2);
+
+insert into QUESTION(QUESTIONNAIRE_ID, text, ANSWER_TYPE)
+VALUES(1, 'Напишите что Вам понравилось, а что нет', 1);

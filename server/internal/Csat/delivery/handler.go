@@ -36,7 +36,7 @@ func NewCsatHandler(csatUsecase csatUsecase.UsecaseI, logger *mw.ACLog) *CsatHan
 func (handler *CsatHandler) RegisterHandler(router *mux.Router) {
 	router.HandleFunc("/api/csat/quizzes/{id}/config", handler.GetQuestionnaire).Methods(http.MethodGet)
 	router.HandleFunc("/api/csat/quizzes", handler.AddAnswer).Methods(http.MethodPost)
-	router.HandleFunc("/api/csat/quizzes/answers/{id}", handler.GetAnswerList).Methods(http.MethodGet)
+	router.HandleFunc("/api/csat/admin/quizzes/answers/{id}", handler.GetAnswerList).Methods(http.MethodGet)
 }
 
 func (handler *CsatHandler) GetQuestionnaire(w http.ResponseWriter, r *http.Request) {
