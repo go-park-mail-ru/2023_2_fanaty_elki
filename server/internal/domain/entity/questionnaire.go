@@ -18,8 +18,3 @@ type Answer struct {
 	Text       string
 }
 
-type Admin struct {
-	Id       uint
-	Username string
-	Password string
-}

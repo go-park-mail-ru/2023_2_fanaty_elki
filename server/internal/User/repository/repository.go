@@ -2,6 +2,7 @@ package repository
 
 import (
 	"server/internal/domain/dto"
+	"server/internal/domain/entity"
 	// "server/internal/domain/entity"
 )
 
@@ -12,4 +13,6 @@ type UserRepositoryI interface {
 	FindUserByUsername(value string) (*dto.DBGetUser, error)
 	FindUserByEmail(value string) (*dto.DBGetUser, error)
 	FindUserByPhone(value string) (*dto.DBGetUser, error)
+	GetAdminById(id uint) (*entity.Admin, error)
+	GetAdminByUsername(username string) (*entity.Admin, error)
 }

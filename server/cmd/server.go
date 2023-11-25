@@ -11,6 +11,9 @@ import (
 	"net/http"
 	"server/config"
 	"server/db"
+	adminDev "server/internal/Admin/delivery"
+	adminRep "server/internal/Admin/repository/redis"
+	adminUsecase "server/internal/Admin/usecase"
 	cartDev "server/internal/Cart/delivery"
 	cartRep "server/internal/Cart/repository/postgres"
 	cartUsecase "server/internal/Cart/usecase"
@@ -29,7 +32,7 @@ import (
 	userRep "server/internal/User/repository/postgres"
 	userUsecase "server/internal/User/usecase"
 	"server/internal/middleware"
-	"time"
+	//"time"
 )
 
 // @title Prinesi-Poday API
@@ -39,45 +42,47 @@ import (
 
 const PORT = ":8080"
 
-// var (
-// 	redisAddr = flag.String("addr", "redis://user:@localhost:6379/0", "redis addr")
-
-// 	host     = "localhost"
-// 	port     = 5432
-// 	user     = db.User.Username
-// 	password = db.User.Password
-// 	dbname   = "prinesy-poday"
-// 	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
-// 		"password=%s dbname=%s sslmode=disable",
-// 		host, port, user, password, dbname)
-// )
-
 var (
-	redisAddr = flag.String("addr", "redis://redis-session:6379/0", "redis addr")
+	redisAddr = flag.String("addr", "redis://user:@localhost:6379/0", "redis addr")
 
-	host     = "test_postgres"
+	host     = "localhost"
 	port     = 5432
 	user     = db.User.Username
 	password = db.User.Password
 	dbname   = "prinesy-poday"
-
 	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
 )
+
+// var (
+// 	redisAddr = flag.String("addr", "redis://redis-session:6379/0", "redis addr")
+
+// 	host     = "test_postgres"
+// 	port     = 5432
+// 	user     = db.User.Username
+// 	password = db.User.Password
+// 	dbname   = "prinesy-poday"
+
+// 	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
+// 		"password=%s dbname=%s sslmode=disable",
+// 		host, port, user, password, dbname)
+// )
 
 func main() {
 	flag.Parse()
 	router := mux.NewRouter()
 	authRouter := mux.NewRouter()
 	corsRouter := mux.NewRouter()
+	adminRouter := mux.NewRouter()
+
 
 	redisConn, err := redis.DialURL(*redisAddr)
 	if err != nil {
 		log.Fatal("can`t connect to redis", err)
 	}
 
-	time.Sleep(5 * time.Second)
+//	time.Sleep(5 * time.Second)
 
 	db, err := db.GetPostgres(psqlInfo)
 	if err != nil {
@@ -108,6 +113,7 @@ func main() {
 	cartRepo := cartRep.NewCartRepo(db)
 	sessionRepo := sessionRep.NewSessionManager(redisConn)
 	orderRepo := orderRep.NewOrderRepo(db)
+	adminRepo := adminRep.NewadminManager(redisConn)
 
 	userUC := userUsecase.NewUserUsecase(userRepo, cartRepo)
 	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo, productRepo)
@@ -115,13 +121,16 @@ func main() {
 	sessionUC := sessionUsecase.NewSessionUsecase(sessionRepo, userRepo)
 	orderUC := orderUsecase.NewOrderUsecase(orderRepo, cartRepo, productRepo)
 	productUC := productUsecase.NewProductUsecase(productRepo)
+	adminUC := adminUsecase.NewadminUsecase(adminRepo, userRepo)
 
 	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC, logger)
 	cartsHandler := cartDev.NewCartHandler(cartUC, logger)
 	sessionsHandler := sessionDev.NewSessionHandler(sessionUC, userUC, logger)
 	orderHandler := orderDev.NewOrderHandler(orderUC, sessionUC, logger)
 	productHandler := productDev.NewProductHandler(productUC, logger)
+	adminHandler := adminDev.NewAdminHandler(adminUC, userUC, logger)
 	authMW := middleware.NewSessionMiddleware(sessionUC, logger)
+	adminMW := middleware.NewAdminMiddleware(adminUC, logger)
 
 	router.PathPrefix("/api/login").Handler(corsRouter)
 	router.PathPrefix("/api/logout").Handler(authRouter)
@@ -131,12 +140,14 @@ func main() {
 	router.PathPrefix("/api/orders").Handler(authRouter)
 	router.PathPrefix("/api/csrf").Handler(authRouter)
 	router.PathPrefix("/api/users").Handler(corsRouter)
+	router.PathPrefix("/api/csat").Handler(adminRouter)
 
 	router.Use(logger.ACLogMiddleware)
 	router.Use(middleware.PanicMiddleware)
 	router.Use(middleware.CorsMiddleware)
 	corsRouter.Use(middleware.CorsCredentionalsMiddleware)
 	authRouter.Use(authMW.AuthMiddleware)
+	adminRouter.Use(adminMW.AuthMiddleware)
 
 	restaurantsHandler.RegisterHandler(router)
 	productHandler.RegisterHandler(router)
@@ -145,6 +156,8 @@ func main() {
 	sessionsHandler.RegisterAuthHandler(authRouter)
 	orderHandler.RegisterHandler(authRouter)
 	productHandler.RegisterHandler(router)
+	adminHandler.RegisterAdminHandler(adminRouter)
+	adminHandler.RegisterCorsHandler(adminRouter)
 
 	server := &http.Server{
 		Addr:    PORT,

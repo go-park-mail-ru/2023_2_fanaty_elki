@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"database/sql"
-	"fmt"
 	"server/internal/User/repository"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
@@ -74,7 +73,7 @@ func (repo *UserRepo) CreateUser(user *dto.DBCreateUser) (uint, error) {
 
 	insertUser := `INSERT INTO users (username, password, birthday, phone_number, email, icon) VALUES ($1, $2, $3, $4, $5, $6)`
 	_, err := repo.DB.Exec(insertUser, user.Username, user.Password, user.Birthday, user.PhoneNumber, user.Email, user.Icon)
-	fmt.Println(err)
+
 	if err != nil {
 		return 0, entity.ErrInternalServerError
 	}
@@ -97,4 +96,31 @@ func (repo *UserRepo) UpdateUser(user *dto.DBUpdateUser) error {
 		return entity.ErrInternalServerError
 	}
 	return nil
+}
+
+func (repo *UserRepo) GetAdminById(id uint) (*entity.Admin, error) {
+	admin := &entity.Admin{}
+	row := repo.DB.QueryRow("SELECT username FROM Admin WHERE id = $1", id)
+	err := row.Scan(&admin.Username)
+	admin.Id = id
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, entity.ErrInternalServerError
+	}
+	return admin, nil
+}
+
+func (repo *UserRepo) GetAdminByUsername(username string) (*entity.Admin, error) {
+	admin := &entity.Admin{}
+	row := repo.DB.QueryRow("SELECT id, password FROM Admin WHERE username = $1 ", username)
+	err := row.Scan(&admin.Id, &admin.Password)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, entity.ErrInternalServerError
+	}
+	return admin, nil
 }

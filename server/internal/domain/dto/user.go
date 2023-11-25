@@ -67,6 +67,25 @@ type DBGetUser struct {
 	Icon        sql.NullString 
 }
 
+type ReqAdmin struct {
+	Username string `json:"Username"`
+	Password string `json:"Password"`
+}
+
+type ReqAuthAdmin struct {
+	Username string `json:"Username"`
+}
+
+func ToEntityLoginAdmin(reqUser *ReqAdmin) *entity.Admin {
+	if reqUser == nil{
+		return nil
+	}
+	return &entity.Admin{
+		Username: reqUser.Username,         
+		Password: reqUser.Password,         
+	}
+} 
+
 func ToEntityGetUser(reqUser *DBGetUser) *entity.User {
 	if reqUser == nil{
 		return nil
