@@ -450,3 +450,21 @@ CREATE TABLE IF NOT EXISTS public.ORDERS_ADDRESS
     ADDRESS_ID INT REFERENCES ADDRESS(ID) NOT NULL,
     PRIMARY KEY (ID)
 );
+
+CREATE TABLE IF NOT EXISTS public.comment
+(
+    id            SERIAL                                 NOT NULL,
+    content       TEXT,
+    rating        INT                                    NOT NULL,
+    restaurant_id INT REFERENCES restaurant(id)          NOT NULL,
+    user_id       INT REFERENCES users(id)               NOT NULL,
+    created_at    TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
+	updated_at    TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
+    PRIMARY KEY (ID),
+    CONSTRAINT valid_rating CHECK (rating >= 1 AND rating <= 5)
+);
+
+CREATE TRIGGER set_timestamp
+BEFORE UPDATE ON comment
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
