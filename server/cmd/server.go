@@ -138,7 +138,7 @@ func main() {
 	router.PathPrefix("/api/orders").Handler(authRouter)
 	router.PathPrefix("/api/csrf").Handler(authRouter)
 	router.PathPrefix("/api/users").Handler(corsRouter)
-	router.PathPrefix("/api/comments").Handler(authRouter).Methods(http.MethodPost)
+	router.PathPrefix("/api/comments").Handler(authRouter).Methods(http.MethodPost, http.MethodOptions)
 
 	router.Use(logger.ACLogMiddleware)
 	router.Use(middleware.PanicMiddleware)
@@ -153,7 +153,7 @@ func main() {
 	sessionsHandler.RegisterAuthHandler(authRouter)
 	orderHandler.RegisterHandler(authRouter)
 	productHandler.RegisterHandler(router)
-	commentHandler.RegisterGetHandler(authRouter)
+	commentHandler.RegisterPostHandler(authRouter)
 	commentHandler.RegisterGetHandler(router)
 
 	server := &http.Server{
