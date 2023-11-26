@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	productRep "server/internal/Product/repository"
@@ -10,9 +11,12 @@ import (
 )
 
 type UsecaseI interface {
-	GetRestaurants() ([]*entity.Restaurant, error)
-	GetRestaurantById(id uint) (*entity.Restaurant, error)
+	GetRestaurants() ([]*dto.RestaurantWithCategories, error)
+	GetRestaurantById(id uint) (*dto.RestaurantWithCategories, error)
 	GetRestaurantProducts(id uint) ([]*dto.MenuTypeWithProducts, error)
+	GetRestaurantsByCategory(name string) ([]*dto.RestaurantWithCategories, error)
+	GetCategories() (*[]string, error)
+	Search(word string) ([]*dto.RestaurantWithCategoriesAndProducts, error)
 }
 
 type restaurantUsecase struct {
@@ -28,11 +32,13 @@ func NewRestaurantUsecase(resRep restRep.RestaurantRepositoryI, productRep produ
 
 }
 
-func (res restaurantUsecase) GetRestaurants() ([]*entity.Restaurant, error) {
+func (res restaurantUsecase) GetRestaurants() ([]*dto.RestaurantWithCategories, error) {
 	rests, err := res.restaurantRepo.GetRestaurants()
 	if err != nil {
+		fmt.Println(err)
 		return nil, entity.ErrInternalServerError
 	}
+	restswithcategories := []*dto.RestaurantWithCategories{}
 	for _, rest := range rests {
 		mindeltime := rand.Intn(60)
 		maxdeltime := mindeltime + rand.Intn(20)
@@ -41,11 +47,20 @@ func (res restaurantUsecase) GetRestaurants() ([]*entity.Restaurant, error) {
 		rest.MinDeliveryTime = mindeltime
 		rest.MaxDeliveryTime = maxdeltime
 		rest.DeliveryPrice = float32(delprice)
+		cats, err := res.restaurantRepo.GetCategoriesByRestaurantId(rest.ID)
+		if err != nil {
+			if err != entity.ErrNotFound {
+				fmt.Println(err)
+				return nil, entity.ErrInternalServerError
+			}
+		}
+		restwithcat := dto.ToRestaurantWithCategories(rest, cats)
+		restswithcategories = append(restswithcategories, restwithcat)
 	}
-	return rests, nil
+	return restswithcategories, nil
 }
 
-func (res restaurantUsecase) GetRestaurantById(id uint) (*entity.Restaurant, error) {
+func (res restaurantUsecase) GetRestaurantById(id uint) (*dto.RestaurantWithCategories, error) {
 	rest, err := res.restaurantRepo.GetRestaurantById(id)
 	if err != nil {
 		return nil, err
@@ -57,7 +72,14 @@ func (res restaurantUsecase) GetRestaurantById(id uint) (*entity.Restaurant, err
 	rest.MinDeliveryTime = mindeltime
 	rest.MaxDeliveryTime = maxdeltime
 	rest.DeliveryPrice = float32(delprice)
-	return rest, nil
+	cats, err := res.restaurantRepo.GetCategoriesByRestaurantId(rest.ID)
+	if err != nil {
+		if err != entity.ErrNotFound {
+			return nil, entity.ErrInternalServerError
+		}
+	}
+	restwithcat := dto.ToRestaurantWithCategories(rest, cats)
+	return restwithcat, nil
 }
 
 func (res restaurantUsecase) GetRestaurantProducts(id uint) ([]*dto.MenuTypeWithProducts, error) {
@@ -79,4 +101,114 @@ func (res restaurantUsecase) GetRestaurantProducts(id uint) ([]*dto.MenuTypeWith
 	}
 
 	return menuTypesWithProducts, nil
+}
+
+func (res restaurantUsecase) GetRestaurantsByCategory(name string) ([]*dto.RestaurantWithCategories, error) {
+	rests, err := res.restaurantRepo.GetRestaurantsByCategory(name)
+	if err != nil {
+		if err == entity.ErrNotFound {
+			return nil, entity.ErrNotFound
+		}
+		return nil, entity.ErrInternalServerError
+	}
+	restswithcategories := []*dto.RestaurantWithCategories{}
+	for _, rest := range rests {
+		mindeltime := rand.Intn(60)
+		maxdeltime := mindeltime + rand.Intn(20)
+		delprice := rand.Float64() * 1000
+		delprice = math.Round(delprice*100) / 100
+		rest.MinDeliveryTime = mindeltime
+		rest.MaxDeliveryTime = maxdeltime
+		rest.DeliveryPrice = float32(delprice)
+		cats, err := res.restaurantRepo.GetCategoriesByRestaurantId(rest.ID)
+		if err != nil {
+			if err != entity.ErrNotFound {
+				return nil, entity.ErrInternalServerError
+			}
+		}
+		restwithcat := dto.ToRestaurantWithCategories(rest, cats)
+		restswithcategories = append(restswithcategories, restwithcat)
+	}
+	return restswithcategories, nil
+}
+
+func (res restaurantUsecase) GetCategories() (*[]string, error) {
+	cats, err := res.restaurantRepo.GetCategories()
+	categories := dto.TransformCategoriesToStringSlice(cats)
+	if err != nil {
+		return nil, entity.ErrInternalServerError
+	}
+	return categories, nil
+}
+
+func (res restaurantUsecase) Search(word string) ([]*dto.RestaurantWithCategoriesAndProducts, error) {
+	rests, err := res.restaurantRepo.SearchRestaurants(word)
+	if err != nil {
+		return nil, entity.ErrInternalServerError
+	}
+	restsbycategory, err := res.restaurantRepo.SearchCategories(word)
+	if err != nil {
+		return nil, entity.ErrInternalServerError
+	}
+	restset := make(map[uint]bool)
+	for _, rest := range rests {
+		restset[rest.ID] = true
+	}
+	for i, rest := range restsbycategory {
+		if restset[rest.ID] {
+			restsbycategory = append(restsbycategory[:i], restsbycategory[i+1:]...)
+		} else {
+			restset[rest.ID] = true
+		}
+	}
+	rests = append(rests, restsbycategory...)
+	products, err := res.productRepo.SearchProducts(word)
+	for _, prod := range products {
+		restId, err := res.productRepo.GetRestaurantIdByProduct(prod.ID)
+		if err != nil {
+			return nil, entity.ErrInternalServerError
+		}
+		if !restset[restId] {
+			restById, err := res.restaurantRepo.GetRestaurantById(restId)
+			if err != nil {
+				return nil, entity.ErrInternalServerError
+			}
+			restset[restId] = true
+			rests = append(rests, restById)
+		}
+	}
+	if err != nil {
+		return nil, entity.ErrInternalServerError
+	}
+	restsWithCategoriesAndProducts := []*dto.RestaurantWithCategoriesAndProducts{}
+	for _, rest := range rests {
+		mindeltime := rand.Intn(60)
+		maxdeltime := mindeltime + rand.Intn(20)
+		delprice := rand.Float64() * 1000
+		delprice = math.Round(delprice*100) / 100
+		rest.MinDeliveryTime = mindeltime
+		rest.MaxDeliveryTime = maxdeltime
+		rest.DeliveryPrice = float32(delprice)
+		cats, err := res.restaurantRepo.GetCategoriesByRestaurantId(rest.ID)
+		if err != nil {
+			if err != entity.ErrNotFound {
+				return nil, entity.ErrInternalServerError
+			}
+		}
+		restWithCat := dto.ToRestaurantWithCategories(rest, cats)
+		restWithCatsAndProducts := dto.ToRestaurantWithCategoriesAndProducts(restWithCat, []*entity.Product{})
+		restsWithCategoriesAndProducts = append(restsWithCategoriesAndProducts, restWithCatsAndProducts)
+	}
+	for _, prod := range products {
+		restId, err := res.productRepo.GetRestaurantIdByProduct(prod.ID)
+		if err != nil {
+			return nil, entity.ErrInternalServerError
+		}
+		for _, rest := range restsWithCategoriesAndProducts {
+			if rest.ID == restId {
+				rest.Products = append(rest.Products, prod)
+			}
+		}
+	}
+	return restsWithCategoriesAndProducts, nil
 }

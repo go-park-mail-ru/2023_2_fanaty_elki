@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 	"server/internal/domain/entity"
 )
 
@@ -16,8 +17,9 @@ func NewRestaurantRepo(db *sql.DB) *restaurantRepo {
 }
 
 func (repo *restaurantRepo) GetRestaurants() ([]*entity.Restaurant, error) {
-	rows, err := repo.DB.Query("SELECT id, name, rating, comments_count, category, icon FROM restaurant")
+	rows, err := repo.DB.Query(`SELECT id, name, rating, comments_count, icon FROM restaurant`)
 	if err != nil {
+		fmt.Println(err)
 		if err == sql.ErrNoRows {
 			return nil, nil
 		} else {
@@ -33,7 +35,6 @@ func (repo *restaurantRepo) GetRestaurants() ([]*entity.Restaurant, error) {
 			&restaurant.Name,
 			&restaurant.Rating,
 			&restaurant.CommentsCount,
-			&restaurant.Category,
 			&restaurant.Icon,
 		)
 		if err != nil {
@@ -46,13 +47,12 @@ func (repo *restaurantRepo) GetRestaurants() ([]*entity.Restaurant, error) {
 
 func (repo *restaurantRepo) GetRestaurantById(id uint) (*entity.Restaurant, error) {
 	restaurant := &entity.Restaurant{}
-	row := repo.DB.QueryRow("SELECT id, name, rating, comments_count, category, icon FROM restaurant WHERE id = $1", id)
+	row := repo.DB.QueryRow(`SELECT id, name, rating, comments_count, icon FROM restaurant WHERE id = $1`, id)
 	err := row.Scan(
 		&restaurant.ID,
 		&restaurant.Name,
 		&restaurant.Rating,
 		&restaurant.CommentsCount,
-		&restaurant.Category,
 		&restaurant.Icon,
 	)
 	if err != nil {
@@ -65,7 +65,7 @@ func (repo *restaurantRepo) GetRestaurantById(id uint) (*entity.Restaurant, erro
 }
 
 func (repo *restaurantRepo) GetMenuTypesByRestaurantId(id uint) ([]*entity.MenuType, error) {
-	rows, err := repo.DB.Query("SELECT id, name, restaurant_id FROM menu_type WHERE restaurant_id = $1", id)
+	rows, err := repo.DB.Query(`SELECT id, name, restaurant_id FROM menu_type WHERE restaurant_id = $1`, id)
 	if err != nil {
 		return nil, err
 	}
@@ -89,4 +89,166 @@ func (repo *restaurantRepo) GetMenuTypesByRestaurantId(id uint) ([]*entity.MenuT
 		return nil, entity.ErrNotFound
 	}
 	return MenuTypes, nil
+}
+
+func (repo *restaurantRepo) GetCategoriesByRestaurantId(id uint) ([]*entity.Category, error) {
+	rows, err := repo.DB.Query(`SELECT category.id, category.name FROM restaurant_category rc 
+	INNER JOIN category ON rc.category_id=category.id WHERE restaurant_id = $1`, id)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	defer rows.Close()
+	var Categories = []*entity.Category{}
+	var count = 0
+	for rows.Next() {
+		count++
+		category := &entity.Category{}
+		err = rows.Scan(
+			&category.ID,
+			&category.Name,
+		)
+		if err != nil {
+			return nil, entity.ErrInternalServerError
+		}
+		Categories = append(Categories, category)
+	}
+	if count == 0 {
+		return nil, entity.ErrNotFound
+	}
+	return Categories, nil
+}
+
+func (repo *restaurantRepo) GetRestaurantsByCategory(name string) ([]*entity.Restaurant, error) {
+	rows, err := repo.DB.Query(`SELECT restaurant.id, restaurant.name, rating, comments_count, icon FROM restaurant_category rc 
+	INNER JOIN restaurant ON rc.restaurant_id=restaurant.id INNER JOIN  category ON rc.category_id=category.id WHERE category.name = $1`, name)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, err
+		}
+	}
+	defer rows.Close()
+	var Restaurants = []*entity.Restaurant{}
+	var count = 0
+	for rows.Next() {
+		count++
+		restaurant := &entity.Restaurant{}
+		err = rows.Scan(
+			&restaurant.ID,
+			&restaurant.Name,
+			&restaurant.Rating,
+			&restaurant.CommentsCount,
+			&restaurant.Icon,
+		)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return nil, nil
+			} else {
+				return nil, err
+			}
+		}
+		Restaurants = append(Restaurants, restaurant)
+	}
+	if count == 0 {
+		return nil, entity.ErrNotFound
+	}
+	return Restaurants, nil
+}
+
+func (repo *restaurantRepo) GetCategories() ([]*entity.Category, error) {
+	rows, err := repo.DB.Query(`SELECT id, name FROM category`)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, err
+		}
+	}
+	defer rows.Close()
+	var Categories = []*entity.Category{}
+	var count = 0
+	for rows.Next() {
+		count++
+		category := &entity.Category{}
+		err = rows.Scan(
+			&category.ID,
+			&category.Name,
+		)
+		if err != nil {
+			return nil, err
+		}
+		Categories = append(Categories, category)
+	}
+	if count == 0 {
+		return nil, entity.ErrNotFound
+	}
+	return Categories, nil
+}
+
+func (repo *restaurantRepo) SearchRestaurants(word string) ([]*entity.Restaurant, error) {
+	rows, err := repo.DB.Query(`SELECT id, name, rating, comments_count, icon FROM restaurant WHERE LOWER(name) LIKE LOWER('%' || $1 || '%')`, word)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, err
+		}
+	}
+	defer rows.Close()
+	var Restaurants = []*entity.Restaurant{}
+	for rows.Next() {
+		restaurant := &entity.Restaurant{}
+		err = rows.Scan(
+			&restaurant.ID,
+			&restaurant.Name,
+			&restaurant.Rating,
+			&restaurant.CommentsCount,
+			&restaurant.Icon,
+		)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return nil, nil
+			} else {
+				return nil, err
+			}
+		}
+		Restaurants = append(Restaurants, restaurant)
+	}
+	return Restaurants, nil
+}
+
+func (repo *restaurantRepo) SearchCategories(word string) ([]*entity.Restaurant, error) {
+	rows, err := repo.DB.Query(`select restaurant.id, restaurant.name, rating, comments_count, icon from restaurant_category rc 
+	inner join restaurant on rc.restaurant_id=restaurant.id inner join category on rc.category_id=category.id 
+	where lower(category.name) like lower('%' || $1 || '%')`, word)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, err
+		}
+	}
+	defer rows.Close()
+	var Restaurants = []*entity.Restaurant{}
+	for rows.Next() {
+		restaurant := &entity.Restaurant{}
+		err = rows.Scan(
+			&restaurant.ID,
+			&restaurant.Name,
+			&restaurant.Rating,
+			&restaurant.CommentsCount,
+			&restaurant.Icon,
+		)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return nil, nil
+			} else {
+				return nil, err
+			}
+		}
+		Restaurants = append(Restaurants, restaurant)
+	}
+	return Restaurants, nil
 }

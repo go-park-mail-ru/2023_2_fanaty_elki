@@ -9,6 +9,8 @@ DROP TABLE IF EXISTS cart CASCADE;
 DROP TABLE IF EXISTS cart_product CASCADE;
 DROP TABLE IF EXISTS address CASCADE;
 DROP TABLE IF EXISTS orders_address CASCADE;
+DROP TABLE IF EXISTS category CASCADE;
+DROP TABLE IF EXISTS restaurant_category CASCADE;
 
 
 CREATE OR REPLACE FUNCTION trigger_set_timestamp()
@@ -48,7 +50,6 @@ CREATE TABLE IF NOT EXISTS public.RESTAURANT
     NAME varchar UNIQUE NOT NULL,
 	RATING numeric(2,1) default 0.0 NOT NULL,
 	COMMENTS_COUNT integer default 0 NOT NULL,
-	CATEGORY varchar,
 	ICON varchar default 'deficon' NOT NULL,
 	CREATED_AT TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
 	UPDATED_AT TIMESTAMP WITH TIME ZONE default NOW(),
@@ -64,22 +65,82 @@ FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
 
 
-insert into restaurant(name,rating,comments_count,icon,category)
-values('Burger King',3.7,60,'img/burger_king.jpg','Fastfood');
-insert into restaurant(name,rating,comments_count,icon,category)
-values('Якитория',4.8,69,'img/yakitoria.jpg','Sushi');
-insert into restaurant(name,rating,comments_count,icon,category)
-values('Вкусно и точка',3.2,90,'img/tasty_and..jpg','Fastfood');
-insert into restaurant(name,rating,comments_count,icon,category)
-values('KFC',4.0,90,'img/kfc.jpg','Fastfood');
-insert into restaurant(name,rating,comments_count,icon,category)
-values('Шоколадница',4.5,90,'img/chocolate.jpeg','Fastfood');
-insert into restaurant(name,rating,comments_count,icon,category)
-values('Корчма Тарас Бульба',5.0,90,'img/bulba.jpg','Fastfood');
-insert into restaurant(name,rating,comments_count,icon,category)
-values('Subway',3.0,90,'img/subway.jpeg','Fastfood');
-insert into restaurant(name,rating,comments_count,icon,category)
-values('Sushiwok',4.5,90,'img/sushi_wok.png','Fastfood');
+insert into restaurant(name,rating,comments_count,icon)
+values('Burger King',3.7,60,'img/burger_king.jpg');
+insert into restaurant(name,rating,comments_count,icon)
+values('Якитория',4.8,69,'img/yakitoria.jpg');
+insert into restaurant(name,rating,comments_count,icon)
+values('Вкусно и точка',3.2,90,'img/tasty_and..jpg');
+insert into restaurant(name,rating,comments_count,icon)
+values('KFC',4.0,90,'img/kfc.jpg');
+insert into restaurant(name,rating,comments_count,icon)
+values('Шоколадница',4.5,90,'img/chocolate.jpeg');
+insert into restaurant(name,rating,comments_count,icon)
+values('Корчма Тарас Бульба',5.0,90,'img/bulba.jpg');
+insert into restaurant(name,rating,comments_count,icon)
+values('Subway',3.0,90,'img/subway.jpeg');
+insert into restaurant(name,rating,comments_count,icon)
+values('Sushiwok',4.5,90,'img/sushi_wok.png');
+
+CREATE TABLE IF NOT EXISTS public.category
+(
+    id SERIAL NOT NULL,
+    name TEXT UNIQUE NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT valid_text CHECK ( LENGTH(name) > 0 and LENGTH(name) < 40 )
+);
+
+insert into category(name)
+values('Бургеры');
+insert into category(name)
+values('Суши');
+insert into category(name)
+values('Завтраки');
+insert into category(name)
+values('Обед');
+insert into category(name)
+values('Русская');
+insert into category(name)
+values('Кофе');
+
+CREATE TABLE IF NOT EXISTS public.restaurant_category
+(
+    id SERIAL NOT NULL,
+    restaurant_id INT REFERENCES public.restaurant(id) NOT NULL,
+    category_id INT REFERENCES public.category(id) NOT NULL,
+    PRIMARY KEY (id)
+);
+
+insert into restaurant_category(restaurant_id, category_id)
+values(1,1);
+insert into restaurant_category(restaurant_id, category_id)
+values(1,4);
+insert into restaurant_category(restaurant_id, category_id)
+values(2,2);
+insert into restaurant_category(restaurant_id, category_id)
+values(3,1);
+insert into restaurant_category(restaurant_id, category_id)
+values(3,4);
+insert into restaurant_category(restaurant_id, category_id)
+values(4,1);
+insert into restaurant_category(restaurant_id, category_id)
+values(4,3);
+insert into restaurant_category(restaurant_id, category_id)
+values(4,6);
+insert into restaurant_category(restaurant_id, category_id)
+values(5,1);
+insert into restaurant_category(restaurant_id, category_id)
+values(5,3);
+insert into restaurant_category(restaurant_id, category_id)
+values(5,6);
+insert into restaurant_category(restaurant_id, category_id)
+values(6,4);
+insert into restaurant_category(restaurant_id, category_id)
+values(6,5);
+insert into restaurant_category(restaurant_id, category_id)
+values(7,4);
+insert into restaurant_category(restaurant_id, category_id)
+values(8,2);
 
 
 
