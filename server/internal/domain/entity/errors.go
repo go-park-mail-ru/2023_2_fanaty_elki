@@ -10,6 +10,7 @@ var (
 	ErrInvalidPhoneNumber    = errors.New("invalid phone number")
 	ErrInvalidBirthday	     = errors.New("invalid birthday")
 	ErrInvalidIcon			 = errors.New("invalid icon")
+	ErrInvalidRating		 = errors.New("invalid rating")
 	ErrConflictUsername      = errors.New("username already exists")
 	ErrConflictEmail         = errors.New("email already exists")
 	ErrConflictPhoneNumber   = errors.New("phone number already exists")
