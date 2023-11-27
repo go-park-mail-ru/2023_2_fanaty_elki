@@ -1,4 +1,4 @@
-FROM golang:1.20-alpine AS builder
+FROM golang:1.19
 
 WORKDIR /
 
@@ -6,12 +6,9 @@ COPY . ./app
 
 WORKDIR /app
 
-COPY ["./go.mod", "/"]
-
-RUN apk --no-cache add bash git make gcc gettext musl-dev
-
+RUN echo $(ls)
+RUN go mod download
 RUN go mod tidy
-
 RUN go build cmd/main.go
 
 WORKDIR /

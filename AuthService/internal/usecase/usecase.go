@@ -49,6 +49,10 @@ func (su sessionUsecase) Check(grpcsessionToken *auth.SessionToken) (*auth.Cooki
 		return nil, err
 	}
 
+	if cookie == nil {
+		return &auth.Cookie{UserID: 0}, nil
+	}
+
 	grpccookie := &auth.Cookie{
 		UserID:       uint64(cookie.UserID),
 		SessionToken: cookie.SessionToken,

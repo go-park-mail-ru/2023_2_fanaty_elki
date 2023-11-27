@@ -33,7 +33,9 @@ services:
       - mynetwork
 
   auth_mvs:
-    build: ./AuthService
+    build: 
+      context: ./AuthService/
+      dockerfile: Dockerfile
     restart: always
     depends_on:
       - redis-session
