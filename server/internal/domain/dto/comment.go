@@ -44,6 +44,14 @@ type RespGetComment struct {
 	Date 	 time.Time `json:"Date"`
 }
 
+type DBRespGetComment struct {
+	Username string	   
+	Icon	 string	   
+	Text 	 sql.NullString	   
+	Rating 	 uint8	   
+	Date 	 time.Time 
+}
+
 
 func (c ReqCreateComment) FromReqToEntCreateComment() *entity.Comment {
 	return &entity.Comment{
@@ -77,5 +85,15 @@ func FromEntToRespCreateComment(comment *entity.Comment) *RespCreateComment {
 		Text: comment.Text,
 		Rating: comment.Rating,
 		Date: comment.Date,
+	}
+}
+
+func (c DBRespGetComment) FromDBtoDel() *RespGetComment {
+	return &RespGetComment{
+		Text: transformSqlStringToString(c.Text),
+		Username: c.Username,
+		Icon: c.Icon,
+		Rating: c.Rating,
+		Date: c.Date,
 	}
 }
