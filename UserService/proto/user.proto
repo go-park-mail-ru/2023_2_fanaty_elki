@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+option go_package = ".";
+
+package user;
+
+message Cookie {
+	uint64 UserID = 1;
+	string SessionToken = 2;
+	int64  MaxAge = 3;    
+}
+
+message SessionToken {
+    string Token = 1;
+}
+
+message CsrfToken {
+    string Token = 1;
+}
+
+message DBDeleteCookie {
+    string SessionToken = 1;
+}
+
+message SesionAndCsrf {
+    string SessionToken = 1;
+    string CsrfToken = 2;
+}
+
+message Nothing {
+    bool Dummy = 1;
+}
+
+service SessionRPC {
+  rpc Create (Cookie) returns (Nothing);
+  rpc Check (SessionToken) returns (Cookie);
+  rpc Delete (DBDeleteCookie) returns (Nothing);
+  rpc Expire (Cookie) returns (Nothing);
+  rpc CreateCsrf (SesionAndCsrf) returns (Nothing);
+  rpc GetCsrf (SessionToken) returns (CsrfToken);
+}
+
+

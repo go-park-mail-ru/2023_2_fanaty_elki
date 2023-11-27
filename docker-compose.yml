@@ -32,5 +32,15 @@ services:
     networks:
       - mynetwork
 
+  auth_mvs:
+    build: ./AuthService
+    restart: always
+    depends_on:
+      - redis-session
+    ports:
+      - "8081:8081"
+    networks:
+      - mynetwork
+
 networks:
   mynetwork:

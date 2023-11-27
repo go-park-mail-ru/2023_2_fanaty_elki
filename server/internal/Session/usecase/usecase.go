@@ -1,16 +1,16 @@
 package usecase
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"github.com/microcosm-cc/bluemonday"
 	"math/rand"
 	sessionRep "server/internal/Session/repository"
 	userRep "server/internal/User/repository"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 	"time"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
-	"github.com/microcosm-cc/bluemonday"
 )
 
 const sessKeyLen = 10
@@ -26,7 +26,7 @@ type UsecaseI interface {
 	GetUserProfile(sessionToken string) (*dto.ReqGetUserProfile, error)
 	GetIdByCookie(SessionToken string) (uint, error)
 	CreateCookieAuth(cookie *entity.Cookie) (*dto.ReqGetUserProfile, error)
-	CheckCsrf(sessionToken string, csrfToken string) error 
+	CheckCsrf(sessionToken string, csrfToken string) error
 	CreateCsrf(sessionToken string) (string, error)
 }
 
@@ -41,7 +41,7 @@ func NewSessionUsecase(sessionRep sessionRep.SessionRepositoryI, userRep userRep
 	return &sessionUsecase{
 		sessionRepo: sessionRep,
 		userRepo:    userRep,
-		sanitizer: sanitizer,
+		sanitizer:   sanitizer,
 	}
 }
 
@@ -105,7 +105,7 @@ func (ss sessionUsecase) Check(SessionToken string) (uint, error) {
 }
 
 func (ss sessionUsecase) Logout(cookie *entity.Cookie) error {
-	return ss.sessionRepo.Delete(dto.ToDBDeleteCookie(cookie))	
+	return ss.sessionRepo.Delete(dto.ToDBDeleteCookie(cookie))
 }
 
 func (ss sessionUsecase) GetUserProfile(sessionToken string) (*dto.ReqGetUserProfile, error) {
@@ -115,7 +115,7 @@ func (ss sessionUsecase) GetUserProfile(sessionToken string) (*dto.ReqGetUserPro
 	}
 
 	user, err := ss.userRepo.FindUserById(cookie.UserID)
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 
@@ -125,14 +125,14 @@ func (ss sessionUsecase) GetUserProfile(sessionToken string) (*dto.ReqGetUserPro
 	reqUser.Icon = ss.sanitizer.Sanitize(reqUser.Icon)
 	reqUser.Username = ss.sanitizer.Sanitize(reqUser.Username)
 	reqUser.PhoneNumber = ss.sanitizer.Sanitize(reqUser.PhoneNumber)
-	
+
 	return reqUser, nil
 }
 
 func (ss sessionUsecase) GetIdByCookie(SessionToken string) (uint, error) {
-	
+
 	cookie, err := ss.sessionRepo.Check(SessionToken)
-	if err != nil || cookie == nil{
+	if err != nil || cookie == nil {
 		return 0, err
 	}
 
@@ -150,7 +150,7 @@ func (ss sessionUsecase) CreateCookieAuth(cookie *entity.Cookie) (*dto.ReqGetUse
 
 func (ss sessionUsecase) CreateCsrf(sessionToken string) (string, error) {
 	csrfToken := randStringRunes(10)
-	redisCSRFToken := ss.getCSRFHash(csrfToken) 
+	redisCSRFToken := ss.getCSRFHash(csrfToken)
 	err := ss.sessionRepo.CreateCsrf(sessionToken, redisCSRFToken)
 	if err != nil {
 		return "", err
@@ -164,7 +164,7 @@ func (ss sessionUsecase) CheckCsrf(sessionToken string, csrfToken string) error 
 
 	if err != nil {
 		return err
-	} 
+	}
 
 	if redisCsrfToken == "" || hash != redisCsrfToken {
 		return entity.ErrFailCSRF

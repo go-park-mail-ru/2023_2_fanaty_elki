@@ -4,9 +4,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/gomodule/redigo/redis"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"net/http"
 	"server/config"
@@ -24,11 +25,12 @@ import (
 	restaurantRep "server/internal/Restaurant/repository/postgres"
 	restaurantUsecase "server/internal/Restaurant/usecase"
 	sessionDev "server/internal/Session/delivery"
-	sessionRep "server/internal/Session/repository/redis"
+	sessionRep "server/internal/Session/repository/microservice"
 	sessionUsecase "server/internal/Session/usecase"
 	userRep "server/internal/User/repository/postgres"
 	userUsecase "server/internal/User/usecase"
 	"server/internal/middleware"
+	auth "server/proto/auth"
 	"time"
 )
 
@@ -72,10 +74,20 @@ func main() {
 	authRouter := mux.NewRouter()
 	corsRouter := mux.NewRouter()
 
-	redisConn, err := redis.DialURL(*redisAddr)
+	// redisConn, err := redis.DialURL(*redisAddr)
+	// if err != nil {
+	// 	log.Fatal("can`t connect to redis", err)
+	// }
+
+	grpcConnAuth, err := grpc.Dial(
+		"auth_mvs:8081",
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
-		log.Fatal("can`t connect to redis", err)
+		log.Fatal(err)
 	}
+	defer grpcConnAuth.Close()
+	authManager := auth.NewSessionRPCClient(grpcConnAuth)
 
 	time.Sleep(5 * time.Second)
 
@@ -106,7 +118,7 @@ func main() {
 	restaurantRepo := restaurantRep.NewRestaurantRepo(db)
 	productRepo := productRep.NewProductRepo(db)
 	cartRepo := cartRep.NewCartRepo(db)
-	sessionRepo := sessionRep.NewSessionManager(redisConn)
+	sessionRepo := sessionRep.NewMicroService(authManager)
 	orderRepo := orderRep.NewOrderRepo(db)
 
 	userUC := userUsecase.NewUserUsecase(userRepo, cartRepo)

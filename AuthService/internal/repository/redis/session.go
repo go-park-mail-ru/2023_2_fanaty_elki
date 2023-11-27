@@ -1,11 +1,11 @@
 package repository
 
 import (
+	"AuthService/dto"
+	"AuthService/entity"
 	"encoding/json"
 	"fmt"
 	"github.com/gomodule/redigo/redis"
-	"server/internal/domain/dto"
-	"server/internal/domain/entity"
 	"sync"
 )
 
