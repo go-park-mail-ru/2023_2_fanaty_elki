@@ -60,7 +60,7 @@ func (repo *commentRepo) Get(id uint) ([]*dto.RespGetComment, error) {
 
 	var comments = []*dto.RespGetComment{}
 	for rows.Next() {
-		comment := &dto.RespGetComment{}
+		comment := &dto.DBRespGetComment{}
 		err = rows.Scan(
 			&comment.Username,
 			&comment.Icon,
@@ -71,7 +71,7 @@ func (repo *commentRepo) Get(id uint) ([]*dto.RespGetComment, error) {
 		if err != nil {
 			return nil, entity.ErrInternalServerError
 		}
-		comments = append(comments, comment)
+		comments = append(comments, comment.FromDBtoDel())
 	}
 	err = rows.Err()
 	if err != nil {
