@@ -54,6 +54,11 @@ func (c *commentUsecase) CreateComment(comment *dto.ReqCreateComment) (*dto.Resp
 		respComment.Icon = "img/defaultIcon.png"
 	}
 
+	err = c.restRepo.UpdateComments(comment)
+	if err != nil {
+		return nil, err
+	}
+	
 	return respComment, nil
 } 
 
