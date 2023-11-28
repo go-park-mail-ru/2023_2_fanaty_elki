@@ -2,7 +2,6 @@ package microservice
 
 import (
 	"context"
-	"fmt"
 
 	sessionRep "server/internal/Session/repository"
 	"server/internal/domain/dto"
@@ -41,7 +40,6 @@ func (ms *microService) Create(cookie *entity.Cookie) error {
 }
 
 func (ms *microService) Check(sessionToken string) (*entity.Cookie, error) {
-	fmt.Println("hello")
 	ctx := context.Background()
 
 	grpcsessionToken := &auth.SessionToken{Token: sessionToken}

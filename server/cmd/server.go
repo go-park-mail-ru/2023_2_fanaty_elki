@@ -19,7 +19,7 @@ import (
 	orderRep "server/internal/Order/repository/postgres"
 	orderUsecase "server/internal/Order/usecase"
 	productDev "server/internal/Product/delivery"
-	productRep "server/internal/Product/repository/postgres"
+	productRep "server/internal/Product/repository/microservice"
 	productUsecase "server/internal/Product/usecase"
 	restaurantDev "server/internal/Restaurant/delivery"
 	restaurantRep "server/internal/Restaurant/repository/postgres"
@@ -31,6 +31,7 @@ import (
 	userUsecase "server/internal/User/usecase"
 	"server/internal/middleware"
 	auth "server/proto/auth"
+	product "server/proto/product"
 	"time"
 )
 
@@ -74,11 +75,6 @@ func main() {
 	authRouter := mux.NewRouter()
 	corsRouter := mux.NewRouter()
 
-	// redisConn, err := redis.DialURL(*redisAddr)
-	// if err != nil {
-	// 	log.Fatal("can`t connect to redis", err)
-	// }
-
 	grpcConnAuth, err := grpc.Dial(
 		"auth_mvs:8081",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -88,6 +84,16 @@ func main() {
 	}
 	defer grpcConnAuth.Close()
 	authManager := auth.NewSessionRPCClient(grpcConnAuth)
+
+	grpcConnProduct, err := grpc.Dial(
+		"product_mvs:8082",
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer grpcConnProduct.Close()
+	productManager := product.NewProductRPCClient(grpcConnProduct)
 
 	time.Sleep(5 * time.Second)
 
@@ -116,7 +122,7 @@ func main() {
 
 	userRepo := userRep.NewUserRepo(db)
 	restaurantRepo := restaurantRep.NewRestaurantRepo(db)
-	productRepo := productRep.NewProductRepo(db)
+	productRepo := productRep.NewProductMicroService(productManager)
 	cartRepo := cartRep.NewCartRepo(db)
 	sessionRepo := sessionRep.NewMicroService(authManager)
 	orderRepo := orderRep.NewOrderRepo(db)
