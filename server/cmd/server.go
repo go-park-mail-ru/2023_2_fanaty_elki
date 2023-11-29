@@ -178,6 +178,7 @@ func main() {
 	prometheus.MustRegister(InternalServerErrorCounter)
 	prometheus.MustRegister(NotFoundErrorCounter)
 	prometheus.MustRegister(hits)
+	prometheus.MustRegister(timerhits)
 
 	logger := middleware.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
 
