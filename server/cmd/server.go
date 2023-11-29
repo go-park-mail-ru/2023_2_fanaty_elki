@@ -115,7 +115,7 @@ func main() {
 
 	userUC := userUsecase.NewUserUsecase(userRepo, cartRepo)
 	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo, productRepo)
-	cartUC := cartUsecase.NewCartUsecase(cartRepo, productRepo, sessionRepo)
+	cartUC := cartUsecase.NewCartUsecase(cartRepo, productRepo, sessionRepo, restaurantRepo)
 	sessionUC := sessionUsecase.NewSessionUsecase(sessionRepo, userRepo)
 	orderUC := orderUsecase.NewOrderUsecase(orderRepo, cartRepo, productRepo)
 	productUC := productUsecase.NewProductUsecase(productRepo)
