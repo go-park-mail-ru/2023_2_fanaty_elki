@@ -11,7 +11,7 @@ import (
 type UsecaseI interface {
 	GetOrders(userId uint) ([]*dto.RespGetOrder, error)
 	CreateOrder(reqOrder *dto.ReqCreateOrder) (*dto.RespCreateOrder, error)
-	UpdateOrder(reqOrder *dto.ReqUpdateOrder) (error)
+	UpdateOrder(reqOrder *dto.ReqUpdateOrder) error
 	GetOrder(reqOrder *dto.ReqGetOneOrder) (*dto.RespGetOneOrder, error)
 }
 
@@ -21,12 +21,12 @@ type orderUsecase struct {
 	prodRepo  productRep.ProductRepositoryI
 }
 
-func NewOrderUsecase(orderRepI orderRep.OrderRepositoryI, cartRepI cartRep.CartRepositoryI, 
-					 prodRepI  productRep.ProductRepositoryI) *orderUsecase{
+func NewOrderUsecase(orderRepI orderRep.OrderRepositoryI, cartRepI cartRep.CartRepositoryI,
+	prodRepI productRep.ProductRepositoryI) *orderUsecase {
 	return &orderUsecase{
 		orderRepo: orderRepI,
-		cartRepo: cartRepI,
-		prodRepo: prodRepI,
+		cartRepo:  cartRepI,
+		prodRepo:  prodRepI,
 	}
 }
 
@@ -34,9 +34,9 @@ func (or *orderUsecase) CreateOrder(reqOrder *dto.ReqCreateOrder) (*dto.RespCrea
 	if len(reqOrder.Address.City) == 0 || len(reqOrder.Address.Street) == 0 || len(reqOrder.Address.House) == 0 {
 		return nil, entity.ErrBadRequest
 	}
-	
+
 	order := dto.ToEntityCreateOrder(reqOrder)
-	
+
 	cart, err := or.cartRepo.GetCartByUserID(reqOrder.UserId)
 	if err != nil {
 		return nil, err
@@ -46,11 +46,11 @@ func (or *orderUsecase) CreateOrder(reqOrder *dto.ReqCreateOrder) (*dto.RespCrea
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}
-	if len(products) == 0 {
+	if len(products.Products) == 0 {
 		return nil, entity.ErrNotFound
 	}
-	
-	for _, product := range products {
+
+	for _, product := range products.Products {
 		pr, err := or.prodRepo.GetProductByID(product.ProductID)
 		if err != nil {
 			return nil, err
@@ -59,11 +59,11 @@ func (or *orderUsecase) CreateOrder(reqOrder *dto.ReqCreateOrder) (*dto.RespCrea
 			order.Price += uint(pr.Price) * uint(product.ItemCount)
 		}
 	}
-	
+
 	order.DeliveryTime = 30
-	respOrder, err := or.orderRepo.CreateOrder(dto.ToDBReqCreateOrder(order, products))
+	respOrder, err := or.orderRepo.CreateOrder(dto.ToDBReqCreateOrder(order, products.Products))
 	respOrder.Address = order.Address
-	
+
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (or *orderUsecase) CreateOrder(reqOrder *dto.ReqCreateOrder) (*dto.RespCrea
 	return respOrder, nil
 }
 
-func (or *orderUsecase) UpdateOrder(reqOrder *dto.ReqUpdateOrder) (error) {
+func (or *orderUsecase) UpdateOrder(reqOrder *dto.ReqUpdateOrder) error {
 	err := or.orderRepo.UpdateOrder(reqOrder)
 	if err != nil {
 		return err

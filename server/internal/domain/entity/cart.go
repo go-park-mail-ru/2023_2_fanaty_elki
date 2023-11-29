@@ -11,3 +11,8 @@ type CartProduct struct {
 	CartID    uint
 	ItemCount int
 }
+
+type CartWithRestaurant struct {
+	RestaurantId uint
+	Products     []*CartProduct
+}
