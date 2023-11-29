@@ -8,5 +8,5 @@ type Restaurant struct {
 	Icon            string
 	MinDeliveryTime int
 	MaxDeliveryTime int
-	DeliveryPrice   float32
+	DeliveryPrice   int
 }
