@@ -93,7 +93,6 @@ func main() {
 	defer grpcConnAuth.Close()
 	authManager := auth.NewSessionRPCClient(grpcConnAuth)
 
-	
 	grpcConnProduct, err := grpc.Dial(
 		"product_mvs:8082",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -187,7 +186,7 @@ func main() {
 	productUC := productUsecase.NewProductUsecase(productRepo)
 	commentUC := commentUsecase.NewCommentUsecase(commentRepo, userRepo, restaurantRepo)
 
-	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC, logger, *hitstats)
+	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC, logger)
 	cartsHandler := cartDev.NewCartHandler(cartUC, logger)
 	sessionsHandler := sessionDev.NewSessionHandler(sessionUC, userUC, logger)
 	orderHandler := orderDev.NewOrderHandler(orderUC, sessionUC, logger)
