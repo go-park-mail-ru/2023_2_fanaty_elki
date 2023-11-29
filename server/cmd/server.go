@@ -11,6 +11,9 @@ import (
 	cartDev "server/internal/Cart/delivery"
 	cartRep "server/internal/Cart/repository/postgres"
 	cartUsecase "server/internal/Cart/usecase"
+	commentDev "server/internal/Comment/delivery"
+	commentRep "server/internal/Comment/repository/postgres"
+	commentUsecase "server/internal/Comment/usecase"
 	orderDev "server/internal/Order/delivery"
 	orderRep "server/internal/Order/repository/postgres"
 	orderUsecase "server/internal/Order/usecase"
@@ -23,12 +26,13 @@ import (
 	sessionDev "server/internal/Session/delivery"
 	sessionRep "server/internal/Session/repository/microservice"
 	sessionUsecase "server/internal/Session/usecase"
-	userRep "server/internal/User/repository/postgres"
+	userRep "server/internal/User/repository/microservice"
 	userUsecase "server/internal/User/usecase"
 	"server/internal/domain/entity"
 	"server/internal/middleware"
 	auth "server/proto/auth"
 	product "server/proto/product"
+	userP "server/proto/user"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -89,6 +93,7 @@ func main() {
 	defer grpcConnAuth.Close()
 	authManager := auth.NewSessionRPCClient(grpcConnAuth)
 
+	
 	grpcConnProduct, err := grpc.Dial(
 		"product_mvs:8082",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -98,6 +103,16 @@ func main() {
 	}
 	defer grpcConnProduct.Close()
 	productManager := product.NewProductRPCClient(grpcConnProduct)
+
+	grpcConnUser, err := grpc.Dial(
+		"user_mvs:8083",
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer grpcConnUser.Close()
+	userManager := userP.NewUserRPCClient(grpcConnUser)
 
 	time.Sleep(5 * time.Second)
 
@@ -156,12 +171,13 @@ func main() {
 
 	logger := middleware.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
 
-	userRepo := userRep.NewUserRepo(db)
+	userRepo := userRep.NewUserMicroService(userManager)
 	restaurantRepo := restaurantRep.NewRestaurantRepo(db)
 	productRepo := productRep.NewProductMicroService(productManager)
 	cartRepo := cartRep.NewCartRepo(db)
 	sessionRepo := sessionRep.NewMicroService(authManager)
 	orderRepo := orderRep.NewOrderRepo(db)
+	commentRepo := commentRep.NewCommentRepo(db)
 
 	userUC := userUsecase.NewUserUsecase(userRepo, cartRepo)
 	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo, productRepo)
@@ -169,12 +185,15 @@ func main() {
 	sessionUC := sessionUsecase.NewSessionUsecase(sessionRepo, userRepo)
 	orderUC := orderUsecase.NewOrderUsecase(orderRepo, cartRepo, productRepo)
 	productUC := productUsecase.NewProductUsecase(productRepo)
+	commentUC := commentUsecase.NewCommentUsecase(commentRepo, userRepo, restaurantRepo)
 
 	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC, logger, *hitstats)
 	cartsHandler := cartDev.NewCartHandler(cartUC, logger)
 	sessionsHandler := sessionDev.NewSessionHandler(sessionUC, userUC, logger)
 	orderHandler := orderDev.NewOrderHandler(orderUC, sessionUC, logger)
 	productHandler := productDev.NewProductHandler(productUC, logger)
+	commentHandler := commentDev.NewCommentHandler(commentUC, sessionUC, logger)
+
 	authMW := middleware.NewSessionMiddleware(sessionUC, logger)
 
 	router.PathPrefix("/api/login").Handler(corsRouter)
@@ -185,6 +204,7 @@ func main() {
 	router.PathPrefix("/api/orders").Handler(authRouter)
 	router.PathPrefix("/api/csrf").Handler(authRouter)
 	router.PathPrefix("/api/users").Handler(corsRouter)
+	router.PathPrefix("/api/comments").Handler(authRouter).Methods(http.MethodPost, http.MethodOptions)
 
 	router.Use(logger.ACLogMiddleware)
 	router.Use(middleware.PanicMiddleware)
@@ -199,6 +219,8 @@ func main() {
 	sessionsHandler.RegisterAuthHandler(authRouter)
 	orderHandler.RegisterHandler(authRouter)
 	productHandler.RegisterHandler(router)
+	commentHandler.RegisterPostHandler(authRouter)
+	commentHandler.RegisterGetHandler(router)
 
 	router.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
 		promhttp.Handler().ServeHTTP(w, r)

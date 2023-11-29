@@ -74,6 +74,16 @@ services:
     ports:
       - 8090:8090
     restart: always
+    
+  user_mvs:
+    build: 
+      context: ./UserService/
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - test_postgres
+    ports:
+      - "8083:8083"
     networks:
       - mynetwork
 

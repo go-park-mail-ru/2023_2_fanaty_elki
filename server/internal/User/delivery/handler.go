@@ -21,3 +21,4 @@ func NewUserHandler(users userUsecase.UsecaseI) *UserHandler {
 		users: users,
 	}
 }
+

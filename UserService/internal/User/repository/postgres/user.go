@@ -2,9 +2,9 @@ package postgres
 
 import (
 	"database/sql"
-	"server/internal/User/repository"
-	"server/internal/domain/dto"
-	"server/internal/domain/entity"
+	"fmt"
+	"UserService/internal/User/repository"
+	"UserService/internal/dto"
 )
 
 type UserRepo struct {
@@ -25,7 +25,7 @@ func (repo *UserRepo) FindUserByUsername(value string) (*dto.DBGetUser, error) {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		return nil, entity.ErrInternalServerError
+		return nil, dto.ErrInternalServerError
 	}
 	return user, nil
 }
@@ -38,7 +38,7 @@ func (repo *UserRepo) FindUserByEmail(value string) (*dto.DBGetUser, error) {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		return nil, entity.ErrInternalServerError
+		return nil, dto.ErrInternalServerError
 	}
 	return user, nil
 }
@@ -48,11 +48,13 @@ func (repo *UserRepo) FindUserByPhone(value string) (*dto.DBGetUser, error) {
 	row := repo.DB.QueryRow("SELECT id, username, password, birthday, phone_number, email, icon FROM users WHERE phone_number = $1", value)
 	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Birthday, &user.PhoneNumber, &user.Email, &user.Icon)
 	if err != nil {
+		fmt.Println("user phone err", err)
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		return nil, entity.ErrInternalServerError
+		return nil, dto.ErrInternalServerError
 	}
+	fmt.Println("user phone", user)
 	return user, nil
 }
 
@@ -64,7 +66,7 @@ func (repo *UserRepo) FindUserById(id uint) (*dto.DBGetUser, error) {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		return nil, entity.ErrInternalServerError
+		return nil, dto.ErrInternalServerError
 	}
 	return user, nil
 }
@@ -73,14 +75,16 @@ func (repo *UserRepo) CreateUser(user *dto.DBCreateUser) (uint, error) {
 
 	insertUser := `INSERT INTO users (username, password, birthday, phone_number, email, icon) VALUES ($1, $2, $3, $4, $5, $6)`
 	_, err := repo.DB.Exec(insertUser, user.Username, user.Password, user.Birthday, user.PhoneNumber, user.Email, user.Icon)
+	fmt.Println("error createing user", err)
 	if err != nil {
-		return 0, entity.ErrInternalServerError
+		return 0, dto.ErrInternalServerError
 	}
 	var ID uint
 	row := repo.DB.QueryRow("SELECT ID FROM users WHERE username = $1", user.Username)
 	err = row.Scan(&ID)
+	fmt.Println("error sekecting user", err)
 	if err != nil {
-		return 0, entity.ErrInternalServerError
+		return 0, dto.ErrInternalServerError
 	}
 
 	return ID, nil
@@ -92,7 +96,7 @@ func (repo *UserRepo) UpdateUser(user *dto.DBUpdateUser) error {
 				   WHERE id = $7`
 	_, err := repo.DB.Exec(updateUser, user.Username, user.Password, user.Birthday, user.PhoneNumber, user.Email, user.Icon, user.ID)
 	if err != nil {
-		return entity.ErrInternalServerError
+		return dto.ErrInternalServerError
 	}
 	return nil
 }
