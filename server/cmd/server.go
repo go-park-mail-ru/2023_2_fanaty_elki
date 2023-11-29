@@ -4,10 +4,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"net/http"
 	"server/config"
@@ -29,10 +25,18 @@ import (
 	sessionUsecase "server/internal/Session/usecase"
 	userRep "server/internal/User/repository/postgres"
 	userUsecase "server/internal/User/usecase"
+	"server/internal/domain/entity"
 	"server/internal/middleware"
 	auth "server/proto/auth"
 	product "server/proto/product"
 	"time"
+
+	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 // @title Prinesi-Poday API
@@ -118,7 +122,39 @@ func main() {
 		return
 	}
 	defer errorLogger.Sync()
-	logger := middleware.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
+
+	var OKHitCounter = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "ok_request_count",
+			Help: "200 status counter",
+		},
+	)
+
+	var InternalServerErrorCounter = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "internal_server_error_request_count",
+			Help: "500 status counter",
+		},
+	)
+
+	var NotFoundErrorCounter = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "no_found_server_error_request_count",
+			Help: "400 status counter",
+		},
+	)
+
+	hitstats := &entity.HitStats{
+		Ok:                  OKHitCounter,
+		InternalServerError: InternalServerErrorCounter,
+		NotFoundError:       NotFoundErrorCounter,
+	}
+
+	prometheus.MustRegister(OKHitCounter)
+	prometheus.MustRegister(InternalServerErrorCounter)
+	prometheus.MustRegister(NotFoundErrorCounter)
+
+	logger := middleware.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
 
 	userRepo := userRep.NewUserRepo(db)
 	restaurantRepo := restaurantRep.NewRestaurantRepo(db)
@@ -134,7 +170,7 @@ func main() {
 	orderUC := orderUsecase.NewOrderUsecase(orderRepo, cartRepo, productRepo)
 	productUC := productUsecase.NewProductUsecase(productRepo)
 
-	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC, logger)
+	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC, logger, *hitstats)
 	cartsHandler := cartDev.NewCartHandler(cartUC, logger)
 	sessionsHandler := sessionDev.NewSessionHandler(sessionUC, userUC, logger)
 	orderHandler := orderDev.NewOrderHandler(orderUC, sessionUC, logger)
@@ -163,6 +199,10 @@ func main() {
 	sessionsHandler.RegisterAuthHandler(authRouter)
 	orderHandler.RegisterHandler(authRouter)
 	productHandler.RegisterHandler(router)
+
+	router.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
+		promhttp.Handler().ServeHTTP(w, r)
+	}).Methods(http.MethodGet)
 
 	server := &http.Server{
 		Addr:    PORT,

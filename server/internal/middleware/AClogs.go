@@ -1,15 +1,17 @@
 package middleware
 
 import (
-	"net/http"
-	"time"
-	"go.uber.org/zap"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
+	"net/http"
+	"server/internal/domain/entity"
+	"time"
 )
 
 type ACLog struct {
-	logger *zap.SugaredLogger
+	logger      *zap.SugaredLogger
 	errorLogger *zap.SugaredLogger
+	hitcounter  entity.HitStats
 }
 
 type responseRecorder struct {
@@ -26,15 +28,16 @@ func NewLoggingResponseWriter(w http.ResponseWriter) *responseRecorder {
 	return &responseRecorder{w, http.StatusOK}
 }
 
-func NewACLog(logger *zap.SugaredLogger, errorLogger *zap.SugaredLogger) *ACLog {
+func NewACLog(logger *zap.SugaredLogger, errorLogger *zap.SugaredLogger, hc entity.HitStats) *ACLog {
 	return &ACLog{
-		logger: logger,
+		logger:      logger,
 		errorLogger: errorLogger,
+		hitcounter:  hc,
 	}
 }
 
 func (ac *ACLog) ACLogMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rec := NewLoggingResponseWriter(w)
 		requestID := uuid.New().String()
 		w.Header().Set("request-id", requestID)
@@ -49,11 +52,20 @@ func (ac *ACLog) ACLogMiddleware(next http.Handler) http.Handler {
 			zap.Int("status", status),
 			zap.Duration("work time", time.Duration(time.Since(start).Microseconds())),
 		)
+
+		switch status {
+		case 200:
+			ac.hitcounter.Ok.Inc()
+		case 404:
+			ac.hitcounter.NotFoundError.Inc()
+		case 500:
+			ac.hitcounter.InternalServerError.Inc()
+		}
 	})
 }
 
 func (ac *ACLog) LogError(message string, err error, requestID string, url string) {
-	ac.errorLogger.Errorw(message, 
+	ac.errorLogger.Errorw(message,
 		zap.Error(err),
 		zap.String("request-id", requestID),
 		zap.String("url", url),

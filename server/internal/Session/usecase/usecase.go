@@ -122,7 +122,7 @@ func (ss sessionUsecase) GetUserProfile(sessionToken string) (*dto.ReqGetUserPro
 	reqUser := dto.ToReqGetUserProfile(user)
 	reqUser.Email = ss.sanitizer.Sanitize(reqUser.Email)
 	reqUser.Birthday = ss.sanitizer.Sanitize(reqUser.Birthday)
-	reqUser.Icon = ss.sanitizer.Sanitize(reqUser.Icon)
+	//reqUser.Icon = ss.sanitizer.Sanitize(reqUser.Icon)
 	reqUser.Username = ss.sanitizer.Sanitize(reqUser.Username)
 	reqUser.PhoneNumber = ss.sanitizer.Sanitize(reqUser.PhoneNumber)
 
