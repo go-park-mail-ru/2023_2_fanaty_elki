@@ -162,17 +162,23 @@ func main() {
 		Name: "hits",
 	}, []string{"status", "path"})
 
+	var timerhits = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "timerhits",
+	}, []string{"status", "path"})
+
 	hitstats := &entity.HitStats{
 		Ok:                  OKHitCounter,
 		InternalServerError: InternalServerErrorCounter,
 		NotFoundError:       NotFoundErrorCounter,
 		UrlMetric:           *hits,
+		Timing:              *timerhits,
 	}
 
 	prometheus.MustRegister(OKHitCounter)
 	prometheus.MustRegister(InternalServerErrorCounter)
 	prometheus.MustRegister(NotFoundErrorCounter)
 	prometheus.MustRegister(hits)
+	prometheus.MustRegister(timerhits)
 
 	logger := middleware.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
 

@@ -9,4 +9,5 @@ type HitStats struct {
 	InternalServerError prometheus.Counter
 	NotFoundError       prometheus.Counter
 	UrlMetric           prometheus.CounterVec
+	Timing              prometheus.CounterVec
 }
