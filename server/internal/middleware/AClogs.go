@@ -65,6 +65,7 @@ func (ac *ACLog) ACLogMiddleware(next http.Handler) http.Handler {
 		}
 
 		ac.hitcounter.UrlMetric.WithLabelValues(strconv.Itoa(status), r.URL.Path).Inc()
+		ac.hitcounter.Timing.WithLabelValues(strconv.Itoa(status), r.URL.Path).Add(float64(time.Duration(time.Since(start).Microseconds())))
 	})
 }
 
