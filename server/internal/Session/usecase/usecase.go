@@ -4,13 +4,15 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"github.com/microcosm-cc/bluemonday"
+	"fmt"
 	"math/rand"
 	sessionRep "server/internal/Session/repository"
 	userRep "server/internal/User/repository"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 	"time"
+
+	"github.com/microcosm-cc/bluemonday"
 )
 
 const sessKeyLen = 10
@@ -56,7 +58,9 @@ func randStringRunes(n int) string {
 func (ss sessionUsecase) Login(user *entity.User) (*entity.Cookie, error) {
 
 	us, err := ss.userRepo.FindUserByUsername(user.Username)
-
+	fmt.Println("login err", err)
+	fmt.Println("login us", us.Username, " ", us.Password)
+	
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +126,7 @@ func (ss sessionUsecase) GetUserProfile(sessionToken string) (*dto.ReqGetUserPro
 	reqUser := dto.ToReqGetUserProfile(user)
 	reqUser.Email = ss.sanitizer.Sanitize(reqUser.Email)
 	reqUser.Birthday = ss.sanitizer.Sanitize(reqUser.Birthday)
-	reqUser.Icon = ss.sanitizer.Sanitize(reqUser.Icon)
+	//reqUser.Icon = ss.sanitizer.Sanitize(reqUser.Icon)
 	reqUser.Username = ss.sanitizer.Sanitize(reqUser.Username)
 	reqUser.PhoneNumber = ss.sanitizer.Sanitize(reqUser.PhoneNumber)
 

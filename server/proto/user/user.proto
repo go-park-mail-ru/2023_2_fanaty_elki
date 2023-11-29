@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+option go_package = ".";
+
+package user;
+
+message ID {
+	uint64 ID = 1;
+}
+
+message Value {
+  string Value = 1;
+}
+
+message DBCreateUser {
+  uint64 ID          = 1;        
+  string Username    = 2;     
+  string Password    = 3;
+  string Birthday    = 4;
+  string PhoneNumber = 5;
+  string Email       = 6;
+  string Icon        = 7;     
+}
+
+message DBUpdateUser {
+  uint64 ID          = 1;        
+  string Username    = 2;     
+  string Password    = 3;
+  string Birthday    = 4;
+  string PhoneNumber = 5;
+  string Email       = 6;
+  string Icon        = 7;  
+}
+
+message DBGetUser {
+  uint64 ID          = 1;        
+  string Username    = 2;     
+  string Password    = 3;
+  string Birthday    = 4;
+  string PhoneNumber = 5;
+  string Email       = 6;
+  string Icon        = 7;  
+}
+
+message Nothing {
+    bool Dummy = 1;
+}
+
+service UserRPC {
+  rpc FindUserById (ID) returns (DBGetUser);
+  rpc CreateUser (DBCreateUser) returns (ID);
+  rpc UpdateUser (DBUpdateUser) returns (Nothing);
+  rpc FindUserByUsername (Value) returns (DBGetUser);
+  rpc FindUserByEmail (Value) returns (DBGetUser);
+  rpc FindUserByPhone (Value) returns (DBGetUser);
+}
+
+
+

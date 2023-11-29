@@ -27,11 +27,12 @@ import (
 	sessionDev "server/internal/Session/delivery"
 	sessionRep "server/internal/Session/repository/microservice"
 	sessionUsecase "server/internal/Session/usecase"
-	userRep "server/internal/User/repository/postgres"
+	userRep "server/internal/User/repository/microservice"
 	userUsecase "server/internal/User/usecase"
 	"server/internal/middleware"
 	auth "server/proto/auth"
 	product "server/proto/product"
+	userP "server/proto/user"
 	"time"
 )
 
@@ -85,6 +86,7 @@ func main() {
 	defer grpcConnAuth.Close()
 	authManager := auth.NewSessionRPCClient(grpcConnAuth)
 
+	
 	grpcConnProduct, err := grpc.Dial(
 		"product_mvs:8082",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -94,6 +96,16 @@ func main() {
 	}
 	defer grpcConnProduct.Close()
 	productManager := product.NewProductRPCClient(grpcConnProduct)
+
+	grpcConnUser, err := grpc.Dial(
+		"user_mvs:8083",
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer grpcConnUser.Close()
+	userManager := userP.NewUserRPCClient(grpcConnUser)
 
 	time.Sleep(5 * time.Second)
 
@@ -120,7 +132,7 @@ func main() {
 	defer errorLogger.Sync()
 	logger := middleware.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
 
-	userRepo := userRep.NewUserRepo(db)
+	userRepo := userRep.NewUserMicroService(userManager)
 	restaurantRepo := restaurantRep.NewRestaurantRepo(db)
 	productRepo := productRep.NewProductMicroService(productManager)
 	cartRepo := cartRep.NewCartRepo(db)

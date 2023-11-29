@@ -1,8 +1,6 @@
 package usecase
 
 import (
-	//"fmt"
-	"github.com/minio/minio-go/v6"
 	"mime/multipart"
 	"net/url"
 	"regexp"
@@ -11,6 +9,8 @@ import (
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 	"time"
+
+	"github.com/minio/minio-go/v6"
 )
 
 type UsecaseI interface {
@@ -48,7 +48,6 @@ func (us userUsecase) CreateUser(newUser *entity.User) (uint, error) {
 	}
 
 	_, err = us.checkUser(newUser)
-
 	if err != nil {
 		return 0, err
 	}
@@ -57,7 +56,6 @@ func (us userUsecase) CreateUser(newUser *entity.User) (uint, error) {
 		newUser.Icon = "img/defaultIcon.png"
 	}
 	user, err := us.userRepo.CreateUser(dto.ToRepoCreateUser(newUser))
-
 	if err != nil {
 		return 0, entity.ErrInternalServerError
 	}
