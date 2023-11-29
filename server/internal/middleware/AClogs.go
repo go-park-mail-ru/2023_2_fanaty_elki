@@ -1,11 +1,13 @@
 package middleware
 
 import (
-	"github.com/google/uuid"
-	"go.uber.org/zap"
 	"net/http"
 	"server/internal/domain/entity"
+	"strconv"
 	"time"
+
+	"github.com/google/uuid"
+	"go.uber.org/zap"
 )
 
 type ACLog struct {
@@ -61,6 +63,8 @@ func (ac *ACLog) ACLogMiddleware(next http.Handler) http.Handler {
 		case 500:
 			ac.hitcounter.InternalServerError.Inc()
 		}
+
+		ac.hitcounter.UrlMetric.WithLabelValues(strconv.Itoa(status), r.URL.Path).Inc()
 	})
 }
 

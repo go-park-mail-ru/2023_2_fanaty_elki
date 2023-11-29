@@ -158,15 +158,21 @@ func main() {
 		},
 	)
 
+	var hits = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "hits",
+	}, []string{"status", "path"})
+
 	hitstats := &entity.HitStats{
 		Ok:                  OKHitCounter,
 		InternalServerError: InternalServerErrorCounter,
 		NotFoundError:       NotFoundErrorCounter,
+		UrlMetric:           *hits,
 	}
 
 	prometheus.MustRegister(OKHitCounter)
 	prometheus.MustRegister(InternalServerErrorCounter)
 	prometheus.MustRegister(NotFoundErrorCounter)
+	prometheus.MustRegister(hits)
 
 	logger := middleware.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
 
