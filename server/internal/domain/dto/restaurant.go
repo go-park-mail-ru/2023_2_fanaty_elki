@@ -11,7 +11,7 @@ type RestaurantWithCategories struct {
 	Categories      []string
 	MinDeliveryTime int
 	MaxDeliveryTime int
-	DeliveryPrice   float32
+	DeliveryPrice   int
 }
 
 func ToRestaurantWithCategories(restaurant *entity.Restaurant, categories []*entity.Category) *RestaurantWithCategories {
@@ -51,7 +51,7 @@ type RestaurantWithCategoriesAndProducts struct {
 	Categories      []string
 	MinDeliveryTime int
 	MaxDeliveryTime int
-	DeliveryPrice   float32
+	DeliveryPrice   int
 	Products        []*entity.Product
 }
 

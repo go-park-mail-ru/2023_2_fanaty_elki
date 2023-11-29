@@ -4,10 +4,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/gorilla/mux"
-	_ "github.com/lib/pq"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"net/http"
 	"server/config"
@@ -32,11 +28,19 @@ import (
 	sessionUsecase "server/internal/Session/usecase"
 	userRep "server/internal/User/repository/microservice"
 	userUsecase "server/internal/User/usecase"
+	"server/internal/domain/entity"
 	"server/internal/middleware"
 	auth "server/proto/auth"
 	product "server/proto/product"
 	userP "server/proto/user"
 	"time"
+
+	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 // @title Prinesi-Poday API
@@ -89,7 +93,6 @@ func main() {
 	defer grpcConnAuth.Close()
 	authManager := auth.NewSessionRPCClient(grpcConnAuth)
 
-	
 	grpcConnProduct, err := grpc.Dial(
 		"product_mvs:8082",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -133,7 +136,51 @@ func main() {
 		return
 	}
 	defer errorLogger.Sync()
-	logger := middleware.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
+
+	var OKHitCounter = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "ok_request_count",
+			Help: "200 status counter",
+		},
+	)
+
+	var InternalServerErrorCounter = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "internal_server_error_request_count",
+			Help: "500 status counter",
+		},
+	)
+
+	var NotFoundErrorCounter = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "no_found_server_error_request_count",
+			Help: "400 status counter",
+		},
+	)
+
+	var hits = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "hits",
+	}, []string{"status", "path"})
+
+	var timerhits = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "timerhits",
+	}, []string{"status", "path"})
+
+	hitstats := &entity.HitStats{
+		Ok:                  OKHitCounter,
+		InternalServerError: InternalServerErrorCounter,
+		NotFoundError:       NotFoundErrorCounter,
+		UrlMetric:           *hits,
+		Timing:              *timerhits,
+	}
+
+	prometheus.MustRegister(OKHitCounter)
+	prometheus.MustRegister(InternalServerErrorCounter)
+	prometheus.MustRegister(NotFoundErrorCounter)
+	prometheus.MustRegister(hits)
+	prometheus.MustRegister(timerhits)
+
+	logger := middleware.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
 
 	userRepo := userRep.NewUserMicroService(userManager)
 	restaurantRepo := restaurantRep.NewRestaurantRepo(db)
@@ -185,6 +232,10 @@ func main() {
 	productHandler.RegisterHandler(router)
 	commentHandler.RegisterPostHandler(authRouter)
 	commentHandler.RegisterGetHandler(router)
+
+	router.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
+		promhttp.Handler().ServeHTTP(w, r)
+	}).Methods(http.MethodGet)
 
 	server := &http.Server{
 		Addr:    PORT,

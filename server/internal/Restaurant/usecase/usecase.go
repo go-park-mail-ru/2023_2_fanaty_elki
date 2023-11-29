@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"fmt"
-	"math"
 	"math/rand"
 	productRep "server/internal/Product/repository"
 	restRep "server/internal/Restaurant/repository"
@@ -40,13 +39,12 @@ func (res restaurantUsecase) GetRestaurants() ([]*dto.RestaurantWithCategories, 
 	}
 	restswithcategories := []*dto.RestaurantWithCategories{}
 	for _, rest := range rests {
-		mindeltime := rand.Intn(60)
-		maxdeltime := mindeltime + rand.Intn(20)
-		delprice := rand.Float64() * 1000
-		delprice = math.Round(delprice*100) / 100
+		mindeltime := rand.Intn(30) + 30
+		maxdeltime := mindeltime + 10 + rand.Intn(10)
+		delprice := rand.Intn(400) + 200
 		rest.MinDeliveryTime = mindeltime
 		rest.MaxDeliveryTime = maxdeltime
-		rest.DeliveryPrice = float32(delprice)
+		rest.DeliveryPrice = delprice
 		cats, err := res.restaurantRepo.GetCategoriesByRestaurantId(rest.ID)
 		if err != nil {
 			if err != entity.ErrNotFound {
@@ -65,13 +63,12 @@ func (res restaurantUsecase) GetRestaurantById(id uint) (*dto.RestaurantWithCate
 	if err != nil {
 		return nil, err
 	}
-	mindeltime := rand.Intn(60)
-	maxdeltime := mindeltime + rand.Intn(20)
-	delprice := rand.Float64() * 1000
-	delprice = math.Round(delprice*100) / 100
+	mindeltime := rand.Intn(30) + 30
+	maxdeltime := mindeltime + 10 + rand.Intn(10)
+	delprice := rand.Intn(400) + 200
 	rest.MinDeliveryTime = mindeltime
 	rest.MaxDeliveryTime = maxdeltime
-	rest.DeliveryPrice = float32(delprice)
+	rest.DeliveryPrice = delprice
 	cats, err := res.restaurantRepo.GetCategoriesByRestaurantId(rest.ID)
 	if err != nil {
 		if err != entity.ErrNotFound {
@@ -113,13 +110,12 @@ func (res restaurantUsecase) GetRestaurantsByCategory(name string) ([]*dto.Resta
 	}
 	restswithcategories := []*dto.RestaurantWithCategories{}
 	for _, rest := range rests {
-		mindeltime := rand.Intn(60)
-		maxdeltime := mindeltime + rand.Intn(20)
-		delprice := rand.Float64() * 1000
-		delprice = math.Round(delprice*100) / 100
+		mindeltime := rand.Intn(30) + 30
+		maxdeltime := mindeltime + 10 + rand.Intn(10)
+		delprice := rand.Intn(400) + 200
 		rest.MinDeliveryTime = mindeltime
 		rest.MaxDeliveryTime = maxdeltime
-		rest.DeliveryPrice = float32(delprice)
+		rest.DeliveryPrice = delprice
 		cats, err := res.restaurantRepo.GetCategoriesByRestaurantId(rest.ID)
 		if err != nil {
 			if err != entity.ErrNotFound {
@@ -182,13 +178,12 @@ func (res restaurantUsecase) Search(word string) ([]*dto.RestaurantWithCategorie
 	}
 	restsWithCategoriesAndProducts := []*dto.RestaurantWithCategoriesAndProducts{}
 	for _, rest := range rests {
-		mindeltime := rand.Intn(60)
-		maxdeltime := mindeltime + rand.Intn(20)
-		delprice := rand.Float64() * 1000
-		delprice = math.Round(delprice*100) / 100
+		mindeltime := rand.Intn(30) + 30
+		maxdeltime := mindeltime + 10 + rand.Intn(10)
+		delprice := rand.Intn(400) + 200
 		rest.MinDeliveryTime = mindeltime
 		rest.MaxDeliveryTime = maxdeltime
-		rest.DeliveryPrice = float32(delprice)
+		rest.DeliveryPrice = delprice
 		cats, err := res.restaurantRepo.GetCategoriesByRestaurantId(rest.ID)
 		if err != nil {
 			if err != entity.ErrNotFound {

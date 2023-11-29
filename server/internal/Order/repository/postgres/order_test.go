@@ -1,8 +1,11 @@
 package repository
 
 import (
+	//"fmt"
+	"fmt"
 	"reflect"
 	"server/internal/domain/dto"
+	"server/internal/domain/entity"
 	"testing"
 	"time"
 
@@ -23,23 +26,38 @@ func TestCreateOrderSuccess(t *testing.T) {
 	var flat uint
 	flat = 1
 
+	product := &entity.CartProduct{
+		ID:        1,
+		ProductID: 1,
+		CartID:    1,
+		ItemCount: 1,
+	}
+	products := []*entity.CartProduct{product}
 	order := &dto.DBReqCreateOrder{
-		Products: &map[uint]int{1: 2},
+		Products: products,
 		UserId:   1,
-		Status:   "CREATED",
+		Status:   0,
 		Date:     time.Now(),
 		Address: &dto.DBCreateOrderAddress{
 			City:   "Moscow",
 			Street: "Tverskaya",
 			House:  "2",
-			Flat:   &flat,
+			Flat:   flat,
 		},
 	}
 
 	respOrder := &dto.RespCreateOrder{
-		Id:     1,
-		Status: "CREATED",
-		Date:   time.Now(),
+		Id:           1,
+		Status:       0,
+		Date:         order.Date,
+		Price:        109,
+		DeliveryTime: 30,
+		Address: &entity.Address{
+			City:   "Moscow",
+			Street: "Tverskaya",
+			House:  "2",
+			Flat:   flat,
+		},
 	}
 
 	var userID uint
@@ -56,12 +74,12 @@ func TestCreateOrderSuccess(t *testing.T) {
 
 	mock.
 		ExpectQuery("INSERT INTO orders").
-		WithArgs(userID, order.Date, order.Status).
+		WithArgs(userID, order.Date, order.Status, order.Price, order.DeliveryTime).
 		WillReturnRows(rows)
 
 	mock.
 		ExpectExec("INSERT INTO orders_product ").
-		WithArgs(1, orderID, 2).
+		WithArgs(1, orderID, 1).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	rows = sqlmock.
@@ -102,7 +120,7 @@ func TestUpdateOrderSuccess(t *testing.T) {
 	}
 
 	order := &dto.ReqUpdateOrder{
-		Status: "CREATED",
+		Status: 1,
 		Id:     1,
 	}
 
@@ -129,46 +147,46 @@ func TestGetOrdersSuccess(t *testing.T) {
 		DB: db,
 	}
 
-	var flat uint
-	flat = 1
-
 	rows := sqlmock.
-		NewRows([]string{"id", "status", "created_at", "city", "street", "house_numbe", "flat_number"})
+		NewRows([]string{"id", "status", "created_at", "price", "delivery_time", "city", "street", "house_numbe", "flat_number"})
 	expect := []*dto.RespGetOrder{
 		{
 			Id:     1,
-			Status: "CREATED",
+			Status: 0,
 			Date:   time.Now(),
 			Address: &dto.RespOrderAddress{
 				City:   "Moscow",
 				Street: "Tverskaya",
 				House:  "2",
-				Flat:   &flat,
+				Flat:   0,
 			},
 		},
 		{
 			Id:     2,
-			Status: "CREATED",
+			Status: 0,
 			Date:   time.Now(),
 			Address: &dto.RespOrderAddress{
 				City:   "Moscow",
 				Street: "Tverskaya",
 				House:  "3",
-				Flat:   &flat,
+				Flat:   0,
 			},
 		},
 	}
 
 	for _, order := range expect {
-		rows = rows.AddRow(order.Id, order.Status, order.Date, order.Address.City, order.Address.Street, order.Address.House, order.Address.Flat)
+		rows = rows.AddRow(order.Id, order.Status, order.Date, order.Price, order.DeliveryTime, order.Address.City, order.Address.Street, order.Address.House, order.Address.Flat)
 	}
-
-	mock.
-		ExpectQuery("SELECT o.id, o.status, o.created_at, a.city, a.street, a.house_number, a.flat_number FROM orders o JOIN orders_address oa on o.id = oa.orders_id JOIN address a on a.id = oa.address_id WHERE").
-		WillReturnRows(rows)
-
 	var userID uint
 	userID = 1
+	mock.
+		ExpectQuery(`SELECT o.id, o.status, o.created_at, o.price, o.delivery_time, a.city, a.street, a.house_number, a.flat_number
+		FROM orders o
+	   JOIN orders_address oa on o.id = oa.orders_id
+	   JOIN address a on a.id = oa.address_id
+	   WHERE`).
+		WithArgs(userID).
+		WillReturnRows(rows)
 
 	orders, err := repo.GetOrders(userID)
 	if err != nil {
@@ -193,77 +211,118 @@ func TestGetOrderSuccess(t *testing.T) {
 		DB: db,
 	}
 
-	row := sqlmock.
-		NewRows([]string{"status", "created_at", "updated_at"})
-
 	reqorder := &dto.ReqGetOneOrder{
 		OrderId: 1,
 		UserId:  1,
 	}
 
+	products := []*dto.RespGetOrderProduct{
+		{
+			Id:    1,
+			Name:  "Burger",
+			Price: 134.0,
+			Icon:  "deih",
+			Count: 3,
+		},
+		{
+			Id:    2,
+			Name:  "Burger1",
+			Price: 134.0,
+			Icon:  "deih",
+			Count: 3,
+		},
+	}
+
+	address := &dto.RespOrderAddress{
+		City:   "Moscow",
+		Street: "Tverskaya",
+		House:  "2",
+		Flat:   0,
+	}
+
 	order := dto.RespGetOneOrder{
-		Status:      "CREATED",
-		Date:        time.Now(),
-		UpdatedDate: time.Now(),
-		Products: []*dto.RespGetOrderProduct{
+		Id:     1,
+		Status: 0,
+		Date:   time.Now(),
+		OrderItems: []*dto.OrderItems{
 			{
-				Name:        "Burger",
-				Price:       134.0,
-				CookingTime: 80,
-				Portion:     "120 г",
-				Icon:        "deih",
-				Count:       3,
-			},
-			{
-				Name:        "Burger1",
-				Price:       134.0,
-				CookingTime: 80,
-				Portion:     "120 г",
-				Icon:        "deih",
-				Count:       3,
+				RestaurantName: "Burger King",
+				Products:       products,
 			},
 		},
+		Address: address,
 	}
 
 	resporder := &dto.RespGetOneOrder{
-		Status:      "CREATED",
-		Date:        time.Now(),
-		UpdatedDate: time.Now(),
+		Id:     1,
+		Status: 0,
+		Date:   time.Now(),
+		OrderItems: []*dto.OrderItems{
+			{
+				RestaurantName: "Burger King",
+				Products:       products,
+			},
+		},
+		Address: address,
 	}
 
-	row = row.AddRow(resporder.Status, resporder.Date, resporder.Date)
+	row := sqlmock.
+		NewRows([]string{"id", "status", "order_date", "price", "delivery_time", "city", "street", "house_number", "falt_number"})
+	fmt.Println(resporder.Address)
+	row = row.AddRow(resporder.Id, resporder.Status, resporder.Date, resporder.Price, resporder.DeliveryTime, resporder.Address.City, resporder.Address.Street, resporder.Address.House, resporder.Address.Flat)
 
 	mock.
-		ExpectQuery("SELECT status, order_date, updated_at FROM orders WHERE").WithArgs(reqorder.OrderId, reqorder.UserId).
+		ExpectQuery(`SELECT o.id, o.status, o.order_date, o.price, o.delivery_time, a.city, a.street, a.house_number, a.flat_number
+		FROM orders o
+		   JOIN orders_address oa on o.id = oa.orders_id
+		   JOIN address a on a.id = oa.address_id
+		   WHERE`).WithArgs(reqorder.UserId, reqorder.OrderId).
 		WillReturnRows(row)
 
 	rows := sqlmock.
-		NewRows([]string{"p.name", "p.price", "p.cooking_time", "p.portion", "p.icon", "op.item_count"})
+		NewRows([]string{"p.id", "p.name", "p.price", "p.icon", "op.item_count"})
 	expectprod := []*dto.RespGetOrderProduct{
 		{
-			Name:        "Burger",
-			Price:       134.0,
-			CookingTime: 80,
-			Portion:     "120 г",
-			Icon:        "deih",
-			Count:       3,
+			Id:    1,
+			Name:  "Burger",
+			Price: 134.0,
+			Icon:  "deih",
+			Count: 3,
 		},
 		{
-			Name:        "Burger1",
-			Price:       134.0,
-			CookingTime: 80,
-			Portion:     "120 г",
-			Icon:        "deih",
-			Count:       3,
+			Id:    2,
+			Name:  "Burger1",
+			Price: 134.0,
+			Icon:  "deih",
+			Count: 3,
 		},
 	}
 
-	for _, order := range expectprod {
-		rows = rows.AddRow(order.Name, order.Price, order.CookingTime, order.Portion, order.Icon, order.Count)
+	for _, product := range expectprod {
+		rows = rows.AddRow(product.Id, product.Name, product.Price, product.Icon, product.Count)
 	}
 
 	mock.
-		ExpectQuery("SELECT p.name, p.price, p.cooking_time, p.portion, p.icon, op.item_count FROM product p JOIN orders_product op ON p.id = op.product_id JOIN orders o ON o.id = op.order_id WHERE").
+		ExpectQuery(`SELECT p.id, p.name, p.price, p.icon, op.item_count
+		FROM product p
+		JOIN orders_product op ON p.id = op.product_id
+		JOIN orders o ON o.id = op.order_id
+		WHERE`).WithArgs(order.Id).
+		WillReturnRows(rows)
+
+	rows = sqlmock.
+		NewRows([]string{"r.name"})
+	expectres := "Burger King"
+
+	rows.AddRow(expectres)
+
+	mock.
+		ExpectQuery(`SELECT r.name
+		FROM restaurant r
+		JOIN menu_type mt ON mt.restaurant_id = r.id
+		JOIN product_menu_type pmt ON pmt.menu_type_id = mt.id 
+		JOIN product p ON p.id = pmt.id
+		WHERE`).WithArgs(order.Id).
 		WillReturnRows(rows)
 
 	actual, err := repo.GetOrder(reqorder)
@@ -272,8 +331,8 @@ func TestGetOrderSuccess(t *testing.T) {
 		return
 	}
 
-	if !reflect.DeepEqual(actual.Products, order.Products) {
-		t.Errorf("results not match, want %v, have %v", &actual.Products, &order.Products)
+	if !reflect.DeepEqual(actual.OrderItems, order.OrderItems) {
+		t.Errorf("results not match, want %v, have %v", &actual.OrderItems, &order.OrderItems)
 		return
 	}
 
