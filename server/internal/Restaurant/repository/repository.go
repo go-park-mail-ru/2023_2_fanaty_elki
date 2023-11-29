@@ -1,6 +1,9 @@
 package repository
 
-import "server/internal/domain/entity"
+import (
+	"server/internal/domain/entity"
+	"server/internal/domain/dto"
+)
 
 type RestaurantRepositoryI interface {
 	GetRestaurants() ([]*entity.Restaurant, error)
@@ -11,4 +14,5 @@ type RestaurantRepositoryI interface {
 	GetCategories() ([]*entity.Category, error)
 	SearchRestaurants(word string) ([]*entity.Restaurant, error)
 	SearchCategories(word string) ([]*entity.Restaurant, error)
+	UpdateComments(comment *dto.ReqCreateComment) error
 }

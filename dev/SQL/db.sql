@@ -11,6 +11,7 @@ DROP TABLE IF EXISTS address CASCADE;
 DROP TABLE IF EXISTS orders_address CASCADE;
 DROP TABLE IF EXISTS category CASCADE;
 DROP TABLE IF EXISTS restaurant_category CASCADE;
+DROP TABLE IF EXISTS comment CASCADE;
 
 
 CREATE OR REPLACE FUNCTION trigger_set_timestamp()
@@ -65,22 +66,22 @@ FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
 
 
-insert into restaurant(name,rating,comments_count,icon)
-values('Burger King',3.7,60,'img/burger_king.jpg');
-insert into restaurant(name,rating,comments_count,icon)
-values('Якитория',4.8,69,'img/yakitoria.jpg');
-insert into restaurant(name,rating,comments_count,icon)
-values('Вкусно и точка',3.2,90,'img/tasty_and..jpg');
-insert into restaurant(name,rating,comments_count,icon)
-values('KFC',4.0,90,'img/kfc.jpg');
-insert into restaurant(name,rating,comments_count,icon)
-values('Шоколадница',4.5,90,'img/chocolate.jpeg');
-insert into restaurant(name,rating,comments_count,icon)
-values('Корчма Тарас Бульба',5.0,90,'img/bulba.jpg');
-insert into restaurant(name,rating,comments_count,icon)
-values('Subway',3.0,90,'img/subway.jpeg');
-insert into restaurant(name,rating,comments_count,icon)
-values('Sushiwok',4.5,90,'img/sushi_wok.png');
+insert into restaurant(name, icon)
+values('Burger King', 'img/burger_king.jpg');
+insert into restaurant(name, icon)
+values('Якитория', 'img/yakitoria.jpg');
+insert into restaurant(name, icon)
+values('Вкусно и точка', 'img/tasty_and..jpg');
+insert into restaurant(name, icon)
+values('KFC', 'img/kfc.jpg');
+insert into restaurant(name, icon)
+values('Шоколадница', 'img/chocolate.jpeg');
+insert into restaurant(name, icon)
+values('Корчма Тарас Бульба', 'img/bulba.jpg');
+insert into restaurant(name, icon)
+values('Subway', 'img/subway.jpeg');
+insert into restaurant(name, icon)
+values('Sushiwok', 'img/sushi_wok.png');
 
 CREATE TABLE IF NOT EXISTS public.category
 (
@@ -511,3 +512,21 @@ CREATE TABLE IF NOT EXISTS public.ORDERS_ADDRESS
     ADDRESS_ID INT REFERENCES ADDRESS(ID) NOT NULL,
     PRIMARY KEY (ID)
 );
+
+CREATE TABLE IF NOT EXISTS public.comment
+(
+    id            SERIAL                                 NOT NULL,
+    content       TEXT,
+    rating        INT                                    NOT NULL,
+    restaurant_id INT REFERENCES restaurant(id)          NOT NULL,
+    user_id       INT REFERENCES users(id)               NOT NULL,
+    created_at    TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
+	updated_at    TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
+    PRIMARY KEY (ID),
+    CONSTRAINT valid_rating CHECK (rating >= 1 AND rating <= 5)
+);
+
+CREATE TRIGGER set_timestamp
+BEFORE UPDATE ON comment
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();

@@ -15,6 +15,9 @@ import (
 	cartDev "server/internal/Cart/delivery"
 	cartRep "server/internal/Cart/repository/postgres"
 	cartUsecase "server/internal/Cart/usecase"
+	commentDev "server/internal/Comment/delivery"
+	commentRep "server/internal/Comment/repository/postgres"
+	commentUsecase "server/internal/Comment/usecase"
 	orderDev "server/internal/Order/delivery"
 	orderRep "server/internal/Order/repository/postgres"
 	orderUsecase "server/internal/Order/usecase"
@@ -138,6 +141,7 @@ func main() {
 	cartRepo := cartRep.NewCartRepo(db)
 	sessionRepo := sessionRep.NewMicroService(authManager)
 	orderRepo := orderRep.NewOrderRepo(db)
+	commentRepo := commentRep.NewCommentRepo(db)
 
 	userUC := userUsecase.NewUserUsecase(userRepo, cartRepo)
 	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo, productRepo)
@@ -145,12 +149,15 @@ func main() {
 	sessionUC := sessionUsecase.NewSessionUsecase(sessionRepo, userRepo)
 	orderUC := orderUsecase.NewOrderUsecase(orderRepo, cartRepo, productRepo)
 	productUC := productUsecase.NewProductUsecase(productRepo)
+	commentUC := commentUsecase.NewCommentUsecase(commentRepo, userRepo, restaurantRepo)
 
 	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC, logger)
 	cartsHandler := cartDev.NewCartHandler(cartUC, logger)
 	sessionsHandler := sessionDev.NewSessionHandler(sessionUC, userUC, logger)
 	orderHandler := orderDev.NewOrderHandler(orderUC, sessionUC, logger)
 	productHandler := productDev.NewProductHandler(productUC, logger)
+	commentHandler := commentDev.NewCommentHandler(commentUC, sessionUC, logger)
+
 	authMW := middleware.NewSessionMiddleware(sessionUC, logger)
 
 	router.PathPrefix("/api/login").Handler(corsRouter)
@@ -161,6 +168,7 @@ func main() {
 	router.PathPrefix("/api/orders").Handler(authRouter)
 	router.PathPrefix("/api/csrf").Handler(authRouter)
 	router.PathPrefix("/api/users").Handler(corsRouter)
+	router.PathPrefix("/api/comments").Handler(authRouter).Methods(http.MethodPost, http.MethodOptions)
 
 	router.Use(logger.ACLogMiddleware)
 	router.Use(middleware.PanicMiddleware)
@@ -175,6 +183,8 @@ func main() {
 	sessionsHandler.RegisterAuthHandler(authRouter)
 	orderHandler.RegisterHandler(authRouter)
 	productHandler.RegisterHandler(router)
+	commentHandler.RegisterPostHandler(authRouter)
+	commentHandler.RegisterGetHandler(router)
 
 	server := &http.Server{
 		Addr:    PORT,
