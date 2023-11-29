@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+option go_package = ".";
+
+package product;
+
+message ID {
+	uint64 ID = 1;
+}
+
+message Word {
+  string Word = 1;
+}
+
+message Product {
+  uint64 ID = 1;        
+  string Name = 2;     
+  float Price = 3;
+  int64 CookingTime = 4;
+  string Portion = 5;
+  string Description = 6;
+  string Icon = 7;     
+}
+
+message ProductSlice {
+  repeated Product Products = 1;   
+}
+
+message Nothing {
+    bool Dummy = 1;
+}
+
+service ProductRPC {
+  rpc GetProductsByMenuTypeId (ID) returns (ProductSlice);
+  rpc GetProductByID (ID) returns (Product);
+  rpc SearchProducts (Word) returns (ProductSlice);
+  rpc GetRestaurantIdByProduct (ID) returns (ID);
+}
+
+

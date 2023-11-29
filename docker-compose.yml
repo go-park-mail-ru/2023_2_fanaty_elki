@@ -1,0 +1,72 @@
+version: "3.5"
+services:
+  test_postgres:
+    image: "postgres:latest"
+    container_name: test_postgres
+    ports:
+      - "13081:5432"
+    volumes:
+      - ./dev/SQL:/docker-entrypoint-initdb.d/
+      - ./dev/log:/var/log/
+    environment:
+      POSTGRES_USER: uliana
+      POSTGRES_DB: prinesy-poday
+      POSTGRES_PASSWORD: uliana
+    networks:
+      - mynetwork
+
+  redis-session:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - mynetwork
+  app:
+    build: .
+    container_name: app
+    restart: always
+    depends_on: 
+      - test_postgres
+    ports:
+      - "8080:8080"
+    networks:
+      - mynetwork
+
+  auth_mvs:
+    build: 
+      context: ./AuthService/
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - redis-session
+    ports:
+      - "8081:8081"
+    networks:
+      - mynetwork
+
+  product_mvs:
+    build: 
+      context: ./ProductService/
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - test_postgres
+    ports:
+      - "8082:8082"
+    networks:
+      - mynetwork
+
+  user_mvs:
+    build: 
+      context: ./UserService/
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - test_postgres
+    ports:
+      - "8083:8083"
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:

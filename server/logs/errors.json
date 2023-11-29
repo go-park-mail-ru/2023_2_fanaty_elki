@@ -1,0 +1,112 @@
+{"time":"2023-11-08T02:54:34.364+0300","message":"order: not found order","error":"item is not found","request-id":"d7a4889d-f55d-4778-bb24-a2b419409d30","url":"/api/orders/1"}
+{"time":"2023-11-08T03:41:29.555+0300","message":"problems with adding product to cart","error":"internal server error","request-id":"abdc6443-4a43-40e7-8207-9398b980be61","url":"/api/cart/add"}
+{"time":"2023-11-08T05:20:45.285+0300","message":"no cookie","error":"http: named cookie not present","request-id":"0fcbf6f3-cf70-4222-909a-6379e140e33b","url":"/api/me"}
+{"time":"2023-11-08T05:21:39.268+0300","message":"order: not found order","error":"item is not found","request-id":"fc1668fc-7dc3-4a70-9699-14ad6ae0bde1","url":"/api/orders/3"}
+{"time":"2023-11-08T12:08:47.861+0300","message":"bad request","error":"invalid username","request-id":"d0f15130-8a5f-4f79-9b61-de6b62967736","url":"/api/users"}
+{"time":"2023-11-08T12:09:14.415+0300","message":"bad request","error":"invalid username","request-id":"b84f72d9-7b0c-48e5-92a0-116c75e189da","url":"/api/users"}
+{"time":"2023-11-08T12:09:15.355+0300","message":"bad request","error":"invalid username","request-id":"746632a3-d51d-4af6-ad44-3613d21af87e","url":"/api/users"}
+{"time":"2023-11-08T12:09:44.036+0300","message":"bad request","error":"invalid username","request-id":"33373ee0-8dff-4f75-bb87-952e67b2e939","url":"/api/users"}
+{"time":"2023-11-08T12:12:53.066+0300","message":"bad request","error":"invalid username","request-id":"d362a6b1-82dd-42ce-9a39-e63f57ae7ef2","url":"/api/users"}
+{"time":"2023-11-08T12:13:33.732+0300","message":"bad request","error":"invalid username","request-id":"03796d48-000a-4183-8aac-ed76c2f6bda1","url":"/api/users"}
+{"time":"2023-11-08T12:14:02.260+0300","message":"bad request","error":"invalid password","request-id":"14c67bf2-455c-4160-9dbb-fc7459a19bb9","url":"/api/users"}
+{"time":"2023-11-09T20:42:31.468+0300","message":"bad request","error":"username already exists","request-id":"fa5a5324-5f72-48dc-998c-c22148bb57f9","url":"/api/users"}
+{"time":"2023-11-09T20:45:58.948+0300","message":"bad request","error":"username already exists","request-id":"03ee3cc4-13df-432f-aa26-0f90980c665c","url":"/api/users"}
+{"time":"2023-11-09T20:46:15.189+0300","message":"bad content-type","error":"bad content-type","request-id":"2981e062-434e-409a-92c3-262505c0fed7","url":"/api/users"}
+{"time":"2023-11-09T20:57:00.050+0300","message":"bad content-type","error":"bad content-type","request-id":"eb971122-3e07-410c-b3bf-befa3ea96e2a","url":"/api/users"}
+{"time":"2023-11-09T20:57:07.987+0300","message":"bad request","error":"invalid username","request-id":"9bd10873-3fdb-4ecb-96b4-303d5317511f","url":"/api/users"}
+{"time":"2023-11-09T20:57:18.565+0300","message":"bad request","error":"invalid password","request-id":"80ed2085-50ee-458e-b090-200e3ae61c6d","url":"/api/users"}
+{"time":"2023-11-09T20:58:38.360+0300","message":"bad request","error":"invalid phone number","request-id":"9dab259a-4e5a-4efb-a23e-b422caf8932e","url":"/api/users"}
+{"time":"2023-11-09T20:58:46.996+0300","message":"bad request","error":"invalid phone number","request-id":"19649763-7925-4fa9-8183-9d2d91962827","url":"/api/users"}
+{"time":"2023-11-09T20:59:09.168+0300","message":"bad request","error":"invalid phone number","request-id":"f4ae71b1-1516-4c15-ad8e-d76037f79805","url":"/api/users"}
+{"time":"2023-11-09T21:00:17.688+0300","message":"bad request","error":"email already exists","request-id":"9aa2088a-a344-4ba3-b37d-abd96f4afa8f","url":"/api/users"}
+{"time":"2023-11-09T21:16:32.062+0300","message":"conflcit","error":"email already exists","request-id":"61ed4c33-b31e-4d06-89b5-78514a2368e4","url":"/api/users"}
+{"time":"2023-11-09T21:16:47.108+0300","message":"conflcit","error":"username already exists","request-id":"d80bce91-a443-422c-aa57-d12936600875","url":"/api/users"}
+{"time":"2023-11-09T21:16:55.635+0300","message":"conflcit","error":"email already exists","request-id":"72d28efe-f29d-49a0-bbe0-fb162dd5fbd1","url":"/api/users"}
+{"time":"2023-11-09T21:17:02.802+0300","message":"conflcit","error":"phone number already exists","request-id":"3f09810a-5de6-4070-8316-8eae08733f66","url":"/api/users"}
+{"time":"2023-11-09T21:17:14.567+0300","message":"invalid field","error":"invalid phone number","request-id":"4a7d6fe8-4c47-4483-b410-5a2cdaff0892","url":"/api/users"}
+{"time":"2023-11-09T21:30:32.549+0300","message":"conflcit","error":"username already exists","request-id":"1312d58b-80e0-4d7d-841c-62fc8da113ed","url":"/api/users"}
+{"time":"2023-11-09T21:33:12.876+0300","message":"invalid field","error":"invalid username","request-id":"2eba755d-574d-48c3-8402-450f4651478c","url":"/api/users"}
+{"time":"2023-11-09T21:34:10.576+0300","message":"invalid field","error":"invalid birthday","request-id":"47be2387-cbf5-4034-a8e5-2b05c151d259","url":"/api/users"}
+{"time":"2023-11-09T21:42:47.707+0300","message":"user not found","request-id":"9a4fe483-1963-4ac8-9cfc-7a9fa7586fe1","url":"/api/users/me"}
+{"time":"2023-11-09T21:43:07.468+0300","message":"invalid field","error":"invalid birthday","request-id":"3bcfdfab-81f4-497e-9165-25abb6774a90","url":"/api/users"}
+{"time":"2023-11-09T21:43:18.442+0300","message":"incorrect data","error":"bad request","request-id":"2da4d48d-2634-4195-9eca-6e8fbc48b52e","url":"/api/login"}
+{"time":"2023-11-09T21:43:47.671+0300","message":"problems with unmarshalling json","error":"invalid character '}' looking for beginning of object key string","request-id":"8851fa5c-01ef-4692-81bb-aa76392d2d2c","url":"/api/login"}
+{"time":"2023-11-09T21:44:34.129+0300","message":"problems with unmarshalling json","error":"invalid character '\"' after object key:value pair","request-id":"f9b20c8d-05ff-4cab-aa6c-78d8702de015","url":"/api/users"}
+{"time":"2023-11-09T21:44:42.708+0300","message":"invalid field","error":"invalid birthday","request-id":"03d8cc9a-7d4b-4fbf-9453-881deeae4473","url":"/api/users"}
+{"time":"2023-11-09T21:45:29.886+0300","message":"invalid field","error":"invalid birthday","request-id":"83d433f9-b3a5-400a-91dd-ae7ed5f80244","url":"/api/users"}
+{"time":"2023-11-09T21:46:33.733+0300","message":"invalid field","error":"invalid birthday","request-id":"03db33f9-51ee-4e6d-b857-96fda03d7fbc","url":"/api/users"}
+{"time":"2023-11-09T21:46:56.436+0300","message":"invalid field","error":"invalid phone number","request-id":"cd29f860-8b84-4f60-b27b-56e929b8e2e9","url":"/api/users"}
+{"time":"2023-11-09T21:49:39.800+0300","message":"incorrect data","error":"invalid birthday","request-id":"94039c04-eba2-4c08-a7a4-9e8170f88521","url":"/api/users/me"}
+{"time":"2023-11-09T21:58:07.962+0300","message":"conflcit","error":"username already exists","request-id":"159cc346-02ff-4ca3-8012-a95a30fe65be","url":"/api/users/me"}
+{"time":"2023-11-09T21:58:17.874+0300","message":"conflcit","error":"email already exists","request-id":"8117894e-56ec-4727-b515-6d9c5c8cd38a","url":"/api/users/me"}
+{"time":"2023-11-09T21:58:25.177+0300","message":"conflcit","error":"phone number already exists","request-id":"482a01e2-a50b-4b1f-bc5d-a272b6db6117","url":"/api/users/me"}
+{"time":"2023-11-09T22:17:32.196+0300","message":"no cookie","error":"http: named cookie not present","request-id":"33fa385e-5c00-4357-a897-6ddef9f10794","url":"/api/logout"}
+{"time":"2023-11-09T22:17:33.257+0300","message":"no cookie","error":"http: named cookie not present","request-id":"6378b6b6-0696-45bf-adf4-9eeb9c568b35","url":"/api/logout"}
+{"time":"2023-11-09T22:17:33.531+0300","message":"no cookie","error":"http: named cookie not present","request-id":"027a627f-9a2a-4c39-9dea-0962c2322c7d","url":"/api/logout"}
+{"time":"2023-11-09T22:17:49.790+0300","message":"incorrect data","error":"bad request","request-id":"dfd8e3aa-6533-4155-8922-68231fbdba91","url":"/api/login"}
+{"time":"2023-11-09T22:18:16.360+0300","message":"incorrect data","error":"bad request","request-id":"d92f9ab0-c544-4e30-a637-302de9d1e0d0","url":"/api/login"}
+{"time":"2023-11-09T22:18:56.834+0300","message":"problems with unmarshalling json","error":"invalid character '\"' after object key:value pair","request-id":"d13e70cb-c70a-4fce-95e7-5239c2234a97","url":"/api/login"}
+{"time":"2023-11-09T22:44:35.381+0300","message":"problems with creating cookie","error":"internal server error","request-id":"1c356622-3be1-44f2-950a-bab5daed26bb","url":"/api/login"}
+{"time":"2023-11-09T22:46:02.832+0300","message":"problems with creating cookie","error":"internal server error","request-id":"bddbc55f-c3f3-4657-8206-3a7a74c7f7e8","url":"/api/login"}
+{"time":"2023-11-09T22:47:53.775+0300","message":"user not found","request-id":"1a1fc08a-4f0f-47ed-9a80-e5b04d36342d","url":"/api/users/me"}
+{"time":"2023-11-09T23:28:10.820+0300","message":"user not found","request-id":"e7107c29-e962-4ae0-9d9f-96187dc601b6","url":"/api/users/me"}
+{"time":"2023-11-09T23:28:11.654+0300","message":"user not found","request-id":"e1050301-6cf0-4d6c-ac70-5adaac045a87","url":"/api/users/me"}
+{"time":"2023-11-09T23:28:22.895+0300","message":"problems with creating cookie","error":"internal server error","request-id":"271cb825-b830-4c48-aab2-dc8f818aa4ec","url":"/api/login"}
+{"time":"2023-11-09T23:29:30.731+0300","message":"problems with creating cookie","error":"internal server error","request-id":"a7f3b1bd-d788-4d2d-9b9d-b645d47663e5","url":"/api/login"}
+{"time":"2023-11-09T23:30:04.967+0300","message":"problems with creating cookie","error":"internal server error","request-id":"c4ceab18-8f50-48c4-ad74-b4ee02debd16","url":"/api/login"}
+{"time":"2023-11-09T23:31:06.334+0300","message":"problems with creating cookie","error":"internal server error","request-id":"ee767cdc-4542-404d-82eb-4bcec9e23410","url":"/api/login"}
+{"time":"2023-11-09T23:32:43.223+0300","message":"no cookie","error":"http: named cookie not present","request-id":"c1135b90-a596-43ac-bcba-beb213ecea78","url":"/api/auth"}
+{"time":"2023-11-09T23:34:20.052+0300","message":"no cookie","error":"http: named cookie not present","request-id":"23d7522a-019a-4331-834b-285f461530d7","url":"/api/users/me"}
+{"time":"2023-11-09T23:38:18.190+0300","message":"no cookie","error":"http: named cookie not present","request-id":"dc16a46a-cae3-4468-ac15-22ad89e925c5","url":"/api/auth"}
+{"time":"2023-11-09T23:41:55.920+0300","message":"no cookie","error":"http: named cookie not present","request-id":"27673297-b89c-4d62-968b-672725efcbc4","url":"/api/auth"}
+{"time":"2023-11-10T10:03:30.396+0300","message":"no cookie","error":"http: named cookie not present","request-id":"c020a731-3761-46b0-9d64-1932af38e26b","url":"/api/logout"}
+{"time":"2023-11-10T10:03:50.810+0300","message":"no cookie","error":"http: named cookie not present","request-id":"16cab3f0-ec12-465d-80c4-b9a7be78984b","url":"/api/auth"}
+{"time":"2023-11-09T22:52:02.792+0300","message":"problems restaurants id","error":"item is not found","request-id":"ebbb77a2-6db3-4111-8de6-6d6f881cd8a9","url":"/api/restaurants/9"}
+{"time":"2023-11-09T22:52:02.792+0300","message":"problems restaurants id","error":"item is not found","request-id":"ebbb77a2-6db3-4111-8de6-6d6f881cd8a9","url":"/api/restaurants/9"}
+{"time":"2023-11-09T23:00:47.169+0300","message":"problems with parameters","error":"id is not number","request-id":"21728a95-5d3a-49a6-94cc-99625421ad1b","url":"/api/restaurants/uu"}
+{"time":"2023-11-09T23:06:03.586+0300","message":"problems with parameters","error":"id is not number","request-id":"807b97b0-972b-4d5d-8dd0-c91ec90aab98","url":"/api/restaurants/ii/products"}
+{"time":"2023-11-09T23:17:26.107+0300","message":"problems restaurants id","error":"item is not found","request-id":"6c626c23-72b9-4e38-8eef-b8bcc8351804","url":"/api/restaurants/50"}
+{"time":"2023-11-09T23:46:39.693+0300","message":"problems restaurants id","error":"item is not found","request-id":"89174513-2c93-4dcf-8965-fdb041209c4a","url":"/api/restaurants/50"}
+{"time":"2023-11-10T00:24:32.166+0300","message":"no cookie","error":"http: named cookie not present","request-id":"71d6d7d3-1be7-43bb-937b-b5b9d6cb25ea","url":"/api/cart"}
+{"time":"2023-11-10T00:25:46.296+0300","message":"bad request","error":"username already exists","request-id":"b67c71f7-ee1c-4095-9523-77ad1020286c","url":"/api/users"}
+{"time":"2023-11-10T00:43:45.949+0300","message":"problems with adding product to cart","error":"internal server error","request-id":"1bb008e0-fde4-4241-89c2-5b7df4ef0938","url":"/api/cart/add"}
+{"time":"2023-11-10T00:44:59.335+0300","message":"problems with adding product to cart","error":"internal server error","request-id":"0ebc1732-f83f-49d8-978a-a66fb3770a59","url":"/api/cart/add"}
+{"time":"2023-11-10T13:51:08.901+0300","message":"problems with adding product to cart","error":"item is not found","request-id":"2b6f873f-080b-49f2-9c84-d499acb5b1a0","url":"/api/cart/add"}
+{"time":"2023-11-10T13:57:18.620+0300","message":"problems with adding product to cart","error":"sql: Scan called without calling Next","request-id":"e7e9a021-f1e6-448d-b3af-d988d9d20cf5","url":"/api/cart/add"}
+{"time":"2023-11-10T13:59:39.556+0300","message":"problems restaurants id","error":"item is not found","request-id":"d0c4d938-e3f9-4b8d-bf2e-fdf4073d0a60","url":"/api/restaurants/50"}
+{"time":"2023-11-10T14:00:03.038+0300","message":"problems with adding product to cart","error":"sql: Scan called without calling Next","request-id":"b914c13b-ff97-40c2-96b1-adc6f4f625d8","url":"/api/cart/add"}
+{"time":"2023-11-10T14:13:16.159+0300","message":"problems with adding product to cart","error":"item is not found","request-id":"eeda3d72-ef40-4111-8935-653a410e3018","url":"/api/cart/add"}
+{"time":"2023-11-10T14:21:22.300+0300","message":"problems restaurants id","error":"item is not found","request-id":"620c4c67-133e-4d2a-8c1a-070f99d77074","url":"/api/cart"}
+{"time":"2023-11-10T14:34:20.301+0300","message":"problems with unmarshalling json","error":"json: cannot unmarshal number into Go value of type dto.ReqProductID","request-id":"2bc59836-525c-484c-ae23-f91b39d607c6","url":"/api/cart"}
+{"time":"2023-11-10T14:35:26.240+0300","message":"problems with unmarshalling json","error":"json: cannot unmarshal number into Go value of type dto.ReqProductID","request-id":"d9c8a04c-5368-409e-a55d-261481086fc9","url":"/api/cart"}
+{"time":"2023-11-10T14:41:32.297+0300","message":"problems with unmarshalling json","error":"invalid character 'u' looking for beginning of value","request-id":"321c1fdd-5e9f-4b7a-ba52-bd7bc5c7e859","url":"/api/cart"}
+{"time":"2023-11-10T14:41:50.852+0300","message":"problems restaurants id","error":"item is not found","request-id":"851caea7-4a7d-48de-87ab-004e920160ee","url":"/api/cart"}
+{"time":"2023-11-10T14:43:08.627+0300","message":"no cookie","error":"http: named cookie not present","request-id":"287f0b94-a496-46bf-87be-f2e65b36705c","url":"/api/cart"}
+{"time":"2023-11-10T15:38:04.267+0300","message":"no cookie","error":"http: named cookie not present","request-id":"4b429bb2-57f2-4a47-843d-8628664214f9","url":"/api/cart/4"}
+{"time":"2023-11-10T15:38:52.424+0300","message":"bad request","error":"username already exists","request-id":"cde94f67-9f01-4110-a2a5-4090d9353e40","url":"/api/users"}
+{"time":"2023-11-10T15:55:49.406+0300","message":"problems deleting product from cart","error":"item is not found","request-id":"46ccbcaa-d221-476a-95b0-0950b100a29c","url":"/api/cart/65"}
+{"time":"2023-11-10T15:56:31.523+0300","message":"problems restaurants id","error":"item is not found","request-id":"9f8420ef-4dab-4c84-b542-b8546efa9db3","url":"/api/cart/65"}
+{"time":"2023-11-10T15:56:38.180+0300","message":"problems restaurants id","error":"item is not found","request-id":"ee4ae66c-bb11-4db2-b1ce-6b897c5ca444","url":"/api/cart/12"}
+{"time":"2023-11-10T15:56:50.435+0300","message":"problems with parameters","error":"id is not number","request-id":"a4a1e3ef-7125-4a24-87fa-2683301d86cd","url":"/api/cart/uu"}
+{"time":"2023-11-10T16:16:38.780+0300","message":"problems with parameters","error":"id is not number","request-id":"3cd3c797-abd7-42f0-ac06-0ec7f93a12f4","url":"/api/cart/clear"}
+{"time":"2023-11-10T16:49:04.670+0300","message":"product not found","error":"item is not found","request-id":"1b0514f8-1ac0-45cf-af54-c2f5bd22eae4","url":"/api/products/23"}
+{"time":"2023-11-10T17:21:22.402+0300","message":"no cookie","error":"http: named cookie not present","request-id":"931c1542-c42e-45b8-9e0f-18dc3e500cbc","url":"/api/orders"}
+{"time":"2023-11-10T17:22:48.476+0300","message":"invalid field","error":"invalid phone number","request-id":"f3004cda-3ab0-497f-a99c-573b538b4d3d","url":"/api/users"}
+{"time":"2023-11-10T17:53:48.529+0300","message":"problems with unmarshalling json","error":"json: cannot unmarshal number into Go struct field ReqCreateOrderAddress.Address.House of type string","request-id":"f2018acc-d602-4235-aca6-ceaea0a20f06","url":"/api/orders"}
+{"time":"2023-11-10T17:54:03.002+0300","message":"problems with creating order","error":"internal server error","request-id":"2c56bfec-9e04-4c2f-ac61-f9fdb73e6e31","url":"/api/orders"}
+{"time":"2023-11-10T17:54:58.157+0300","message":"problems with creating order","error":"internal server error","request-id":"724ba09d-7196-4fb1-83e0-7af1fa543ed1","url":"/api/orders"}
+{"time":"2023-11-10T17:59:42.399+0300","message":"unauthorized","request-id":"e84776dc-9631-4f99-afd6-8d00c191f795","url":"/api/auth"}
+{"time":"2023-11-10T18:01:14.608+0300","message":"unauthorized","request-id":"12361cf1-d5fe-4f23-ba21-d7fbc6f25de2","url":"/api/auth"}
+{"time":"2023-11-10T18:01:40.155+0300","message":"user not found","request-id":"69711f19-2ee9-4864-a464-d06cc9650741","url":"/api/auth"}
+{"time":"2023-11-10T18:01:56.640+0300","message":"user not found","request-id":"81121df4-ece6-4adb-b686-366ee95f3f05","url":"/api/users/me"}
+{"time":"2023-11-10T18:02:19.220+0300","message":"user not found","request-id":"d99d79e9-38a8-4f94-821d-29ee022f4927","url":"/api/users/me"}
+{"time":"2023-11-10T18:02:49.450+0300","message":"problems with creating user","error":"internal server error","request-id":"8d776e7b-57f4-4848-bf7c-13fe958dadd6","url":"/api/users"}
+{"time":"2023-11-10T18:04:10.041+0300","message":"problems with creating user","error":"internal server error","request-id":"54070e91-1f04-4173-af81-01f01fa1eeb6","url":"/api/users"}
+{"time":"2023-11-10T18:05:20.259+0300","message":"invalid field","error":"invalid password","request-id":"05f6f68f-66ec-4bc7-a9ce-31c3c78a6ebe","url":"/api/users"}
+{"time":"2023-11-10T18:06:11.031+0300","message":"user not found","request-id":"a981adf1-61c2-4193-b5a8-46dea09b13e3","url":"/api/auth"}
+{"time":"2023-11-10T18:08:31.312+0300","message":"problems with unmarshalling json","error":"json: cannot unmarshal number into Go struct field ReqCreateOrderAddress.Address.House of type string","request-id":"e0c15962-3139-4684-b8dc-3e9d56397e28","url":"/api/orders"}
+{"time":"2023-11-10T18:09:32.238+0300","message":"no cookie","error":"http: named cookie not present","request-id":"5565b00c-3d20-415f-8f0e-c2151b5c03d7","url":"/api/orders"}
+{"time":"2023-11-10T18:33:18.436+0300","message":"no cookie","error":"http: named cookie not present","request-id":"ced58729-7739-49db-9e72-983fba2bce8a","url":"/api/auth"}
+{"time":"2023-11-10T18:33:33.792+0300","message":"no cookie","error":"http: named cookie not present","request-id":"254c56ea-10d3-4e5e-b725-ed03e943f747","url":"/api/orders"}
+{"time":"2023-11-10T18:34:28.325+0300","message":"no cookie","error":"http: named cookie not present","request-id":"81649307-06d1-413f-9ed8-fdd4ee58e7cf","url":"/api/orders"}
+{"time":"2023-11-10T18:39:19.673+0300","message":"no cookie","error":"http: named cookie not present","request-id":"430964a3-c42a-4a58-8352-18fe2ee9e66a","url":"/api/orders"}
