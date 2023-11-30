@@ -46,8 +46,10 @@ func (repo *CartRepo) GetCartByUserID(userID uint) (*entity.Cart, error) {
 	return cart, nil
 }
 
-func (repo *CartRepo) GetCartProductsByCartID(cartID uint) ([]*entity.CartProduct, error) {
-	rows, err := repo.DB.Query("SELECT id, product_id, cart_id, item_count FROM cart_product WHERE cart_id = $1", cartID)
+func (repo *CartRepo) GetCartProductsByCartID(cartID uint) (*entity.CartWithRestaurant, error) {
+	CartWithRestaurant := &entity.CartWithRestaurant{}
+
+	cartRows, err := repo.DB.Query("SELECT id, product_id, cart_id, item_count FROM cart_product WHERE cart_id = $1", cartID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -55,12 +57,12 @@ func (repo *CartRepo) GetCartProductsByCartID(cartID uint) ([]*entity.CartProduc
 			return nil, err
 		}
 	}
-	defer rows.Close()
+	defer cartRows.Close()
 
-	var CartProducts = []*entity.CartProduct{}
-	for rows.Next() {
+	var cartProducts = []*entity.CartProduct{}
+	for cartRows.Next() {
 		cartProduct := &entity.CartProduct{}
-		err = rows.Scan(
+		err = cartRows.Scan(
 			&cartProduct.ID,
 			&cartProduct.ProductID,
 			&cartProduct.CartID,
@@ -69,9 +71,42 @@ func (repo *CartRepo) GetCartProductsByCartID(cartID uint) ([]*entity.CartProduc
 		if err != nil {
 			return nil, err
 		}
-		CartProducts = append(CartProducts, cartProduct)
+		cartProducts = append(cartProducts, cartProduct)
 	}
-	return CartProducts, nil
+
+	CartWithRestaurant.Products = cartProducts
+
+	if len(cartProducts) == 0 {
+		return CartWithRestaurant, nil
+	}
+
+	restaurantRows, err := repo.DB.Query(
+		`SELECT mt.Restaurant_id
+		FROM Product p
+		JOIN Product_Menu_Type pmt ON p.id = pmt.Product_Id
+		JOIN Menu_Type mt ON pmt.Menu_Type_id = mt.Id
+		WHERE pmt.Product_Id = $1`,
+		cartProducts[0].ProductID,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, err
+		}
+	}
+	defer restaurantRows.Close()
+
+	restaurantRows.Next()
+	var restaurantId uint
+	err = restaurantRows.Scan(&restaurantId)
+	if err != nil {
+		return nil, err
+	}
+
+	CartWithRestaurant.RestaurantId = restaurantId
+
+	return CartWithRestaurant, nil
 }
 
 func (repo *CartRepo) AddProductToCart(cartID uint, productID uint) error {
