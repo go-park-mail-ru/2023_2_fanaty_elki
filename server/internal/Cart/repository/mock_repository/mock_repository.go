@@ -137,10 +137,10 @@ func (mr *MockCartRepositoryIMockRecorder) GetCartByUserID(userID interface{}) *
 }
 
 // GetCartProductsByCartID mocks base method.
-func (m *MockCartRepositoryI) GetCartProductsByCartID(cartID uint) ([]*entity.CartProduct, error) {
+func (m *MockCartRepositoryI) GetCartProductsByCartID(cartID uint) (*entity.CartWithRestaurant, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCartProductsByCartID", cartID)
-	ret0, _ := ret[0].([]*entity.CartProduct)
+	ret0, _ := ret[0].(*entity.CartWithRestaurant)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

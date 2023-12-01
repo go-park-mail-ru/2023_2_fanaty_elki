@@ -6,6 +6,7 @@ package mock_repository
 
 import (
 	reflect "reflect"
+	dto "server/internal/domain/dto"
 	entity "server/internal/domain/entity"
 
 	gomock "github.com/golang/mock/gomock"
@@ -32,6 +33,36 @@ func NewMockRestaurantRepositoryI(ctrl *gomock.Controller) *MockRestaurantReposi
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockRestaurantRepositoryI) EXPECT() *MockRestaurantRepositoryIMockRecorder {
 	return m.recorder
+}
+
+// GetCategories mocks base method.
+func (m *MockRestaurantRepositoryI) GetCategories() ([]*entity.Category, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCategories")
+	ret0, _ := ret[0].([]*entity.Category)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCategories indicates an expected call of GetCategories.
+func (mr *MockRestaurantRepositoryIMockRecorder) GetCategories() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCategories", reflect.TypeOf((*MockRestaurantRepositoryI)(nil).GetCategories))
+}
+
+// GetCategoriesByRestaurantId mocks base method.
+func (m *MockRestaurantRepositoryI) GetCategoriesByRestaurantId(id uint) ([]*entity.Category, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCategoriesByRestaurantId", id)
+	ret0, _ := ret[0].([]*entity.Category)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCategoriesByRestaurantId indicates an expected call of GetCategoriesByRestaurantId.
+func (mr *MockRestaurantRepositoryIMockRecorder) GetCategoriesByRestaurantId(id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCategoriesByRestaurantId", reflect.TypeOf((*MockRestaurantRepositoryI)(nil).GetCategoriesByRestaurantId), id)
 }
 
 // GetMenuTypesByRestaurantId mocks base method.
@@ -77,4 +108,63 @@ func (m *MockRestaurantRepositoryI) GetRestaurants() ([]*entity.Restaurant, erro
 func (mr *MockRestaurantRepositoryIMockRecorder) GetRestaurants() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRestaurants", reflect.TypeOf((*MockRestaurantRepositoryI)(nil).GetRestaurants))
+}
+
+// GetRestaurantsByCategory mocks base method.
+func (m *MockRestaurantRepositoryI) GetRestaurantsByCategory(name string) ([]*entity.Restaurant, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRestaurantsByCategory", name)
+	ret0, _ := ret[0].([]*entity.Restaurant)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRestaurantsByCategory indicates an expected call of GetRestaurantsByCategory.
+func (mr *MockRestaurantRepositoryIMockRecorder) GetRestaurantsByCategory(name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRestaurantsByCategory", reflect.TypeOf((*MockRestaurantRepositoryI)(nil).GetRestaurantsByCategory), name)
+}
+
+// SearchCategories mocks base method.
+func (m *MockRestaurantRepositoryI) SearchCategories(word string) ([]*entity.Restaurant, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchCategories", word)
+	ret0, _ := ret[0].([]*entity.Restaurant)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchCategories indicates an expected call of SearchCategories.
+func (mr *MockRestaurantRepositoryIMockRecorder) SearchCategories(word interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchCategories", reflect.TypeOf((*MockRestaurantRepositoryI)(nil).SearchCategories), word)
+}
+
+// SearchRestaurants mocks base method.
+func (m *MockRestaurantRepositoryI) SearchRestaurants(word string) ([]*entity.Restaurant, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchRestaurants", word)
+	ret0, _ := ret[0].([]*entity.Restaurant)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchRestaurants indicates an expected call of SearchRestaurants.
+func (mr *MockRestaurantRepositoryIMockRecorder) SearchRestaurants(word interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchRestaurants", reflect.TypeOf((*MockRestaurantRepositoryI)(nil).SearchRestaurants), word)
+}
+
+// UpdateComments mocks base method.
+func (m *MockRestaurantRepositoryI) UpdateComments(comment *dto.ReqCreateComment) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateComments", comment)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateComments indicates an expected call of UpdateComments.
+func (mr *MockRestaurantRepositoryIMockRecorder) UpdateComments(comment interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateComments", reflect.TypeOf((*MockRestaurantRepositoryI)(nil).UpdateComments), comment)
 }

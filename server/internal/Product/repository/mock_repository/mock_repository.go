@@ -63,3 +63,33 @@ func (mr *MockProductRepositoryIMockRecorder) GetProductsByMenuTypeId(id interfa
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductsByMenuTypeId", reflect.TypeOf((*MockProductRepositoryI)(nil).GetProductsByMenuTypeId), id)
 }
+
+// GetRestaurantIdByProduct mocks base method.
+func (m *MockProductRepositoryI) GetRestaurantIdByProduct(id uint) (uint, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRestaurantIdByProduct", id)
+	ret0, _ := ret[0].(uint)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRestaurantIdByProduct indicates an expected call of GetRestaurantIdByProduct.
+func (mr *MockProductRepositoryIMockRecorder) GetRestaurantIdByProduct(id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRestaurantIdByProduct", reflect.TypeOf((*MockProductRepositoryI)(nil).GetRestaurantIdByProduct), id)
+}
+
+// SearchProducts mocks base method.
+func (m *MockProductRepositoryI) SearchProducts(word string) ([]*entity.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchProducts", word)
+	ret0, _ := ret[0].([]*entity.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchProducts indicates an expected call of SearchProducts.
+func (mr *MockProductRepositoryIMockRecorder) SearchProducts(word interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchProducts", reflect.TypeOf((*MockProductRepositoryI)(nil).SearchProducts), word)
+}

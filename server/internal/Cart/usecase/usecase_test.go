@@ -5,6 +5,7 @@ import (
 
 	mockC "server/internal/Cart/repository/mock_repository"
 	mockP "server/internal/Product/repository/mock_repository"
+	mockR "server/internal/Restaurant/repository/mock_repository"
 	mockS "server/internal/Session/repository/mock_repository"
 	dto "server/internal/domain/dto"
 	"server/internal/domain/entity"
@@ -21,7 +22,8 @@ func TestGetUserCartSuccess(t *testing.T) {
 	mockCart := mockC.NewMockCartRepositoryI(ctrl)
 	mockProd := mockP.NewMockProductRepositoryI(ctrl)
 	mockSes := mockS.NewMockSessionRepositoryI(ctrl)
-	usecase := NewCartUsecase(mockCart, mockProd, mockSes)
+	mockRest := mockR.NewMockRestaurantRepositoryI(ctrl)
+	usecase := NewCartUsecase(mockCart, mockProd, mockSes, mockRest)
 
 	cookie := &entity.Cookie{
 		UserID:       1,
@@ -43,12 +45,21 @@ func TestGetUserCartSuccess(t *testing.T) {
 		Icon:        "deficon",
 	}
 
-	cartProds := []*entity.CartProduct{
-		{
-			ID:        1,
-			ProductID: 1,
-			CartID:    1,
-			ItemCount: 1,
+	cartwithrest := &entity.CartWithRestaurant{
+		RestaurantId: 1,
+		Products: []*entity.CartProduct{
+			{
+				ID:        1,
+				ProductID: 1,
+				CartID:    1,
+				ItemCount: 6,
+			},
+			{
+				ID:        2,
+				ProductID: 3,
+				CartID:    1,
+				ItemCount: 6,
+			},
 		},
 	}
 
@@ -71,7 +82,7 @@ func TestGetUserCartSuccess(t *testing.T) {
 
 	mockSes.EXPECT().Check(cookie.SessionToken).Return(cookie, nil)
 	mockCart.EXPECT().GetCartByUserID(UserID).Return(cart, nil)
-	mockCart.EXPECT().GetCartProductsByCartID(cart.ID).Return(cartProds, nil)
+	mockCart.EXPECT().GetCartProductsByCartID(cart.ID).Return(cartwithrest, nil)
 	mockProd.EXPECT().GetProductByID(res[0].Product.ID).Return(prod, nil)
 	actual, err := usecase.GetUserCart(cookie.SessionToken)
 	assert.Equal(t, res, actual)
@@ -86,7 +97,8 @@ func TestAddProductToCartSuccess(t *testing.T) {
 	mockCart := mockC.NewMockCartRepositoryI(ctrl)
 	mockProd := mockP.NewMockProductRepositoryI(ctrl)
 	mockSes := mockS.NewMockSessionRepositoryI(ctrl)
-	usecase := NewCartUsecase(mockCart, mockProd, mockSes)
+	mockRest := mockR.NewMockRestaurantRepositoryI(ctrl)
+	usecase := NewCartUsecase(mockCart, mockProd, mockSes, mockRest)
 
 	cookie := &entity.Cookie{
 		UserID:       1,
@@ -135,7 +147,8 @@ func TestDeleteProductFromCartSuccess(t *testing.T) {
 	mockCart := mockC.NewMockCartRepositoryI(ctrl)
 	mockProd := mockP.NewMockProductRepositoryI(ctrl)
 	mockSes := mockS.NewMockSessionRepositoryI(ctrl)
-	usecase := NewCartUsecase(mockCart, mockProd, mockSes)
+	mockRest := mockR.NewMockRestaurantRepositoryI(ctrl)
+	usecase := NewCartUsecase(mockCart, mockProd, mockSes, mockRest)
 
 	cookie := &entity.Cookie{
 		UserID:       1,
@@ -177,7 +190,8 @@ func TestCleanCartSuccess(t *testing.T) {
 	mockCart := mockC.NewMockCartRepositoryI(ctrl)
 	mockProd := mockP.NewMockProductRepositoryI(ctrl)
 	mockSes := mockS.NewMockSessionRepositoryI(ctrl)
-	usecase := NewCartUsecase(mockCart, mockProd, mockSes)
+	mockRest := mockR.NewMockRestaurantRepositoryI(ctrl)
+	usecase := NewCartUsecase(mockCart, mockProd, mockSes, mockRest)
 
 	cookie := &entity.Cookie{
 		UserID:       1,
