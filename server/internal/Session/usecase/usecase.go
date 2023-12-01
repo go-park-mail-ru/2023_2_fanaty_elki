@@ -59,8 +59,8 @@ func (ss sessionUsecase) Login(user *entity.User) (*entity.Cookie, error) {
 
 	us, err := ss.userRepo.FindUserByUsername(user.Username)
 	fmt.Println("login err", err)
-	fmt.Println("login us", us.Username, " ", us.Password)
-	
+	fmt.Println("login us", us, " ", us)
+
 	if err != nil {
 		return nil, err
 	}
