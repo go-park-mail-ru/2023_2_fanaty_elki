@@ -3,7 +3,6 @@ package delivery
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	restaurantUsecase "server/internal/Restaurant/usecase"
 	"server/internal/domain/entity"
@@ -58,7 +57,6 @@ func (handler *RestaurantHandler) GetRestaurantList(w http.ResponseWriter, r *ht
 	rests, err := handler.restaurants.GetRestaurants()
 
 	if err != nil {
-		fmt.Println(err)
 		handler.logger.LogError("problems with getting restauratns", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return

@@ -21,29 +21,27 @@ func TestGetRestaurantsSuccess(t *testing.T) {
 	}
 
 	rows := sqlmock.
-		NewRows([]string{"id", "name", "rating", "comments_count", "category", "icon"})
+		NewRows([]string{"id", "name", "rating", "comments_count", "icon"})
 	expect := []*entity.Restaurant{
 		{ID: 1,
 			Name:          "Burger King",
 			Rating:        3.7,
 			CommentsCount: 60,
-			Category:      "Fastfood",
 			Icon:          "img/burger_king.jpg",
 		},
 		{ID: 2,
 			Name:          "MacBurger",
 			Rating:        3.8,
 			CommentsCount: 69,
-			Category:      "Fastfood",
 			Icon:          "img/mac_burger.jpg",
 		},
 	}
 	for _, restaurant := range expect {
-		rows = rows.AddRow(restaurant.ID, restaurant.Name, restaurant.Rating, restaurant.CommentsCount, restaurant.Category, restaurant.Icon)
+		rows = rows.AddRow(restaurant.ID, restaurant.Name, restaurant.Rating, restaurant.CommentsCount, restaurant.Icon)
 	}
 
 	mock.
-		ExpectQuery("SELECT id, name, rating, comments_count, category, icon FROM restaurant").
+		ExpectQuery("SELECT id, name, rating, comments_count, icon FROM restaurant").
 		WillReturnRows(rows)
 
 	restaurants, err := repo.GetRestaurants()
@@ -57,9 +55,9 @@ func TestGetRestaurantsSuccess(t *testing.T) {
 		return
 	}
 
-	emptyrows := sqlmock.NewRows([]string{"id", "name", "rating", "comments_count", "category", "icon"})
+	emptyrows := sqlmock.NewRows([]string{"id", "name", "rating", "comments_count", "icon"})
 
-	mock.ExpectQuery("SELECT id, name, rating, comments_count, category, icon FROM restaurant").
+	mock.ExpectQuery("SELECT id, name, rating, comments_count, icon FROM restaurant").
 		WillReturnRows(emptyrows)
 
 	restaurants, err = repo.GetRestaurants()
@@ -82,7 +80,7 @@ func TestGetRestaurantsFail(t *testing.T) {
 	}
 
 	testErr := errors.New("test")
-	mock.ExpectQuery("SELECT id, name, rating, comments_count, category, icon FROM restaurant").
+	mock.ExpectQuery("SELECT id, name, rating, comments_count, icon FROM restaurant").
 		WillReturnError(testErr)
 
 	restaurants, err := repo.GetRestaurants()
@@ -109,22 +107,21 @@ func TestGetRestaurantByIdSuccess(t *testing.T) {
 	}
 
 	row := sqlmock.
-		NewRows([]string{"id", "name", "rating", "comments_count", "category", "icon"})
+		NewRows([]string{"id", "name", "rating", "comments_count", "icon"})
 	expect := &entity.Restaurant{
 		ID:            1,
 		Name:          "Burger King",
 		Rating:        3.7,
 		CommentsCount: 60,
-		Category:      "Fastfood",
 		Icon:          "img/burger_king.jpg",
 	}
 
-	row = row.AddRow(expect.ID, expect.Name, expect.Rating, expect.CommentsCount, expect.Category, expect.Icon)
+	row = row.AddRow(expect.ID, expect.Name, expect.Rating, expect.CommentsCount, expect.Icon)
 
 	var elemID = 1
 
 	mock.
-		ExpectQuery("SELECT id, name, rating, comments_count, category, icon FROM restaurant WHERE").WithArgs(elemID).
+		ExpectQuery("SELECT id, name, rating, comments_count, icon FROM restaurant WHERE").WithArgs(elemID).
 		WillReturnRows(row)
 
 	restaurant, err := repo.GetRestaurantById(uint(elemID))
@@ -138,9 +135,9 @@ func TestGetRestaurantByIdSuccess(t *testing.T) {
 		return
 	}
 
-	emptyrows := sqlmock.NewRows([]string{"id", "name", "rating", "comments_count", "category", "icon"})
+	emptyrows := sqlmock.NewRows([]string{"id", "name", "rating", "comments_count", "icon"})
 
-	mock.ExpectQuery("SELECT id, name, rating, comments_count, category, icon FROM restaurant").WithArgs(elemID).
+	mock.ExpectQuery("SELECT id, name, rating, comments_count, icon FROM restaurant").WithArgs(elemID).
 		WillReturnRows(emptyrows)
 
 	restaurant, err = repo.GetRestaurantById(uint(elemID))
@@ -165,7 +162,7 @@ func TestGetRestaurantByIdFail(t *testing.T) {
 	var elemID = 1
 
 	testErr := errors.New("test")
-	mock.ExpectQuery("SELECT id, name, rating, comments_count, category, icon FROM restaurant").WithArgs(elemID).
+	mock.ExpectQuery("SELECT id, name, rating, comments_count,  icon FROM restaurant").WithArgs(elemID).
 		WillReturnError(testErr)
 
 	restaurants, err := repo.GetRestaurantById(uint(elemID))

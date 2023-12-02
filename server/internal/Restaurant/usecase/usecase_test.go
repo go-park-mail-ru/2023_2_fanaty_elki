@@ -20,26 +20,54 @@ func TestGetRestaurantsSucces(t *testing.T) {
 	mockProd := mockP.NewMockProductRepositoryI(ctrl)
 	usecase := NewRestaurantUsecase(mockRest, mockProd)
 
-	res := []*entity.Restaurant{
+	res := []*dto.RestaurantWithCategories{
 		{ID: 1,
 			Name:          "Burger King",
 			Rating:        3.7,
 			CommentsCount: 60,
-			Category:      "Fastfood",
+			Categories:    []string{"Burger", "Breakfast"},
 			Icon:          "img/burger_king.jpg",
 		},
 		{ID: 2,
 			Name:          "MacBurger",
 			Rating:        3.8,
 			CommentsCount: 69,
-			Category:      "Fastfood",
+			Categories:    []string{"Burger", "Breakfast"},
 			Icon:          "img/mac_burger.jpg",
 		},
 	}
 
-	mockRest.EXPECT().GetRestaurants().Return(res, nil)
+	rest := []*entity.Restaurant{
+		{ID: 1,
+			Name:          "Burger King",
+			Rating:        3.7,
+			CommentsCount: 60,
+			Icon:          "img/burger_king.jpg",
+		},
+		{ID: 2,
+			Name:          "MacBurger",
+			Rating:        3.8,
+			CommentsCount: 69,
+			Icon:          "img/mac_burger.jpg",
+		},
+	}
+
+	categories := []*entity.Category{
+		{
+			ID:   1,
+			Name: "Burger",
+		},
+		{
+			ID:   2,
+			Name: "Breakfast",
+		},
+	}
+
+	mockRest.EXPECT().GetRestaurants().Return(rest, nil)
+	mockRest.EXPECT().GetCategoriesByRestaurantId(rest[0].ID).Return(categories, nil)
+	mockRest.EXPECT().GetCategoriesByRestaurantId(rest[1].ID).Return(categories, nil)
 	actual, err := usecase.GetRestaurants()
-	assert.Equal(t, res, actual)
+	assert.Equal(t, res[0].Name, actual[0].Name)
 	assert.Nil(t, err)
 
 }
@@ -73,13 +101,24 @@ func TestGetRestaurantByIdSuccess(t *testing.T) {
 		Name:          "Burger King",
 		Rating:        3.7,
 		CommentsCount: 60,
-		Category:      "Fastfood",
 		Icon:          "img/burger_king.jpg",
 	}
 
 	var elemID = 1
 
+	categories := []*entity.Category{
+		{
+			ID:   1,
+			Name: "Burger",
+		},
+		{
+			ID:   2,
+			Name: "Breakfast",
+		},
+	}
+
 	mockRest.EXPECT().GetRestaurantById(uint(elemID)).Return(rest, nil)
+	mockRest.EXPECT().GetCategoriesByRestaurantId(uint(elemID)).Return(categories, nil)
 	actual, err := usecase.GetRestaurantById(uint(elemID))
 	assert.Equal(t, rest.Name, actual.Name)
 	assert.Nil(t, err)

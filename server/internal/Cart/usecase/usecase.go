@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"fmt"
 	cartRep "server/internal/Cart/repository"
 	productRep "server/internal/Product/repository"
 	restaurantRep "server/internal/Restaurant/repository"
@@ -67,7 +66,6 @@ func (cu cartUsecase) GetUserCart(SessionToken string) (*dto.CartWithRestaurant,
 		return CartWithRestaurant, nil
 	}
 
-	fmt.Println(cartWithRestaurant)
 	restaurant, err := cu.restaurantRepo.GetRestaurantById(cartWithRestaurant.RestaurantId)
 	if err != nil {
 		return nil, err
