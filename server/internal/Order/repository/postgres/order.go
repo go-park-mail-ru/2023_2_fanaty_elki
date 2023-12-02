@@ -2,8 +2,6 @@ package repository
 
 import (
 	"database/sql"
-	"fmt"
-	//"fmt"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 )
@@ -178,7 +176,6 @@ func (repo *orderRepo) GetOrder(reqOrder *dto.ReqGetOneOrder) (*dto.RespGetOneOr
 	orderItems := &dto.OrderItems{}
 
 	err = repo.DB.QueryRow(getRestaurant, products[0].Id).Scan(&orderItems.RestaurantName)
-	fmt.Println(err)
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}

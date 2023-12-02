@@ -1,8 +1,6 @@
 package repository
 
 import (
-	//"fmt"
-	"fmt"
 	"reflect"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
@@ -268,7 +266,6 @@ func TestGetOrderSuccess(t *testing.T) {
 
 	row := sqlmock.
 		NewRows([]string{"id", "status", "order_date", "price", "delivery_time", "city", "street", "house_number", "falt_number"})
-	fmt.Println(resporder.Address)
 	row = row.AddRow(resporder.Id, resporder.Status, resporder.Date, resporder.Price, resporder.DeliveryTime, resporder.Address.City, resporder.Address.Street, resporder.Address.House, resporder.Address.Flat)
 
 	mock.

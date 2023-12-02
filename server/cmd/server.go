@@ -217,8 +217,8 @@ func main() {
 	router.PathPrefix("/api/users").Handler(corsRouter)
 	router.PathPrefix("/api/comments").Handler(authRouter).Methods(http.MethodPost, http.MethodOptions)
 
-	router.Use(logger.ACLogMiddleware)
 	router.Use(middleware.PanicMiddleware)
+	router.Use(logger.ACLogMiddleware)
 	router.Use(middleware.CorsMiddleware)
 	corsRouter.Use(middleware.CorsCredentionalsMiddleware)
 	authRouter.Use(authMW.AuthMiddleware)
