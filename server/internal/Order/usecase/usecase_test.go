@@ -1,12 +1,14 @@
 package usecase
 
 import (
+	mockC "server/internal/Cart/repository/mock_repository"
 	mockO "server/internal/Order/repository/mock_repository"
+	mockP "server/internal/Product/repository/mock_repository"
 	dto "server/internal/domain/dto"
 	"server/internal/domain/entity"
 	"testing"
-	"time"
 
+	"time"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -16,15 +18,15 @@ func TestCreateOrderSuccess(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockOrder := mockO.NewMockOrderRepositoryI(ctrl)
-	usecase := NewOrderUsecase(mockOrder)
+	mockCart := mockC.NewMockCartRepositoryI(ctrl)
+	mockProduct := mockP.NewMockProductRepositoryI(ctrl)
+	usecase := NewOrderUsecase(mockOrder, mockCart, mockProduct)
 
 	var flat uint
 	flat = 1
-
+	
 	timenow := time.Now()
-
 	reqorder := &dto.ReqCreateOrder{
-		Products: []uint{1, 2, 3},
 		UserId:   1,
 		Address: &dto.ReqCreateOrderAddress{
 			City:   "Moscow",
@@ -34,18 +36,65 @@ func TestCreateOrderSuccess(t *testing.T) {
 		},
 	}
 
+	order := dto.ToEntityCreateOrder(reqorder)
+	order.Date = timenow
+
+	cart := &entity.Cart{
+		ID: 1,
+		UserID: 1,
+	}
+
+	mockCart.EXPECT().GetCartByUserID(order.UserId).Return(cart, nil)
+
+	products := []*entity.CartProduct{
+		{
+			ID: 1,
+			ProductID: 1,
+			CartID: 1,
+			ItemCount: 1,
+		},
+	}
+
+	mockCart.EXPECT().GetCartProductsByCartID(cart.ID).Return(products, nil)
+
+	product := &entity.Product{
+		ID:1,
+		Name: "Burger",
+		Price: 100,
+		CookingTime: 10,
+		Portion: "120g",
+		Icon: "def",
+	}
+	mockProduct.EXPECT().GetProductByID(products[0].ProductID).Return(product, nil)
+
+	order.Price += uint(product.Price) * uint(products[0].ItemCount)
+
 	resporder := &dto.RespCreateOrder{
 		Id:     1,
-		Status: "CREATED",
+		Status: 0,
+		Price: uint(product.Price) * uint(products[0].ItemCount),
 		Date:   timenow,
+		Address: &entity.Address{
+			City:   "Moscow",
+			Street: "Tverskaya",
+			House:  "2",
+			Flat:   flat,
+		},
+
+		DeliveryTime: 30,
 	}
 
-	products := make(map[uint]int)
-	for _, product := range reqorder.Products {
-		products[product]++
+	resorder := &dto.RespCreateOrder{
+		Id:     1,
+		Status: 0,
+		Price: uint(product.Price) * uint(products[0].ItemCount),
+		Date:   timenow,
+		DeliveryTime: 30,
+		Address: nil,
 	}
 
-	mockOrder.EXPECT().CreateOrder(gomock.Any()).Return(resporder, nil)
+
+	mockOrder.EXPECT().CreateOrder(gomock.Any()).Return(resorder, nil)
 	actual, err := usecase.CreateOrder(reqorder)
 	assert.Equal(t, resporder, actual)
 	assert.Nil(t, err)
@@ -57,13 +106,15 @@ func TestCreateOrderFail(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockOrder := mockO.NewMockOrderRepositoryI(ctrl)
-	usecase := NewOrderUsecase(mockOrder)
+	mockCart := mockC.NewMockCartRepositoryI(ctrl)
+	mockProduct := mockP.NewMockProductRepositoryI(ctrl)
+
+	usecase := NewOrderUsecase(mockOrder, mockCart, mockProduct)
 
 	var flat uint
 	flat = 1
 
 	reqorder := &dto.ReqCreateOrder{
-		Products: []uint{1, 2, 3},
 		UserId:   1,
 		Address: &dto.ReqCreateOrderAddress{
 			City:   "",
@@ -76,7 +127,6 @@ func TestCreateOrderFail(t *testing.T) {
 	actual, err := usecase.CreateOrder(reqorder)
 	assert.Equal(t, entity.ErrBadRequest, err)
 	assert.Nil(t, actual)
-
 }
 
 func TestUpdateOrderSuccess(t *testing.T) {
@@ -84,16 +134,18 @@ func TestUpdateOrderSuccess(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockOrder := mockO.NewMockOrderRepositoryI(ctrl)
-	usecase := NewOrderUsecase(mockOrder)
+	mockCart := mockC.NewMockCartRepositoryI(ctrl)
+	mockProduct := mockP.NewMockProductRepositoryI(ctrl)
+	usecase := NewOrderUsecase(mockOrder, mockCart, mockProduct)
 
 	dbreqorder := dto.ReqUpdateOrder{
 		Id:     1,
-		Status: "Wait",
+		Status: 1,
 	}
 
 	reqorder := dto.ReqUpdateOrder{
 		Id:     1,
-		Status: "Wait",
+		Status: 1,
 	}
 
 	mockOrder.EXPECT().UpdateOrder(&dbreqorder).Return(nil)
@@ -108,8 +160,10 @@ func TestGetOrdersSuccess(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockOrder := mockO.NewMockOrderRepositoryI(ctrl)
-	usecase := NewOrderUsecase(mockOrder)
-
+	mockCart := mockC.NewMockCartRepositoryI(ctrl)
+	mockProduct := mockP.NewMockProductRepositoryI(ctrl)
+	usecase := NewOrderUsecase(mockOrder, mockCart, mockProduct)
+	
 	var UserID uint
 	UserID = 1
 
@@ -121,25 +175,27 @@ func TestGetOrdersSuccess(t *testing.T) {
 	resporders := []*dto.RespGetOrder{
 		{
 			Id:     1,
-			Status: "Wait",
+			Status: 0,
 			Date:   timenow,
 			Address: &dto.RespOrderAddress{
 				City:   "Moscow",
 				Street: "Tverskaya",
 				House:  "2",
-				Flat:   &flat,
+				Flat:   flat,
 			},
+			Price: 100,
 		},
 		{
 			Id:     2,
-			Status: "Wait",
+			Status: 0,
 			Date:   timenow,
 			Address: &dto.RespOrderAddress{
 				City:   "Moscow",
 				Street: "Tverskaya",
 				House:  "3",
-				Flat:   &flat,
+				Flat:   flat,
 			},
+			Price: 200,
 		},
 	}
 
@@ -155,7 +211,9 @@ func TestGetOrderSuccess(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockOrder := mockO.NewMockOrderRepositoryI(ctrl)
-	usecase := NewOrderUsecase(mockOrder)
+	mockCart := mockC.NewMockCartRepositoryI(ctrl)
+	mockProduct := mockP.NewMockProductRepositoryI(ctrl)
+	usecase := NewOrderUsecase(mockOrder, mockCart, mockProduct)
 
 	timenow := time.Now()
 
@@ -164,11 +222,31 @@ func TestGetOrderSuccess(t *testing.T) {
 		UserId:  1,
 	}
 
+	products := &dto.RespGetOrderProduct{
+		Id: 1,
+		Name: "Burger",
+		Price: 100,
+		Icon: "def",
+		Count: 1,
+	}
+
+	orderItems := &dto.OrderItems{
+		RestaurantName: "BK",
+		Products: []*dto.RespGetOrderProduct{products},
+	}
+
 	resporder := &dto.RespGetOneOrder{
-		Status:      "Wait",
+		Id: 1,
+		Status:      0,
 		Date:        timenow,
-		UpdatedDate: timenow,
-		Products:    []*dto.RespGetOrderProduct{},
+		Address: &dto.RespOrderAddress{
+			City:   "Moscow",
+			Street: "Tverskaya",
+			House:  "2",
+			Flat:   1,
+		},
+		OrderItems: []*dto.OrderItems{orderItems},
+
 	}
 
 	mockOrder.EXPECT().GetOrder(reqorder).Return(resporder, nil)
