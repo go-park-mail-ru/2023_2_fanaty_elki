@@ -77,10 +77,10 @@ func (mr *MockUsecaseIMockRecorder) DeleteProductFromCart(SessionToken, productI
 }
 
 // GetUserCart mocks base method.
-func (m *MockUsecaseI) GetUserCart(SessionToken string) ([]*dto.CartProduct, error) {
+func (m *MockUsecaseI) GetUserCart(SessionToken string) (*dto.CartWithRestaurant, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserCart", SessionToken)
-	ret0, _ := ret[0].([]*dto.CartProduct)
+	ret0, _ := ret[0].(*dto.CartWithRestaurant)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

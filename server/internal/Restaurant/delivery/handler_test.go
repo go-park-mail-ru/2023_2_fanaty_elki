@@ -26,19 +26,19 @@ func TestGetRestaurantsListSuccess(t *testing.T) {
 	mock := mockR.NewMockUsecaseI(ctrl)
 	handler := NewRestaurantHandler(mock, logger)
 
-	rests := []*entity.Restaurant{
+	rests := []*dto.RestaurantWithCategories{
 		{ID: 1,
 			Name:          "Burger King",
 			Rating:        3.7,
 			CommentsCount: 60,
-			Category:      "Fastfood",
+			Categories:    []string{"Burger", "Breakfast"},
 			Icon:          "img/burger_king.jpg",
 		},
 		{ID: 2,
 			Name:          "MacBurger",
 			Rating:        3.8,
 			CommentsCount: 69,
-			Category:      "Fastfood",
+			Categories:    []string{"Burger", "Breakfast"},
 			Icon:          "img/mac_burger.jpg",
 		},
 	}
@@ -80,7 +80,8 @@ func TestGetRestaurantsListFail(t *testing.T) {
 	defer ctrl.Finish()
 	apiPath := "/api/restaurants"
 	mock := mockR.NewMockUsecaseI(ctrl)
-	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
+	hitstats := &entity.HitStats{}
+	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
 	handler := NewRestaurantHandler(mock, logger)
 
 	testErr := errors.New("test")
@@ -106,12 +107,12 @@ func TestGetRestaurantByIdSuccess(t *testing.T) {
 	var logger *mw.ACLog
 	handler := NewRestaurantHandler(mock, logger)
 
-	restaurant := &entity.Restaurant{
+	restaurant := &dto.RestaurantWithCategories{
 		ID:            1,
 		Name:          "Burger King",
 		Rating:        3.7,
 		CommentsCount: 60,
-		Category:      "Fastfood",
+		Categories:    []string{"Burger", "Breakfast"},
 		Icon:          "img/burger_king.jpg",
 	}
 
@@ -160,7 +161,8 @@ func TestGetRestaurantByIdFail(t *testing.T) {
 	defer ctrl.Finish()
 	apiPath := "/api/restaurants/fdfd"
 	mock := mockR.NewMockUsecaseI(ctrl)
-	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
+	hitstats := &entity.HitStats{}
+	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
 	handler := NewRestaurantHandler(mock, logger)
 
 	req := httptest.NewRequest("GET", apiPath, nil)
@@ -286,7 +288,8 @@ func TestGetRestaurantProductsFail(t *testing.T) {
 	defer ctrl.Finish()
 	apiPath := "/api/restaurants/fdfd/products"
 	mock := mockR.NewMockUsecaseI(ctrl)
-	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
+	hitstats := &entity.HitStats{}
+	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
 	handler := NewRestaurantHandler(mock, logger)
 
 	req := httptest.NewRequest("GET", apiPath, nil)

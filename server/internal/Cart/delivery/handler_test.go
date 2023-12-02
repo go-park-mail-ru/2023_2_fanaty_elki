@@ -34,17 +34,41 @@ func TestGetCartSuccess(t *testing.T) {
 		SessionToken: "HJJvgsvd",
 	}
 
-	res := []*dto.CartProduct{
-		{Product: &entity.Product{
-			ID:          1,
-			Name:        "Burger",
-			Price:       120.0,
-			CookingTime: 23,
-			Portion:     "160 г",
-			Description: "Nice burger",
-			Icon:        "deficon",
-		},
-			ItemCount: 1,
+	rest := &entity.Restaurant{
+		ID:            1,
+		Name:          "Burger King",
+		Rating:        3.7,
+		CommentsCount: 60,
+		Icon:          "img/burger_king.jpg",
+	}
+
+	res := &dto.CartWithRestaurant{
+		Restaurant: rest,
+		Products: []*dto.CartProduct{
+			{
+				Product: &entity.Product{
+					ID:          1,
+					Name:        "Burger",
+					Price:       120.0,
+					CookingTime: 23,
+					Portion:     "160 г",
+					Description: "Nice burger",
+					Icon:        "deficon",
+				},
+				ItemCount: 6,
+			},
+			{
+				Product: &entity.Product{
+					ID:          2,
+					Name:        "Burger",
+					Price:       120.0,
+					CookingTime: 23,
+					Portion:     "160 г",
+					Description: "Nice burger",
+					Icon:        "deficon",
+				},
+				ItemCount: 6,
+			},
 		},
 	}
 
@@ -82,7 +106,8 @@ func TestGetCartFail(t *testing.T) {
 		return
 	}
 	defer errorLogger.Sync()
-	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
+	hitstats := &entity.HitStats{}
+	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/cart"
@@ -163,7 +188,8 @@ func TestAddProductToCartFail(t *testing.T) {
 		return
 	}
 	defer errorLogger.Sync()
-	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
+	hitstats := &entity.HitStats{}
+	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/cart"
@@ -272,7 +298,8 @@ func TestDeleteProductFromCartFail(t *testing.T) {
 		return
 	}
 	defer errorLogger.Sync()
-	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
+	hitstats := &entity.HitStats{}
+	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/cart/1"
@@ -363,7 +390,8 @@ func TestCleanCartFail(t *testing.T) {
 		return
 	}
 	defer errorLogger.Sync()
-	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
+	hitstats := &entity.HitStats{}
+	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/cart/clear"

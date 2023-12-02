@@ -7,7 +7,6 @@ package mock_usecase
 import (
 	reflect "reflect"
 	dto "server/internal/domain/dto"
-	entity "server/internal/domain/entity"
 
 	gomock "github.com/golang/mock/gomock"
 )
@@ -35,11 +34,26 @@ func (m *MockUsecaseI) EXPECT() *MockUsecaseIMockRecorder {
 	return m.recorder
 }
 
+// GetCategories mocks base method.
+func (m *MockUsecaseI) GetCategories() (*[]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCategories")
+	ret0, _ := ret[0].(*[]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCategories indicates an expected call of GetCategories.
+func (mr *MockUsecaseIMockRecorder) GetCategories() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCategories", reflect.TypeOf((*MockUsecaseI)(nil).GetCategories))
+}
+
 // GetRestaurantById mocks base method.
-func (m *MockUsecaseI) GetRestaurantById(id uint) (*entity.Restaurant, error) {
+func (m *MockUsecaseI) GetRestaurantById(id uint) (*dto.RestaurantWithCategories, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRestaurantById", id)
-	ret0, _ := ret[0].(*entity.Restaurant)
+	ret0, _ := ret[0].(*dto.RestaurantWithCategories)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -66,10 +80,10 @@ func (mr *MockUsecaseIMockRecorder) GetRestaurantProducts(id interface{}) *gomoc
 }
 
 // GetRestaurants mocks base method.
-func (m *MockUsecaseI) GetRestaurants() ([]*entity.Restaurant, error) {
+func (m *MockUsecaseI) GetRestaurants() ([]*dto.RestaurantWithCategories, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRestaurants")
-	ret0, _ := ret[0].([]*entity.Restaurant)
+	ret0, _ := ret[0].([]*dto.RestaurantWithCategories)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -78,4 +92,34 @@ func (m *MockUsecaseI) GetRestaurants() ([]*entity.Restaurant, error) {
 func (mr *MockUsecaseIMockRecorder) GetRestaurants() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRestaurants", reflect.TypeOf((*MockUsecaseI)(nil).GetRestaurants))
+}
+
+// GetRestaurantsByCategory mocks base method.
+func (m *MockUsecaseI) GetRestaurantsByCategory(name string) ([]*dto.RestaurantWithCategories, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRestaurantsByCategory", name)
+	ret0, _ := ret[0].([]*dto.RestaurantWithCategories)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRestaurantsByCategory indicates an expected call of GetRestaurantsByCategory.
+func (mr *MockUsecaseIMockRecorder) GetRestaurantsByCategory(name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRestaurantsByCategory", reflect.TypeOf((*MockUsecaseI)(nil).GetRestaurantsByCategory), name)
+}
+
+// Search mocks base method.
+func (m *MockUsecaseI) Search(word string) ([]*dto.RestaurantWithCategoriesAndProducts, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Search", word)
+	ret0, _ := ret[0].([]*dto.RestaurantWithCategoriesAndProducts)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Search indicates an expected call of Search.
+func (mr *MockUsecaseIMockRecorder) Search(word interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockUsecaseI)(nil).Search), word)
 }

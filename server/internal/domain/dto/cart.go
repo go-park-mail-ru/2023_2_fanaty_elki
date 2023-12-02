@@ -7,6 +7,11 @@ type CartProduct struct {
 	ItemCount int
 }
 
+type CartWithRestaurant struct {
+	Restaurant *entity.Restaurant
+	Products   []*CartProduct
+}
+
 type ReqProductID struct {
 	Id uint
 }
