@@ -6,7 +6,6 @@ import (
 	"errors"
 	"net/http"
 
-	//"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http/httptest"
@@ -22,7 +21,7 @@ import (
 	"server/internal/domain/entity"
 
 	"github.com/golang/mock/gomock"
-	//"github.com/gorilla/mux"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -91,7 +90,8 @@ func TestSignUpFail(t *testing.T) {
 		return
 	}
 	defer errorLogger.Sync()
-	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
+	hitstats := &entity.HitStats{}
+	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/users"
@@ -328,7 +328,8 @@ func TestLoginFail(t *testing.T) {
 		return
 	}
 	defer errorLogger.Sync()
-	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
+	hitstats := &entity.HitStats{}
+	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/login"
@@ -509,7 +510,8 @@ func TestLogoutFail(t *testing.T) {
 		return
 	}
 	defer errorLogger.Sync()
-	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
+	hitstats := &entity.HitStats{}
+	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/logout"
