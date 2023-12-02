@@ -80,7 +80,8 @@ func TestGetProductFail(t *testing.T) {
 	defer ctrl.Finish()
 	apiPath := "/api/products/fdfd"
 	mock := mockP.NewMockUsecaseI(ctrl)
-	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
+	hitstats := entity.HitStats{}
+	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), hitstats)
 	handler := NewProductHandler(mock, logger)
 
 	req := httptest.NewRequest("GET", apiPath, nil)

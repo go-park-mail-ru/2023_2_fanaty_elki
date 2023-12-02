@@ -8,9 +8,9 @@ import (
 	"server/internal/domain/entity"
 	"testing"
 
-	"time"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"time"
 )
 
 func TestCreateOrderSuccess(t *testing.T) {
@@ -24,10 +24,10 @@ func TestCreateOrderSuccess(t *testing.T) {
 
 	var flat uint
 	flat = 1
-	
+
 	timenow := time.Now()
 	reqorder := &dto.ReqCreateOrder{
-		UserId:   1,
+		UserId: 1,
 		Address: &dto.ReqCreateOrderAddress{
 			City:   "Moscow",
 			Street: "Tverskaya",
@@ -40,39 +40,49 @@ func TestCreateOrderSuccess(t *testing.T) {
 	order.Date = timenow
 
 	cart := &entity.Cart{
-		ID: 1,
+		ID:     1,
 		UserID: 1,
 	}
 
 	mockCart.EXPECT().GetCartByUserID(order.UserId).Return(cart, nil)
 
-	products := []*entity.CartProduct{
-		{
-			ID: 1,
-			ProductID: 1,
-			CartID: 1,
-			ItemCount: 1,
+	cartwithrest := &entity.CartWithRestaurant{
+		RestaurantId: 1,
+		Products: []*entity.CartProduct{
+			{
+				ID:        1,
+				ProductID: 1,
+				CartID:    1,
+				ItemCount: 6,
+			},
+			{
+				ID:        2,
+				ProductID: 3,
+				CartID:    1,
+				ItemCount: 6,
+			},
 		},
 	}
 
-	mockCart.EXPECT().GetCartProductsByCartID(cart.ID).Return(products, nil)
+	mockCart.EXPECT().GetCartProductsByCartID(cart.ID).Return(cartwithrest, nil)
 
 	product := &entity.Product{
-		ID:1,
-		Name: "Burger",
-		Price: 100,
+		ID:          1,
+		Name:        "Burger",
+		Price:       100,
 		CookingTime: 10,
-		Portion: "120g",
-		Icon: "def",
+		Portion:     "120g",
+		Icon:        "def",
 	}
-	mockProduct.EXPECT().GetProductByID(products[0].ProductID).Return(product, nil)
+	mockProduct.EXPECT().GetProductByID(cartwithrest.Products[0].ProductID).Return(product, nil)
+	mockProduct.EXPECT().GetProductByID(cartwithrest.Products[1].ProductID).Return(product, nil)
 
-	order.Price += uint(product.Price) * uint(products[0].ItemCount)
+	order.Price += uint(product.Price) * uint(cartwithrest.Products[0].ItemCount)
 
 	resporder := &dto.RespCreateOrder{
 		Id:     1,
 		Status: 0,
-		Price: uint(product.Price) * uint(products[0].ItemCount),
+		Price:  uint(product.Price) * uint(cartwithrest.Products[0].ItemCount),
 		Date:   timenow,
 		Address: &entity.Address{
 			City:   "Moscow",
@@ -85,14 +95,13 @@ func TestCreateOrderSuccess(t *testing.T) {
 	}
 
 	resorder := &dto.RespCreateOrder{
-		Id:     1,
-		Status: 0,
-		Price: uint(product.Price) * uint(products[0].ItemCount),
-		Date:   timenow,
+		Id:           1,
+		Status:       0,
+		Price:        uint(product.Price) * uint(cartwithrest.Products[0].ItemCount),
+		Date:         timenow,
 		DeliveryTime: 30,
-		Address: nil,
+		Address:      nil,
 	}
-
 
 	mockOrder.EXPECT().CreateOrder(gomock.Any()).Return(resorder, nil)
 	actual, err := usecase.CreateOrder(reqorder)
@@ -115,7 +124,7 @@ func TestCreateOrderFail(t *testing.T) {
 	flat = 1
 
 	reqorder := &dto.ReqCreateOrder{
-		UserId:   1,
+		UserId: 1,
 		Address: &dto.ReqCreateOrderAddress{
 			City:   "",
 			Street: "Tverskaya",
@@ -163,7 +172,7 @@ func TestGetOrdersSuccess(t *testing.T) {
 	mockCart := mockC.NewMockCartRepositoryI(ctrl)
 	mockProduct := mockP.NewMockProductRepositoryI(ctrl)
 	usecase := NewOrderUsecase(mockOrder, mockCart, mockProduct)
-	
+
 	var UserID uint
 	UserID = 1
 
@@ -223,22 +232,22 @@ func TestGetOrderSuccess(t *testing.T) {
 	}
 
 	products := &dto.RespGetOrderProduct{
-		Id: 1,
-		Name: "Burger",
+		Id:    1,
+		Name:  "Burger",
 		Price: 100,
-		Icon: "def",
+		Icon:  "def",
 		Count: 1,
 	}
 
 	orderItems := &dto.OrderItems{
 		RestaurantName: "BK",
-		Products: []*dto.RespGetOrderProduct{products},
+		Products:       []*dto.RespGetOrderProduct{products},
 	}
 
 	resporder := &dto.RespGetOneOrder{
-		Id: 1,
-		Status:      0,
-		Date:        timenow,
+		Id:     1,
+		Status: 0,
+		Date:   timenow,
 		Address: &dto.RespOrderAddress{
 			City:   "Moscow",
 			Street: "Tverskaya",
@@ -246,7 +255,6 @@ func TestGetOrderSuccess(t *testing.T) {
 			Flat:   1,
 		},
 		OrderItems: []*dto.OrderItems{orderItems},
-
 	}
 
 	mockOrder.EXPECT().GetOrder(reqorder).Return(resporder, nil)
