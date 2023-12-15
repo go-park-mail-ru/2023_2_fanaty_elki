@@ -20,6 +20,9 @@ import (
 	productDev "server/internal/Product/delivery"
 	productRep "server/internal/Product/repository/microservice"
 	productUsecase "server/internal/Product/usecase"
+	promoDev "server/internal/Promo/delivery"
+	promoRep "server/internal/Promo/repository/postgres"
+	promoUsecase "server/internal/Promo/usecase"
 	restaurantDev "server/internal/Restaurant/delivery"
 	restaurantRep "server/internal/Restaurant/repository/postgres"
 	restaurantUsecase "server/internal/Restaurant/usecase"
@@ -189,6 +192,7 @@ func main() {
 	sessionRepo := sessionRep.NewMicroService(authManager)
 	orderRepo := orderRep.NewOrderRepo(db)
 	commentRepo := commentRep.NewCommentRepo(db)
+	promoRepo := promoRep.NewPromoRepo(db)
 
 	userUC := userUsecase.NewUserUsecase(userRepo, cartRepo)
 	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo, productRepo)
@@ -197,6 +201,7 @@ func main() {
 	orderUC := orderUsecase.NewOrderUsecase(orderRepo, cartRepo, productRepo)
 	productUC := productUsecase.NewProductUsecase(productRepo)
 	commentUC := commentUsecase.NewCommentUsecase(commentRepo, userRepo, restaurantRepo)
+	promoUC := promoUsecase.NewPromoUsecase(cartRepo, promoRepo, sessionRepo, restaurantRepo)
 
 	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC, logger)
 	cartsHandler := cartDev.NewCartHandler(cartUC, logger)
@@ -204,6 +209,7 @@ func main() {
 	orderHandler := orderDev.NewOrderHandler(orderUC, sessionUC, logger)
 	productHandler := productDev.NewProductHandler(productUC, logger)
 	commentHandler := commentDev.NewCommentHandler(commentUC, sessionUC, logger)
+	promoHandler := promoDev.NewPromoHandler(promoUC, logger)
 
 	authMW := middleware.NewSessionMiddleware(sessionUC, logger)
 
@@ -216,6 +222,7 @@ func main() {
 	router.PathPrefix("/api/csrf").Handler(authRouter)
 	router.PathPrefix("/api/users").Handler(corsRouter)
 	router.PathPrefix("/api/comments").Handler(authRouter).Methods(http.MethodPost, http.MethodOptions)
+	router.PathPrefix("/api/promo").Handler(authRouter)
 
 	router.Use(middleware.PanicMiddleware)
 	router.Use(logger.ACLogMiddleware)
@@ -232,6 +239,7 @@ func main() {
 	productHandler.RegisterHandler(router)
 	commentHandler.RegisterPostHandler(authRouter)
 	commentHandler.RegisterGetHandler(router)
+	promoHandler.RegisterHandler(authRouter)
 
 	router.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
 		promhttp.Handler().ServeHTTP(w, r)

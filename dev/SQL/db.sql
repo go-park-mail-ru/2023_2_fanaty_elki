@@ -12,6 +12,8 @@ DROP TABLE IF EXISTS orders_address CASCADE;
 DROP TABLE IF EXISTS category CASCADE;
 DROP TABLE IF EXISTS restaurant_category CASCADE;
 DROP TABLE IF EXISTS comment CASCADE;
+DROP TABLE IF EXISTS promo CASCADE;
+DROP TABLE IF EXISTS user_promo CASCADE;
 
 
 CREATE OR REPLACE FUNCTION trigger_set_timestamp()
@@ -528,5 +530,53 @@ CREATE TABLE IF NOT EXISTS public.comment
 
 CREATE TRIGGER set_timestamp
 BEFORE UPDATE ON comment
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+CREATE TABLE IF NOT EXISTS public.promo
+(
+    id            SERIAL                                 NOT NULL,
+    code          TEXT,
+    promo_type    INT                                    NOT NULL,
+    sale          INT,
+    restaurant_id INT REFERENCES restaurant(id),
+    active_from   TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
+    active_to     TIMESTAMP WITH TIME ZONE               NOT NULL,
+    created_at    TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
+	updated_at    TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
+    PRIMARY KEY (ID)
+);
+
+CREATE TRIGGER set_timestamp
+BEFORE UPDATE ON promo
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+insert into promo(code, promo_type, sale, restaurant_id, active_from, active_to)
+values('KORCHMA15', 0, 15, 6, '2023-12-5', '2023-12-25');
+insert into promo(code,  promo_type, sale, restaurant_id, active_from, active_to)
+values('SUBWAY35',0, 35, 7, '2023-12-5', '2023-12-25');
+insert into promo(code,  promo_type, sale, restaurant_id, active_from, active_to)
+values('YAKITORIA50',0, 50, 2, '2023-12-5', '2023-12-25');
+insert into promo(code,  promo_type,  restaurant_id, active_from, active_to)
+values('BURGERKINGFREE', 1 , 1, '2023-12-5', '2023-12-25');
+insert into promo(code,  promo_type, sale, restaurant_id, active_from, active_to)
+values('VKUSNO20', 0 , 20, 3 , '2023-12-5', '2023-12-10');
+insert into promo(code,  promo_type, active_from, active_to)
+values('PRINESYFREE', 1 , '2023-12-5', '2023-12-25');
+
+
+CREATE TABLE IF NOT EXISTS public.user_promo
+(
+    id            SERIAL                                 NOT NULL,
+    user_id       INT REFERENCES users(id)               NOT NULL,
+    promo_id      INT REFERENCES promo(id)               NOT NULL,
+    created_at    TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
+	updated_at    TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
+    PRIMARY KEY (ID)
+);
+
+CREATE TRIGGER set_timestamp
+BEFORE UPDATE ON user_promo
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
