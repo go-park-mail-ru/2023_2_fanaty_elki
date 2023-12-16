@@ -14,6 +14,7 @@ type UsecaseI interface {
 	AddProductToCart(SessionToken string, productID uint) error
 	DeleteProductFromCart(SessionToken string, productID uint) error
 	CleanCart(SessionToken string) error
+	GetCartTips(SessionToken string) ([]*entity.Product, error)
 }
 
 type cartUsecase struct {
@@ -179,4 +180,54 @@ func (cu cartUsecase) CleanCart(SessionToken string) error {
 	}
 
 	return nil
+}
+
+func (cu cartUsecase) GetCartTips(SessionToken string) ([]*entity.Product, error) {
+	cookie, err := cu.sessionRepo.Check(SessionToken)
+	if err != nil {
+		return nil, err
+	}
+
+	userID := cookie.UserID
+	cart, err := cu.cartRepo.GetCartByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	cartWithRestaurant, err := cu.cartRepo.GetCartProductsByCartID(cart.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	prods := make(map[uint]bool)
+
+	for _, product := range cartWithRestaurant.Products {
+		prods[product.ProductID] = true
+	}
+
+	if cartWithRestaurant.RestaurantId == 0 {
+		return nil, entity.ErrNotFound
+	}
+
+	menuTypes, err := cu.restaurantRepo.GetMenuTypesByRestaurantId(cartWithRestaurant.RestaurantId)
+	if err != nil {
+		return nil, err
+	}
+	var restProducts []*entity.Product
+	for _, menu := range menuTypes {
+		products, err := cu.productRepo.GetProductsByMenuTypeId(menu.ID)
+		if err != nil {
+			return nil, entity.ErrInternalServerError
+		}
+		restProducts = append(restProducts, products...)
+	}
+
+	var tipProducts []*entity.Product
+	for _, product := range restProducts {
+		if !prods[product.ID] {
+			tipProducts = append(tipProducts, product)
+		}
+	}
+
+	return tipProducts, nil
 }

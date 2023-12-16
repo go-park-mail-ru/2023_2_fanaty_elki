@@ -38,6 +38,7 @@ func (handler *CartHandler) RegisterHandler(router *mux.Router) {
 	router.HandleFunc("/api/cart", handler.AddProductToCart).Methods(http.MethodPost)
 	router.HandleFunc("/api/cart/{id}", handler.DeleteProductFromCart).Methods(http.MethodDelete)
 	router.HandleFunc("/api/cart/clear", handler.CleanCart).Methods(http.MethodPost)
+	router.HandleFunc("/api/cart/tips", handler.GetCartTips).Methods(http.MethodGet)
 }
 
 func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
@@ -138,6 +139,34 @@ func (handler *CartHandler) CleanCart(w http.ResponseWriter, r *http.Request) {
 	err = handler.cartUsecase.CleanCart(cookie.Value)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func (handler *CartHandler) GetCartTips(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	cookie, _ := r.Cookie("session_id")
+	tips, err := handler.cartUsecase.GetCartTips(cookie.Value)
+	if err != nil {
+		if err == entity.ErrNotFound {
+			handler.logger.LogError("problems no products in cart", err, w.Header().Get("request-id"), r.URL.Path)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		handler.logger.LogError("problems with getting cart", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	body := tips
+
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(&Result{Body: body})
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		handler.logger.LogError("problems while marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		return
 	}
 }

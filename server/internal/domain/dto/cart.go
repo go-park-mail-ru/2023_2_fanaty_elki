@@ -1,6 +1,8 @@
 package dto
 
-import "server/internal/domain/entity"
+import (
+	"server/internal/domain/entity"
+)
 
 type CartProduct struct {
 	Product   *entity.Product

@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"fmt"
 	cartRep "server/internal/Cart/repository"
 	promoRep "server/internal/Promo/repository"
 	restaurantRep "server/internal/Restaurant/repository"
@@ -59,13 +58,11 @@ func (pu promoUsecase) UsePromo(SessionToken string, promocode string) (*dto.Res
 	}
 
 	if time.Now().Before(promo.ActiveFrom) || time.Now().After(promo.ActiveTo) {
-		fmt.Println("time problems", time.Now(), "active from: ", promo.ActiveFrom, "active to: ", promo.ActiveTo)
 
 		return nil, entity.ErrActionConditionsNotMet
 	}
 
 	if promo.RestaurantId != 0 {
-		fmt.Println("rest problems", promo.RestaurantId)
 		if cartWithRestaurant.RestaurantId != promo.RestaurantId {
 			return nil, entity.ErrActionConditionsNotMet
 		}
