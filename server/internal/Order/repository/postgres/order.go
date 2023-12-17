@@ -63,7 +63,7 @@ func (repo *orderRepo) CreateOrder(order *dto.DBReqCreateOrder) (*dto.RespCreate
 func (repo *orderRepo) UpdateOrder(order *dto.ReqUpdateOrder) error {
 	updateOrder := `UPDATE orders
 					SET status = $1
-					WHERE id = $2`
+					WHERE id = $2` 
 	_, err := repo.DB.Exec(updateOrder, order.Status, order.Id)
 	if err != nil {
 		return entity.ErrInternalServerError

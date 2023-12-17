@@ -26,10 +26,12 @@ var (
 	ErrFailCSRF                  = errors.New("csrf failed")
 	ErrActionConditionsNotMet    = errors.New("action conditions were not met")
 	ErrPromoIsAlreadyApplied     = errors.New("promo is alredy applied")
+	ErrAddressAlreadyExist		 = errors.New("address is already connected to user")
 	StatusFailCSRF               = 419
 	StatusConflicUsername        = 491
 	StatusConflicEmail           = 492
 	StatusConflicPhoneNumber     = 493
 	StatusActionConditionsNotMet = 494
 	StatusPromoIsAlreadyApplied  = 495
+	StatusAddressAlreadyExist    = 496
 )

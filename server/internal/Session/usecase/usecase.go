@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	sessionRep "server/internal/Session/repository"
 	userRep "server/internal/User/repository"
+	addressRep "server/internal/Address/repository"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 	"time"
@@ -35,14 +36,16 @@ type UsecaseI interface {
 type sessionUsecase struct {
 	sessionRepo sessionRep.SessionRepositoryI
 	userRepo    userRep.UserRepositoryI
+	addressRepo addressRep.AddressRepositoryI
 	sanitizer   *bluemonday.Policy
 }
 
-func NewSessionUsecase(sessionRep sessionRep.SessionRepositoryI, userRep userRep.UserRepositoryI) *sessionUsecase {
+func NewSessionUsecase(sessionRep sessionRep.SessionRepositoryI, userRep userRep.UserRepositoryI, addressRep addressRep.AddressRepositoryI) *sessionUsecase {
 	sanitizer := bluemonday.UGCPolicy()
 	return &sessionUsecase{
 		sessionRepo: sessionRep,
 		userRepo:    userRep,
+		addressRepo: addressRep,
 		sanitizer:   sanitizer,
 	}
 }
@@ -124,6 +127,12 @@ func (ss sessionUsecase) GetUserProfile(sessionToken string) (*dto.ReqGetUserPro
 	}
 
 	reqUser := dto.ToReqGetUserProfile(user)
+	addresses, err := ss.addressRepo.GetAddresses(cookie.UserID)
+	if err != nil {
+		return nil, err
+	}
+	reqUser.Addresses = addresses.Addresses
+	reqUser.Current = addresses.CurrentAddressesId
 	reqUser.Email = ss.sanitizer.Sanitize(reqUser.Email)
 	reqUser.Birthday = ss.sanitizer.Sanitize(reqUser.Birthday)
 	//reqUser.Icon = ss.sanitizer.Sanitize(reqUser.Icon)

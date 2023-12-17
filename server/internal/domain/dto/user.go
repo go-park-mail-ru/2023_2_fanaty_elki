@@ -17,11 +17,13 @@ type ReqCreateUser struct {
 }
 
 type ReqGetUserProfile struct {
-	Username    string         `json:"Username"`
-	Birthday    string		   `json:"Birthday"`
-	PhoneNumber string         `json:"PhoneNumber"`
-	Email       string         `json:"Email"`
-	Icon        string		   `json:"Icon"`
+	Username    string            `json:"Username"`
+	Birthday    string		      `json:"Birthday"`
+	PhoneNumber string            `json:"PhoneNumber"`
+	Email       string            `json:"Email"`
+	Icon        string		      `json:"Icon"`
+	Addresses   []*RespGetAddress `json:"Addresses"`
+	Current     uint			  `json:"CurrentAddressId"`
 }
 
 type ReqLoginUser struct {

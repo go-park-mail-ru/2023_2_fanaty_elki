@@ -252,3 +252,4 @@ func (us userUsecase) uploadFile(minioClient *minio.Client, bucketName string, l
 
 	return nil
 }
+
