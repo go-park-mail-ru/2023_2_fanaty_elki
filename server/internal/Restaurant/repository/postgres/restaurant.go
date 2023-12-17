@@ -2,8 +2,8 @@ package repository
 
 import (
 	"database/sql"
-	"server/internal/domain/entity"
 	"server/internal/domain/dto"
+	"server/internal/domain/entity"
 )
 
 type restaurantRepo struct {
@@ -51,6 +51,27 @@ func (repo *restaurantRepo) GetRestaurantById(id uint) (*entity.Restaurant, erro
 	row := repo.DB.QueryRow(`SELECT id, name, rating, comments_count, icon 
 							 FROM restaurant 
 							 WHERE id = $1`, id)
+	err := row.Scan(
+		&restaurant.ID,
+		&restaurant.Name,
+		&restaurant.Rating,
+		&restaurant.CommentsCount,
+		&restaurant.Icon,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, entity.ErrNotFound
+		}
+		return nil, entity.ErrInternalServerError
+	}
+	return restaurant, nil
+}
+
+func (repo *restaurantRepo) GetRestaurantByName(name string) (*entity.Restaurant, error) {
+	restaurant := &entity.Restaurant{}
+	row := repo.DB.QueryRow(`SELECT id, name, rating, comments_count, icon 
+							 FROM restaurant 
+							 WHERE name = $1`, name)
 	err := row.Scan(
 		&restaurant.ID,
 		&restaurant.Name,
@@ -268,7 +289,6 @@ func (repo *restaurantRepo) SearchCategories(word string) ([]*entity.Restaurant,
 	return Restaurants, nil
 }
 
-
 func (repo *restaurantRepo) UpdateComments(comment *dto.ReqCreateComment) error {
 	getCountCommments := `SELECT rating, comments_count
 						  FROM restaurant
@@ -280,10 +300,10 @@ func (repo *restaurantRepo) UpdateComments(comment *dto.ReqCreateComment) error 
 	if err != nil {
 		return entity.ErrInternalServerError
 	}
-	
+
 	count += 1
-	rating = (rating * float32(count - 1) + float32(comment.Rating)) / float32(count)
-	
+	rating = (rating*float32(count-1) + float32(comment.Rating)) / float32(count)
+
 	updateComment := `UPDATE restaurant
 					  SET rating = $1, comments_count = $2
 					  WHERE id = $3`

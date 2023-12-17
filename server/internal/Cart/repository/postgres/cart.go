@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 	"server/internal/Cart/repository"
 	"server/internal/domain/entity"
 )
@@ -104,7 +105,31 @@ func (repo *CartRepo) GetCartProductsByCartID(cartID uint) (*entity.CartWithRest
 		return nil, err
 	}
 
+	promoRow := repo.DB.QueryRow(`SELECT promo_id FROM cart_promo WHERE cart_id = $1`, cartID)
+	// if err != nil {
+	// 	fmt.Println("query", err)
+	// 	if err == sql.ErrNoRows {
+	// 		return nil, nil
+	// 	} else {
+	// 		return nil, err
+	// 	}
+	// }
+	// defer promoRows.Close()
+
+	// promoRows.Next()
+	var promoId uint
+	err = promoRow.Scan(&promoId)
+	if err != nil {
+		fmt.Println("sacn", err)
+		if err == sql.ErrNoRows {
+			promoId = 0
+		} else {
+			return nil, err
+		}
+	}
+
 	CartWithRestaurant.RestaurantId = restaurantId
+	CartWithRestaurant.PromoId = promoId
 
 	return CartWithRestaurant, nil
 }

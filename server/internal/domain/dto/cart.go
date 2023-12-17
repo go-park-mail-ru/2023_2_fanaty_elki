@@ -12,6 +12,7 @@ type CartProduct struct {
 type CartWithRestaurant struct {
 	Restaurant *entity.Restaurant
 	Products   []*CartProduct
+	Promo      *RespPromo
 }
 
 type ReqProductID struct {

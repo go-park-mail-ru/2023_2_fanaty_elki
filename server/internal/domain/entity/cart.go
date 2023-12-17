@@ -15,4 +15,5 @@ type CartProduct struct {
 type CartWithRestaurant struct {
 	RestaurantId uint
 	Products     []*CartProduct
+	PromoId      uint
 }

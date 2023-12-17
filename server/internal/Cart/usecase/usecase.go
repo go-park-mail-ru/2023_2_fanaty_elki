@@ -3,6 +3,7 @@ package usecase
 import (
 	cartRep "server/internal/Cart/repository"
 	productRep "server/internal/Product/repository"
+	promoRep "server/internal/Promo/repository"
 	restaurantRep "server/internal/Restaurant/repository"
 	sessionRep "server/internal/Session/repository"
 	dto "server/internal/domain/dto"
@@ -22,14 +23,16 @@ type cartUsecase struct {
 	productRepo    productRep.ProductRepositoryI
 	sessionRepo    sessionRep.SessionRepositoryI
 	restaurantRepo restaurantRep.RestaurantRepositoryI
+	promoRepo      promoRep.PromoRepositoryI
 }
 
-func NewCartUsecase(cartRep cartRep.CartRepositoryI, productRep productRep.ProductRepositoryI, sessionRep sessionRep.SessionRepositoryI, restaurantRep restaurantRep.RestaurantRepositoryI) *cartUsecase {
+func NewCartUsecase(cartRep cartRep.CartRepositoryI, productRep productRep.ProductRepositoryI, sessionRep sessionRep.SessionRepositoryI, restaurantRep restaurantRep.RestaurantRepositoryI, promoRep promoRep.PromoRepositoryI) *cartUsecase {
 	return &cartUsecase{
 		cartRepo:       cartRep,
 		productRepo:    productRep,
 		sessionRepo:    sessionRep,
 		restaurantRepo: restaurantRep,
+		promoRepo:      promoRep,
 	}
 }
 
@@ -73,6 +76,18 @@ func (cu cartUsecase) GetUserCart(SessionToken string) (*dto.CartWithRestaurant,
 	}
 
 	CartWithRestaurant.Restaurant = restaurant
+
+	if cartWithRestaurant.PromoId != 0 {
+
+		promo, err := cu.promoRepo.GetPromoById(cartWithRestaurant.PromoId)
+		if err != nil {
+			return nil, err
+		}
+
+		resppromo := dto.ToRespPromo(promo)
+		CartWithRestaurant.Promo = resppromo
+
+	}
 
 	return CartWithRestaurant, nil
 }
@@ -174,6 +189,17 @@ func (cu cartUsecase) CleanCart(SessionToken string) error {
 	if err != nil {
 		return err
 	}
+
+	cartWithRestaurant, err := cu.cartRepo.GetCartProductsByCartID(cart.ID)
+	if err != nil {
+		return err
+	}
+
+	err = cu.promoRepo.DeletePromoFromCart(cart.ID, cartWithRestaurant.PromoId)
+	if err != nil {
+		return err
+	}
+
 	err = cu.cartRepo.CleanCart(cart.ID)
 	if err != nil {
 		return err

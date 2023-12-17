@@ -19,8 +19,8 @@ type DBGetPromo struct {
 }
 
 type RespPromo struct {
-	PromoType int
-	Discount  uint
+	Type     int
+	Discount uint
 }
 
 func ToRespPromo(promo *entity.Promo) *RespPromo {
@@ -28,8 +28,8 @@ func ToRespPromo(promo *entity.Promo) *RespPromo {
 		return nil
 	}
 	return &RespPromo{
-		PromoType: promo.PromoType,
-		Discount:  promo.Sale,
+		Type:     promo.PromoType,
+		Discount: promo.Sale,
 	}
 }
 

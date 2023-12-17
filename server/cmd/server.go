@@ -195,8 +195,8 @@ func main() {
 	promoRepo := promoRep.NewPromoRepo(db)
 
 	userUC := userUsecase.NewUserUsecase(userRepo, cartRepo)
-	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo, productRepo)
-	cartUC := cartUsecase.NewCartUsecase(cartRepo, productRepo, sessionRepo, restaurantRepo)
+	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo, productRepo, sessionRepo, orderRepo)
+	cartUC := cartUsecase.NewCartUsecase(cartRepo, productRepo, sessionRepo, restaurantRepo, promoRepo)
 	sessionUC := sessionUsecase.NewSessionUsecase(sessionRepo, userRepo)
 	orderUC := orderUsecase.NewOrderUsecase(orderRepo, cartRepo, productRepo)
 	productUC := productUsecase.NewProductUsecase(productRepo)
