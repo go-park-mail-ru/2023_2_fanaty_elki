@@ -34,6 +34,7 @@ func NewRestaurantHandler(restaurants restaurantUsecase.UsecaseI, logger *mw.ACL
 
 func (handler *RestaurantHandler) RegisterHandler(router *mux.Router) {
 	router.HandleFunc("/api/restaurants", handler.GetRestaurantList).Methods(http.MethodGet)
+	router.HandleFunc("/api/restaurants/tips", handler.GetRestaurantTipList).Methods(http.MethodGet)
 	router.HandleFunc("/api/restaurants/{id:[0-9]+}", handler.GetRestaurantById).Methods(http.MethodGet)
 	router.HandleFunc("/api/restaurants/{id}/products", handler.GetRestaurantProducts).Methods(http.MethodGet)
 	router.HandleFunc("/api/restaurants/{category}", handler.GetRestaurantListByCategory).Methods(http.MethodGet)
@@ -255,6 +256,30 @@ func (handler *RestaurantHandler) Search(w http.ResponseWriter, r *http.Request)
 			return
 		}
 		handler.logger.LogError("problems with searching", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	body := rests
+
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(&Result{Body: body})
+
+	if err != nil {
+		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func (handler *RestaurantHandler) GetRestaurantTipList(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	cookie, _ := r.Cookie("session_id")
+	rests, err := handler.restaurants.GetRestaurantTips(cookie.Value)
+
+	if err != nil {
+		handler.logger.LogError("problems with getting restaurant tips", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

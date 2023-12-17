@@ -199,9 +199,9 @@ func main() {
 	addressRepo := addressRep.NewAddressRepo(db)
 
 	userUC := userUsecase.NewUserUsecase(userRepo, cartRepo)
-	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo, productRepo)
-	cartUC := cartUsecase.NewCartUsecase(cartRepo, productRepo, sessionRepo, restaurantRepo)
 	sessionUC := sessionUsecase.NewSessionUsecase(sessionRepo, userRepo, addressRepo)
+	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo, productRepo, sessionRepo, orderRepo)
+	cartUC := cartUsecase.NewCartUsecase(cartRepo, productRepo, sessionRepo, restaurantRepo, promoRepo)
 	orderUC := orderUsecase.NewOrderUsecase(orderRepo, cartRepo, productRepo)
 	productUC := productUsecase.NewProductUsecase(productRepo)
 	commentUC := commentUsecase.NewCommentUsecase(commentRepo, userRepo, restaurantRepo)

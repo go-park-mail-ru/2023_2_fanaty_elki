@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"fmt"
 	cartRep "server/internal/Cart/repository"
 	promoRep "server/internal/Promo/repository"
 	restaurantRep "server/internal/Restaurant/repository"
@@ -59,13 +58,11 @@ func (pu promoUsecase) UsePromo(SessionToken string, promocode string) (*dto.Res
 	}
 
 	if time.Now().Before(promo.ActiveFrom) || time.Now().After(promo.ActiveTo) {
-		fmt.Println("time problems", time.Now(), "active from: ", promo.ActiveFrom, "active to: ", promo.ActiveTo)
 
 		return nil, entity.ErrActionConditionsNotMet
 	}
 
 	if promo.RestaurantId != 0 {
-		fmt.Println("rest problems", promo.RestaurantId)
 		if cartWithRestaurant.RestaurantId != promo.RestaurantId {
 			return nil, entity.ErrActionConditionsNotMet
 		}
@@ -86,6 +83,11 @@ func (pu promoUsecase) UsePromo(SessionToken string, promocode string) (*dto.Res
 		return nil, err
 	}
 
+	err = pu.promoRepo.SetPromoToCart(cart.ID, promo.ID)
+	if err != nil {
+		return nil, err
+	}
+
 	return dto.ToRespPromo(promo), nil
 }
 
@@ -96,6 +98,11 @@ func (pu promoUsecase) DeletePromo(SessionToken string, promocode string) error 
 	}
 
 	userID := cookie.UserID
+
+	cart, err := pu.cartRepo.GetCartByUserID(userID)
+	if err != nil {
+		return err
+	}
 
 	promo, err := pu.promoRepo.GetPromo(promocode)
 	if err != nil {
@@ -116,6 +123,11 @@ func (pu promoUsecase) DeletePromo(SessionToken string, promocode string) error 
 		return entity.ErrNotFound
 	} else {
 		err := pu.promoRepo.DeletePromo(userID, promo.ID)
+		if err != nil {
+			return err
+		}
+
+		err = pu.promoRepo.DeletePromoFromCart(cart.ID, promo.ID)
 		if err != nil {
 			return err
 		}

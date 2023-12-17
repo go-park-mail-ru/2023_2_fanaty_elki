@@ -15,6 +15,8 @@ DROP TABLE IF EXISTS comment CASCADE;
 DROP TABLE IF EXISTS promo CASCADE;
 DROP TABLE IF EXISTS user_promo CASCADE;
 DROP TABLE IF EXISTS users_address CASCADE;
+DROP TABLE IF EXISTS cart_promo CASCADE;
+
 
 CREATE OR REPLACE FUNCTION trigger_set_timestamp()
 RETURNS TRIGGER AS $$
@@ -595,5 +597,20 @@ CREATE TABLE IF NOT EXISTS public.user_promo
 
 CREATE TRIGGER set_timestamp
 BEFORE UPDATE ON user_promo
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+CREATE TABLE IF NOT EXISTS public.cart_promo
+(
+    id            SERIAL                                 NOT NULL,
+    cart_id       INT REFERENCES cart(id)                NOT NULL,
+    promo_id      INT REFERENCES promo(id)               NOT NULL,
+    created_at    TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
+	updated_at    TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
+    PRIMARY KEY (ID)
+);
+
+CREATE TRIGGER set_timestamp
+BEFORE UPDATE ON cart_promo
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
