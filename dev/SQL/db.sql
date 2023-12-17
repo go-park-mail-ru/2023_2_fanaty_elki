@@ -583,6 +583,8 @@ insert into promo(code,  promo_type, sale, restaurant_id, active_from, active_to
 values('VKUSNO20', 0 , 20, 3 , '2023-12-5', '2023-12-10');
 insert into promo(code,  promo_type, active_from, active_to)
 values('PRINESYFREE', 1 , '2023-12-5', '2023-12-25');
+insert into promo(code,  promo_type, sale, active_from, active_to)
+values('SHYSH30', 0, 30, '2023-12-5', '2023-12-25');
 
 
 CREATE TABLE IF NOT EXISTS public.user_promo
