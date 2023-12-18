@@ -238,6 +238,7 @@ func main() {
 	authRouter.Use(authMW.AuthMiddleware)
 
 	restaurantsHandler.RegisterHandler(corsRouter)
+	restaurantsHandler.RegisterCategoryHandler(router)
 	productHandler.RegisterHandler(router)
 	cartsHandler.RegisterHandler(authRouter)
 	sessionsHandler.RegisterCorsHandler(corsRouter)

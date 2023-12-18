@@ -38,8 +38,11 @@ func (handler *RestaurantHandler) RegisterHandler(router *mux.Router) {
 	router.HandleFunc("/api/restaurants/{id:[0-9]+}", handler.GetRestaurantById).Methods(http.MethodGet)
 	router.HandleFunc("/api/restaurants/{id}/products", handler.GetRestaurantProducts).Methods(http.MethodGet)
 	router.HandleFunc("/api/restaurants/{category}", handler.GetRestaurantListByCategory).Methods(http.MethodGet)
-	router.HandleFunc("/api/categories", handler.GetCategoryList).Methods(http.MethodGet)
 	router.HandleFunc("/api/restaurants/", handler.Search).Methods(http.MethodGet)
+}
+
+func (handler *RestaurantHandler) RegisterCategoryHandler(router *mux.Router) {
+	router.HandleFunc("/api/categories", handler.GetCategoryList).Methods(http.MethodGet)
 }
 
 // GetRestaurantsList godoc
