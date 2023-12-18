@@ -229,7 +229,7 @@ func main() {
 	router.PathPrefix("/api/users").Handler(corsRouter)
 	router.PathPrefix("/api/comments").Handler(authRouter).Methods(http.MethodPost, http.MethodOptions)
 	router.PathPrefix("/api/promo").Handler(authRouter)
-	router.PathPrefix("/api/restaurants").Handler(authRouter)
+	router.PathPrefix("/api/restaurants").Handler(corsRouter)
 
 	router.Use(middleware.PanicMiddleware)
 	router.Use(logger.ACLogMiddleware)
@@ -237,13 +237,12 @@ func main() {
 	corsRouter.Use(middleware.CorsCredentionalsMiddleware)
 	authRouter.Use(authMW.AuthMiddleware)
 
-	restaurantsHandler.RegisterHandler(authRouter)
+	restaurantsHandler.RegisterHandler(corsRouter)
 	productHandler.RegisterHandler(router)
 	cartsHandler.RegisterHandler(authRouter)
 	sessionsHandler.RegisterCorsHandler(corsRouter)
 	sessionsHandler.RegisterAuthHandler(authRouter)
 	orderHandler.RegisterHandler(authRouter)
-	productHandler.RegisterHandler(router)
 	commentHandler.RegisterPostHandler(authRouter)
 	commentHandler.RegisterGetHandler(router)
 	promoHandler.RegisterHandler(authRouter)
