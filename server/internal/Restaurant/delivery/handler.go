@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	restaurantUsecase "server/internal/Restaurant/usecase"
+	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 	mw "server/internal/middleware"
 	"strconv"
@@ -38,8 +39,11 @@ func (handler *RestaurantHandler) RegisterHandler(router *mux.Router) {
 	router.HandleFunc("/api/restaurants/{id:[0-9]+}", handler.GetRestaurantById).Methods(http.MethodGet)
 	router.HandleFunc("/api/restaurants/{id}/products", handler.GetRestaurantProducts).Methods(http.MethodGet)
 	router.HandleFunc("/api/restaurants/{category}", handler.GetRestaurantListByCategory).Methods(http.MethodGet)
-	router.HandleFunc("/api/categories", handler.GetCategoryList).Methods(http.MethodGet)
 	router.HandleFunc("/api/restaurants/", handler.Search).Methods(http.MethodGet)
+}
+
+func (handler *RestaurantHandler) RegisterCategoryHandler(router *mux.Router) {
+	router.HandleFunc("/api/categories", handler.GetCategoryList).Methods(http.MethodGet)
 }
 
 // GetRestaurantsList godoc
@@ -276,7 +280,15 @@ func (handler *RestaurantHandler) GetRestaurantTipList(w http.ResponseWriter, r 
 	w.Header().Set("Content-Type", "application/json")
 
 	cookie, _ := r.Cookie("session_id")
-	rests, err := handler.restaurants.GetRestaurantTips(cookie.Value)
+
+	var rests []*dto.RestaurantWithCategories
+	var err error
+
+	if cookie == nil {
+		rests, err = handler.restaurants.GetRandomRestaurantTips()
+	} else {
+		rests, err = handler.restaurants.GetRestaurantTips(cookie.Value)
+	}
 
 	if err != nil {
 		handler.logger.LogError("problems with getting restaurant tips", err, w.Header().Get("request-id"), r.URL.Path)
