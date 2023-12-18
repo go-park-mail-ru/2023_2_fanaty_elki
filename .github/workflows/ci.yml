@@ -21,8 +21,8 @@ jobs:
     - name: Verify dependencies
       run: find -name go.mod -execdir go mod verify \;
 
-    # - name: Build
-    #   run: go build -v ./...
+    - name: ls
+      run: ls
 
     # - name: Run go vet
     #   run: go vet ./...
