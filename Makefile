@@ -1,5 +1,10 @@
-# Сборка
-# $ docker build -t prod-server:local -f DockerFile .
+network:
+	docker network create mynetwork
 
-run:
-	docker run -p 3000:3333 prod-server:rk1
+.PHONY: up
+up: 
+	docker-compose up -d
+
+.PHONY: down
+down: 
+	docker-compose down
