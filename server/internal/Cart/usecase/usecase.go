@@ -15,7 +15,7 @@ type UsecaseI interface {
 	AddProductToCart(SessionToken string, productID uint) error
 	DeleteProductFromCart(SessionToken string, productID uint) error
 	CleanCart(SessionToken string) error
-	GetCartTips(SessionToken string) ([]*entity.Product, error)
+	GetCartTips(SessionToken string) (*dto.ProductSlice, error)
 }
 
 type cartUsecase struct {
@@ -208,7 +208,7 @@ func (cu cartUsecase) CleanCart(SessionToken string) error {
 	return nil
 }
 
-func (cu cartUsecase) GetCartTips(SessionToken string) ([]*entity.Product, error) {
+func (cu cartUsecase) GetCartTips(SessionToken string) (*dto.ProductSlice, error) {
 	cookie, err := cu.sessionRepo.Check(SessionToken)
 	if err != nil {
 		return nil, err
@@ -248,12 +248,17 @@ func (cu cartUsecase) GetCartTips(SessionToken string) ([]*entity.Product, error
 		restProducts = append(restProducts, products...)
 	}
 
-	var tipProducts []*entity.Product
+	var tipProducts dto.ProductSlice
 	for _, product := range restProducts {
 		if !prods[product.ID] {
 			tipProducts = append(tipProducts, product)
 		}
 	}
 
-	return tipProducts, nil
+	// productSlice := &dto.ProductSlice{}
+	// for _, product := range tipProducts {
+	// 	productSlice.Products = append(productSlice.Products, product)
+	// }
+
+	return &tipProducts, nil
 }

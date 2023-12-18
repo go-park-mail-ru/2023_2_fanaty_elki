@@ -1,16 +1,19 @@
 package delivery
 
 import (
-	"encoding/json"
+	//"encoding/json"
 	"errors"
 	"io/ioutil"
 	"net/http"
 	cartUsecase "server/internal/Cart/usecase"
+	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 	mw "server/internal/middleware"
 	"strconv"
 
 	"github.com/gorilla/mux"
+	easyjson "github.com/mailru/easyjson"
+	easyjsonopt "github.com/mailru/easyjson/opt"
 )
 
 type Result struct {
@@ -54,8 +57,10 @@ func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
 
 	body := cart
 
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(&Result{Body: body})
+	// encoder := json.NewEncoder(w)
+	// err = encoder.Encode(&Result{Body: body})
+
+	_, err = easyjson.MarshalToWriter(body, w)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -66,13 +71,20 @@ func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
 
 func (handler *CartHandler) AddProductToCart(w http.ResponseWriter, r *http.Request) {
 	jsonbody, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	var id uint
-	err = json.Unmarshal(jsonbody, &id)
+	// if err != nil {
+	// 	handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
+	// 	w.WriteHeader(http.StatusBadRequest)
+	// 	return
+	// }
+
+	//err = json.Unmarshal(jsonbody, &id)
+
+	//id := &dto.ReqProductID{}
+
+	var id easyjsonopt.Int
+
+	id.UnmarshalJSON(jsonbody)
+
 	if err != nil {
 		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
@@ -81,7 +93,7 @@ func (handler *CartHandler) AddProductToCart(w http.ResponseWriter, r *http.Requ
 
 	cookie, _ := r.Cookie("session_id")
 
-	err = handler.cartUsecase.AddProductToCart(cookie.Value, id)
+	err = handler.cartUsecase.AddProductToCart(cookie.Value, uint(id.V))
 	if err != nil {
 		if err == entity.ErrNotFound {
 			handler.logger.LogError("problems no product", err, w.Header().Get("request-id"), r.URL.Path)
@@ -108,7 +120,6 @@ func (handler *CartHandler) DeleteProductFromCart(w http.ResponseWriter, r *http
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		handler.logger.LogError("problems with parameters", errors.New("id is not number"), w.Header().Get("request-id"), r.URL.Path)
-		err = json.NewEncoder(w).Encode(&RespError{Err: "id is not a number"})
 		return
 	}
 
@@ -161,8 +172,10 @@ func (handler *CartHandler) GetCartTips(w http.ResponseWriter, r *http.Request) 
 
 	body := tips
 
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(&Result{Body: body})
+	// encoder := json.NewEncoder(w)
+	// err = encoder.Encode(&Result{Body: body})
+
+	_, err = easyjson.MarshalToWriter(body, w)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
