@@ -23,4 +23,5 @@ type Result struct {
 	Body interface{} `json:"Body"`
 }
 
+//easyjson:json
 type ProductSlice []*entity.Product

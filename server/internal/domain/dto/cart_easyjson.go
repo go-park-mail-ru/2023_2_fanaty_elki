@@ -162,7 +162,169 @@ func (v *ReqProductID) UnmarshalJSON(data []byte) error {
 func (v *ReqProductID) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonDdb0949aDecodeServerEasy1(l, v)
 }
-func easyjsonDdb0949aDecodeServerEasy2(in *jlexer.Lexer, out *CartWithRestaurant) {
+func easyjsonDdb0949aDecodeServerEasy2(in *jlexer.Lexer, out *ProductSlice) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		in.Skip()
+		*out = nil
+	} else {
+		in.Delim('[')
+		if *out == nil {
+			if !in.IsDelim(']') {
+				*out = make(ProductSlice, 0, 8)
+			} else {
+				*out = ProductSlice{}
+			}
+		} else {
+			*out = (*out)[:0]
+		}
+		for !in.IsDelim(']') {
+			var v1 *entity.Product
+			if in.IsNull() {
+				in.Skip()
+				v1 = nil
+			} else {
+				if v1 == nil {
+					v1 = new(entity.Product)
+				}
+				easyjsonDdb0949aDecodeServerInternalDomainEntity(in, v1)
+			}
+			*out = append(*out, v1)
+			in.WantComma()
+		}
+		in.Delim(']')
+	}
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonDdb0949aEncodeServerEasy2(out *jwriter.Writer, in ProductSlice) {
+	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+		out.RawString("null")
+	} else {
+		out.RawByte('[')
+		for v2, v3 := range in {
+			if v2 > 0 {
+				out.RawByte(',')
+			}
+			if v3 == nil {
+				out.RawString("null")
+			} else {
+				easyjsonDdb0949aEncodeServerInternalDomainEntity(out, *v3)
+			}
+		}
+		out.RawByte(']')
+	}
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v ProductSlice) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjsonDdb0949aEncodeServerEasy2(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v ProductSlice) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjsonDdb0949aEncodeServerEasy2(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *ProductSlice) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjsonDdb0949aDecodeServerEasy2(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *ProductSlice) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjsonDdb0949aDecodeServerEasy2(l, v)
+}
+func easyjsonDdb0949aDecodeServerInternalDomainEntity(in *jlexer.Lexer, out *entity.Product) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "ID":
+			out.ID = uint(in.Uint())
+		case "Name":
+			out.Name = string(in.String())
+		case "Price":
+			out.Price = float32(in.Float32())
+		case "CookingTime":
+			out.CookingTime = int(in.Int())
+		case "Portion":
+			out.Portion = string(in.String())
+		case "Description":
+			out.Description = string(in.String())
+		case "Icon":
+			out.Icon = string(in.String())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjsonDdb0949aEncodeServerInternalDomainEntity(out *jwriter.Writer, in entity.Product) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"ID\":"
+		out.RawString(prefix[1:])
+		out.Uint(uint(in.ID))
+	}
+	{
+		const prefix string = ",\"Name\":"
+		out.RawString(prefix)
+		out.String(string(in.Name))
+	}
+	{
+		const prefix string = ",\"Price\":"
+		out.RawString(prefix)
+		out.Float32(float32(in.Price))
+	}
+	{
+		const prefix string = ",\"CookingTime\":"
+		out.RawString(prefix)
+		out.Int(int(in.CookingTime))
+	}
+	{
+		const prefix string = ",\"Portion\":"
+		out.RawString(prefix)
+		out.String(string(in.Portion))
+	}
+	{
+		const prefix string = ",\"Description\":"
+		out.RawString(prefix)
+		out.String(string(in.Description))
+	}
+	{
+		const prefix string = ",\"Icon\":"
+		out.RawString(prefix)
+		out.String(string(in.Icon))
+	}
+	out.RawByte('}')
+}
+func easyjsonDdb0949aDecodeServerEasy3(in *jlexer.Lexer, out *CartWithRestaurant) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -189,7 +351,7 @@ func easyjsonDdb0949aDecodeServerEasy2(in *jlexer.Lexer, out *CartWithRestaurant
 				if out.Restaurant == nil {
 					out.Restaurant = new(entity.Restaurant)
 				}
-				easyjsonDdb0949aDecodeServerInternalDomainEntity(in, out.Restaurant)
+				easyjsonDdb0949aDecodeServerInternalDomainEntity1(in, out.Restaurant)
 			}
 		case "Products":
 			if in.IsNull() {
@@ -207,17 +369,17 @@ func easyjsonDdb0949aDecodeServerEasy2(in *jlexer.Lexer, out *CartWithRestaurant
 					out.Products = (out.Products)[:0]
 				}
 				for !in.IsDelim(']') {
-					var v1 *CartProduct
+					var v4 *CartProduct
 					if in.IsNull() {
 						in.Skip()
-						v1 = nil
+						v4 = nil
 					} else {
-						if v1 == nil {
-							v1 = new(CartProduct)
+						if v4 == nil {
+							v4 = new(CartProduct)
 						}
-						(*v1).UnmarshalEasyJSON(in)
+						(*v4).UnmarshalEasyJSON(in)
 					}
-					out.Products = append(out.Products, v1)
+					out.Products = append(out.Products, v4)
 					in.WantComma()
 				}
 				in.Delim(']')
@@ -230,7 +392,7 @@ func easyjsonDdb0949aDecodeServerEasy2(in *jlexer.Lexer, out *CartWithRestaurant
 				if out.Promo == nil {
 					out.Promo = new(RespPromo)
 				}
-				easyjsonDdb0949aDecodeServerEasy3(in, out.Promo)
+				easyjsonDdb0949aDecodeServerEasy4(in, out.Promo)
 			}
 		default:
 			in.SkipRecursive()
@@ -242,7 +404,7 @@ func easyjsonDdb0949aDecodeServerEasy2(in *jlexer.Lexer, out *CartWithRestaurant
 		in.Consumed()
 	}
 }
-func easyjsonDdb0949aEncodeServerEasy2(out *jwriter.Writer, in CartWithRestaurant) {
+func easyjsonDdb0949aEncodeServerEasy3(out *jwriter.Writer, in CartWithRestaurant) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -252,7 +414,7 @@ func easyjsonDdb0949aEncodeServerEasy2(out *jwriter.Writer, in CartWithRestauran
 		if in.Restaurant == nil {
 			out.RawString("null")
 		} else {
-			easyjsonDdb0949aEncodeServerInternalDomainEntity(out, *in.Restaurant)
+			easyjsonDdb0949aEncodeServerInternalDomainEntity1(out, *in.Restaurant)
 		}
 	}
 	{
@@ -262,14 +424,14 @@ func easyjsonDdb0949aEncodeServerEasy2(out *jwriter.Writer, in CartWithRestauran
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v2, v3 := range in.Products {
-				if v2 > 0 {
+			for v5, v6 := range in.Products {
+				if v5 > 0 {
 					out.RawByte(',')
 				}
-				if v3 == nil {
+				if v6 == nil {
 					out.RawString("null")
 				} else {
-					(*v3).MarshalEasyJSON(out)
+					(*v6).MarshalEasyJSON(out)
 				}
 			}
 			out.RawByte(']')
@@ -281,7 +443,7 @@ func easyjsonDdb0949aEncodeServerEasy2(out *jwriter.Writer, in CartWithRestauran
 		if in.Promo == nil {
 			out.RawString("null")
 		} else {
-			easyjsonDdb0949aEncodeServerEasy3(out, *in.Promo)
+			easyjsonDdb0949aEncodeServerEasy4(out, *in.Promo)
 		}
 	}
 	out.RawByte('}')
@@ -290,27 +452,27 @@ func easyjsonDdb0949aEncodeServerEasy2(out *jwriter.Writer, in CartWithRestauran
 // MarshalJSON supports json.Marshaler interface
 func (v CartWithRestaurant) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonDdb0949aEncodeServerEasy2(&w, v)
+	easyjsonDdb0949aEncodeServerEasy3(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v CartWithRestaurant) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonDdb0949aEncodeServerEasy2(w, v)
+	easyjsonDdb0949aEncodeServerEasy3(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *CartWithRestaurant) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonDdb0949aDecodeServerEasy2(&r, v)
+	easyjsonDdb0949aDecodeServerEasy3(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *CartWithRestaurant) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonDdb0949aDecodeServerEasy2(l, v)
+	easyjsonDdb0949aDecodeServerEasy3(l, v)
 }
-func easyjsonDdb0949aDecodeServerEasy3(in *jlexer.Lexer, out *RespPromo) {
+func easyjsonDdb0949aDecodeServerEasy4(in *jlexer.Lexer, out *RespPromo) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -343,7 +505,7 @@ func easyjsonDdb0949aDecodeServerEasy3(in *jlexer.Lexer, out *RespPromo) {
 		in.Consumed()
 	}
 }
-func easyjsonDdb0949aEncodeServerEasy3(out *jwriter.Writer, in RespPromo) {
+func easyjsonDdb0949aEncodeServerEasy4(out *jwriter.Writer, in RespPromo) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -359,7 +521,7 @@ func easyjsonDdb0949aEncodeServerEasy3(out *jwriter.Writer, in RespPromo) {
 	}
 	out.RawByte('}')
 }
-func easyjsonDdb0949aDecodeServerInternalDomainEntity(in *jlexer.Lexer, out *entity.Restaurant) {
+func easyjsonDdb0949aDecodeServerInternalDomainEntity1(in *jlexer.Lexer, out *entity.Restaurant) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -404,7 +566,7 @@ func easyjsonDdb0949aDecodeServerInternalDomainEntity(in *jlexer.Lexer, out *ent
 		in.Consumed()
 	}
 }
-func easyjsonDdb0949aEncodeServerInternalDomainEntity(out *jwriter.Writer, in entity.Restaurant) {
+func easyjsonDdb0949aEncodeServerInternalDomainEntity1(out *jwriter.Writer, in entity.Restaurant) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -450,7 +612,7 @@ func easyjsonDdb0949aEncodeServerInternalDomainEntity(out *jwriter.Writer, in en
 	}
 	out.RawByte('}')
 }
-func easyjsonDdb0949aDecodeServerEasy4(in *jlexer.Lexer, out *CartProduct) {
+func easyjsonDdb0949aDecodeServerEasy5(in *jlexer.Lexer, out *CartProduct) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -477,7 +639,7 @@ func easyjsonDdb0949aDecodeServerEasy4(in *jlexer.Lexer, out *CartProduct) {
 				if out.Product == nil {
 					out.Product = new(entity.Product)
 				}
-				easyjsonDdb0949aDecodeServerInternalDomainEntity1(in, out.Product)
+				easyjsonDdb0949aDecodeServerInternalDomainEntity(in, out.Product)
 			}
 		case "ItemCount":
 			out.ItemCount = int(in.Int())
@@ -491,7 +653,7 @@ func easyjsonDdb0949aDecodeServerEasy4(in *jlexer.Lexer, out *CartProduct) {
 		in.Consumed()
 	}
 }
-func easyjsonDdb0949aEncodeServerEasy4(out *jwriter.Writer, in CartProduct) {
+func easyjsonDdb0949aEncodeServerEasy5(out *jwriter.Writer, in CartProduct) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -501,7 +663,7 @@ func easyjsonDdb0949aEncodeServerEasy4(out *jwriter.Writer, in CartProduct) {
 		if in.Product == nil {
 			out.RawString("null")
 		} else {
-			easyjsonDdb0949aEncodeServerInternalDomainEntity1(out, *in.Product)
+			easyjsonDdb0949aEncodeServerInternalDomainEntity(out, *in.Product)
 		}
 	}
 	{
@@ -515,107 +677,23 @@ func easyjsonDdb0949aEncodeServerEasy4(out *jwriter.Writer, in CartProduct) {
 // MarshalJSON supports json.Marshaler interface
 func (v CartProduct) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonDdb0949aEncodeServerEasy4(&w, v)
+	easyjsonDdb0949aEncodeServerEasy5(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v CartProduct) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonDdb0949aEncodeServerEasy4(w, v)
+	easyjsonDdb0949aEncodeServerEasy5(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *CartProduct) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonDdb0949aDecodeServerEasy4(&r, v)
+	easyjsonDdb0949aDecodeServerEasy5(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *CartProduct) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonDdb0949aDecodeServerEasy4(l, v)
-}
-func easyjsonDdb0949aDecodeServerInternalDomainEntity1(in *jlexer.Lexer, out *entity.Product) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeFieldName(false)
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "ID":
-			out.ID = uint(in.Uint())
-		case "Name":
-			out.Name = string(in.String())
-		case "Price":
-			out.Price = float32(in.Float32())
-		case "CookingTime":
-			out.CookingTime = int(in.Int())
-		case "Portion":
-			out.Portion = string(in.String())
-		case "Description":
-			out.Description = string(in.String())
-		case "Icon":
-			out.Icon = string(in.String())
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjsonDdb0949aEncodeServerInternalDomainEntity1(out *jwriter.Writer, in entity.Product) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"ID\":"
-		out.RawString(prefix[1:])
-		out.Uint(uint(in.ID))
-	}
-	{
-		const prefix string = ",\"Name\":"
-		out.RawString(prefix)
-		out.String(string(in.Name))
-	}
-	{
-		const prefix string = ",\"Price\":"
-		out.RawString(prefix)
-		out.Float32(float32(in.Price))
-	}
-	{
-		const prefix string = ",\"CookingTime\":"
-		out.RawString(prefix)
-		out.Int(int(in.CookingTime))
-	}
-	{
-		const prefix string = ",\"Portion\":"
-		out.RawString(prefix)
-		out.String(string(in.Portion))
-	}
-	{
-		const prefix string = ",\"Description\":"
-		out.RawString(prefix)
-		out.String(string(in.Description))
-	}
-	{
-		const prefix string = ",\"Icon\":"
-		out.RawString(prefix)
-		out.String(string(in.Icon))
-	}
-	out.RawByte('}')
+	easyjsonDdb0949aDecodeServerEasy5(l, v)
 }
