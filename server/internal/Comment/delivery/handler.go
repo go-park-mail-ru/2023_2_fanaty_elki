@@ -1,8 +1,8 @@
 package delivery
 
 import (
-	"encoding/json"
-	"io/ioutil"
+	//"encoding/json"
+	//"io/ioutil"
 	"net/http"
 	commentUsecase "server/internal/Comment/usecase"
 	sessionUsecase "server/internal/Session/usecase"
@@ -10,7 +10,9 @@ import (
 	"server/internal/domain/entity"
 	mw "server/internal/middleware"
 	"strconv"
+
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 )
 
 type Result struct {
@@ -22,14 +24,14 @@ type RespError struct {
 }
 
 type CommentHandler struct {
-	commentUC   commentUsecase.UsecaseI
+	commentUC commentUsecase.UsecaseI
 	sessionUC sessionUsecase.UsecaseI
 	logger    *mw.ACLog
 }
 
 func NewCommentHandler(commentUC commentUsecase.UsecaseI, sessionUC sessionUsecase.UsecaseI, logger *mw.ACLog) *CommentHandler {
 	return &CommentHandler{
-		commentUC:   commentUC,
+		commentUC: commentUC,
 		sessionUC: sessionUC,
 		logger:    logger,
 	}
@@ -51,7 +53,7 @@ func (handler *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Requ
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	
+
 	restaurantId, err := strconv.ParseUint(strid, 10, 64)
 	if err != nil {
 		handler.logger.LogError("problems while parsing comments get parameters", err, w.Header().Get("request-id"), r.URL.Path)
@@ -69,18 +71,19 @@ func (handler *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Requ
 	userId, _ := handler.sessionUC.GetIdByCookie(cookie.Value)
 
 	reqComment := &dto.ReqCreateComment{
-		UserId: userId,
+		UserId:       userId,
 		RestaurantId: uint(restaurantId),
 	}
 
-	jsonbody, err := ioutil.ReadAll(r.Body)
+	//jsonbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	err = json.Unmarshal(jsonbody, &reqComment)
+	//err = json.Unmarshal(jsonbody, &reqComment)
+	err = easyjson.UnmarshalFromReader(r.Body, reqComment)
 	if err != nil {
 		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
@@ -100,7 +103,10 @@ func (handler *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Requ
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	err = json.NewEncoder(w).Encode(&Result{Body:respComment})
+	//err = json.NewEncoder(w).Encode(&Result{Body: respComment})
+
+	_, err = easyjson.MarshalToWriter(respComment, w)
+
 	if err != nil {
 		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -116,7 +122,7 @@ func (handler *CommentHandler) GetComments(w http.ResponseWriter, r *http.Reques
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	
+
 	restaurantId, err := strconv.ParseUint(strid, 10, 64)
 	if err != nil {
 		handler.logger.LogError("problems while parsing comments get parameters", err, w.Header().Get("request-id"), r.URL.Path)
@@ -131,7 +137,10 @@ func (handler *CommentHandler) GetComments(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	err = json.NewEncoder(w).Encode(&Result{Body:respComment})
+	//err = json.NewEncoder(w).Encode(&Result{Body: respComment})
+
+	_, err = easyjson.MarshalToWriter(respComment, w)
+
 	if err != nil {
 		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)

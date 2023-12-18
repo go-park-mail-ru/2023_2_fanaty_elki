@@ -1,12 +1,10 @@
 package delivery
 
 import (
-	//"encoding/json"
 	"errors"
 	"io/ioutil"
 	"net/http"
 	cartUsecase "server/internal/Cart/usecase"
-	//"server/internal/domain/dto"
 	"server/internal/domain/entity"
 	mw "server/internal/middleware"
 	"strconv"
@@ -57,9 +55,6 @@ func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
 
 	body := cart
 
-	// encoder := json.NewEncoder(w)
-	// err = encoder.Encode(&Result{Body: body})
-
 	_, err = easyjson.MarshalToWriter(body, w)
 
 	if err != nil {
@@ -71,15 +66,6 @@ func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
 
 func (handler *CartHandler) AddProductToCart(w http.ResponseWriter, r *http.Request) {
 	jsonbody, err := ioutil.ReadAll(r.Body)
-	// if err != nil {
-	// 	handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
-	// 	w.WriteHeader(http.StatusBadRequest)
-	// 	return
-	// }
-
-	//err = json.Unmarshal(jsonbody, &id)
-
-	//id := &dto.ReqProductID{}
 
 	var id easyjsonopt.Int
 
@@ -171,9 +157,6 @@ func (handler *CartHandler) GetCartTips(w http.ResponseWriter, r *http.Request) 
 	}
 
 	body := tips
-
-	// encoder := json.NewEncoder(w)
-	// err = encoder.Encode(&Result{Body: body})
 
 	_, err = easyjson.MarshalToWriter(body, w)
 

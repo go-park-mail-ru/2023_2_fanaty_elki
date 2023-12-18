@@ -1,8 +1,8 @@
 package delivery
 
 import (
-	"encoding/json"
-	"io/ioutil"
+	"github.com/gorilla/mux"
+	easyjson "github.com/mailru/easyjson"
 	"net/http"
 	addressUsecase "server/internal/Address/usecase"
 	sessionUsecase "server/internal/Session/usecase"
@@ -10,7 +10,6 @@ import (
 	"server/internal/domain/entity"
 	mw "server/internal/middleware"
 	"strconv"
-	"github.com/gorilla/mux"
 )
 
 type Result struct {
@@ -22,14 +21,14 @@ type RespError struct {
 }
 
 type AddressHandler struct {
-	addressUC   addressUsecase.UsecaseI
+	addressUC addressUsecase.UsecaseI
 	sessionUC sessionUsecase.UsecaseI
 	logger    *mw.ACLog
 }
 
 func NewAddressHandler(addressUC addressUsecase.UsecaseI, sessionUC sessionUsecase.UsecaseI, logger *mw.ACLog) *AddressHandler {
 	return &AddressHandler{
-		addressUC:   addressUC,
+		addressUC: addressUC,
 		sessionUC: sessionUC,
 		logger:    logger,
 	}
@@ -51,15 +50,10 @@ func (handler *AddressHandler) CreateAddress(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	jsonbody, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
 	cookie, _ := r.Cookie("session_id")
 	reqAddress := dto.ReqCreateAddress{Cookie: cookie.Value}
-	err = json.Unmarshal(jsonbody, &reqAddress)
+
+	err := easyjson.UnmarshalFromReader(r.Body, &reqAddress)
 	if err != nil {
 		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
