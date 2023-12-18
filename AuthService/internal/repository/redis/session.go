@@ -91,8 +91,9 @@ func (sm *sessionManager) CreateCsrf(sessionToken string, csrfToken string) erro
 
 func (sm *sessionManager) GetCsrf(sessionToken string) (string, error) {
 	mkey := "csrf:" + sessionToken
+	sm.mu.Lock()
 	data, err := redis.Bytes(sm.redisConn.Do("GET", mkey))
-
+	sm.mu.Unlock()
 	if err != nil {
 		if err != redis.ErrNil {
 			return "", entity.ErrInternalServerError
