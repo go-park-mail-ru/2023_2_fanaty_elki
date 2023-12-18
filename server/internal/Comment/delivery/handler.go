@@ -1,8 +1,6 @@
 package delivery
 
 import (
-	//"encoding/json"
-	//"io/ioutil"
 	"net/http"
 	commentUsecase "server/internal/Comment/usecase"
 	sessionUsecase "server/internal/Session/usecase"
@@ -75,14 +73,6 @@ func (handler *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Requ
 		RestaurantId: uint(restaurantId),
 	}
 
-	//jsonbody, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	//err = json.Unmarshal(jsonbody, &reqComment)
 	err = easyjson.UnmarshalFromReader(r.Body, reqComment)
 	if err != nil {
 		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
@@ -103,7 +93,6 @@ func (handler *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Requ
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	//err = json.NewEncoder(w).Encode(&Result{Body: respComment})
 
 	_, err = easyjson.MarshalToWriter(respComment, w)
 
@@ -136,8 +125,6 @@ func (handler *CommentHandler) GetComments(w http.ResponseWriter, r *http.Reques
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	//err = json.NewEncoder(w).Encode(&Result{Body: respComment})
 
 	_, err = easyjson.MarshalToWriter(respComment, w)
 

@@ -9,7 +9,7 @@ import (
 )
 
 type UsecaseI interface {
-	GetOrders(userId uint) ([]*dto.RespGetOrder, error)
+	GetOrders(userId uint) (*dto.RespOrders, error)
 	CreateOrder(reqOrder *dto.ReqCreateOrder) (*dto.RespCreateOrder, error)
 	UpdateOrder(reqOrder *dto.ReqUpdateOrder) error
 	GetOrder(reqOrder *dto.ReqGetOneOrder) (*dto.RespGetOneOrder, error)
@@ -79,8 +79,15 @@ func (or *orderUsecase) UpdateOrder(reqOrder *dto.ReqUpdateOrder) error {
 	return nil
 }
 
-func (or *orderUsecase) GetOrders(userId uint) ([]*dto.RespGetOrder, error) {
-	return or.orderRepo.GetOrders(userId)
+func (or *orderUsecase) GetOrders(userId uint) (*dto.RespOrders, error) {
+	orders, err := or.orderRepo.GetOrders(userId)
+
+	var respOrders dto.RespOrders
+
+	for _, order := range orders {
+		respOrders = append(respOrders, order)
+	}
+	return &respOrders, err
 }
 
 func (or *orderUsecase) GetOrder(reqOrder *dto.ReqGetOneOrder) (*dto.RespGetOneOrder, error) {
