@@ -11,13 +11,13 @@ import (
 )
 
 type UsecaseI interface {
-	GetRestaurants() ([]*dto.RestaurantWithCategories, error)
+	GetRestaurants() (*dto.RestaurantWithCategoriesSlice, error)
 	GetRestaurantById(id uint) (*dto.RestaurantWithCategories, error)
-	GetRestaurantProducts(id uint) ([]*dto.MenuTypeWithProducts, error)
-	GetRestaurantsByCategory(name string) ([]*dto.RestaurantWithCategories, error)
+	GetRestaurantProducts(id uint) (*dto.MenuTypeWithProductsSlice, error)
+	GetRestaurantsByCategory(name string) (*dto.RestaurantWithCategoriesSlice, error)
 	GetCategories() (*[]string, error)
-	Search(word string) ([]*dto.RestaurantWithCategoriesAndProducts, error)
-	GetRestaurantTips(SessionToken string) ([]*dto.RestaurantWithCategories, error)
+	Search(word string) (*dto.RestaurantWithCategoriesAndProductsSlice, error)
+	GetRestaurantTips(SessionToken string) (*dto.RestaurantWithCategoriesSlice, error)
 }
 
 type restaurantUsecase struct {
@@ -37,7 +37,7 @@ func NewRestaurantUsecase(resRep restRep.RestaurantRepositoryI, productRep produ
 
 }
 
-func (res restaurantUsecase) GetRestaurants() ([]*dto.RestaurantWithCategories, error) {
+func (res restaurantUsecase) GetRestaurants() (*dto.RestaurantWithCategoriesSlice, error) {
 	rests, err := res.restaurantRepo.GetRestaurants()
 	if err != nil {
 		return nil, entity.ErrInternalServerError
@@ -59,7 +59,13 @@ func (res restaurantUsecase) GetRestaurants() ([]*dto.RestaurantWithCategories, 
 		restwithcat := dto.ToRestaurantWithCategories(rest, cats)
 		restswithcategories = append(restswithcategories, restwithcat)
 	}
-	return restswithcategories, nil
+
+	var respRestWithCategories dto.RestaurantWithCategoriesSlice
+
+	for _, rest := range restswithcategories {
+		respRestWithCategories = append(respRestWithCategories, rest)
+	}
+	return &respRestWithCategories, nil
 }
 
 func (res restaurantUsecase) GetRestaurantById(id uint) (*dto.RestaurantWithCategories, error) {
@@ -83,7 +89,7 @@ func (res restaurantUsecase) GetRestaurantById(id uint) (*dto.RestaurantWithCate
 	return restwithcat, nil
 }
 
-func (res restaurantUsecase) GetRestaurantProducts(id uint) ([]*dto.MenuTypeWithProducts, error) {
+func (res restaurantUsecase) GetRestaurantProducts(id uint) (*dto.MenuTypeWithProductsSlice, error) {
 	menuTypes, err := res.restaurantRepo.GetMenuTypesByRestaurantId(id)
 	if err != nil {
 		return nil, err
@@ -101,10 +107,16 @@ func (res restaurantUsecase) GetRestaurantProducts(id uint) ([]*dto.MenuTypeWith
 		menuTypesWithProducts = append(menuTypesWithProducts, &menuTypeWithProducts)
 	}
 
-	return menuTypesWithProducts, nil
+	var respMenu dto.MenuTypeWithProductsSlice
+
+	for _, rest := range menuTypesWithProducts {
+		respMenu = append(respMenu, rest)
+	}
+
+	return &respMenu, nil
 }
 
-func (res restaurantUsecase) GetRestaurantsByCategory(name string) ([]*dto.RestaurantWithCategories, error) {
+func (res restaurantUsecase) GetRestaurantsByCategory(name string) (*dto.RestaurantWithCategoriesSlice, error) {
 	rests, err := res.restaurantRepo.GetRestaurantsByCategory(name)
 	if err != nil {
 		if err == entity.ErrNotFound {
@@ -129,19 +141,31 @@ func (res restaurantUsecase) GetRestaurantsByCategory(name string) ([]*dto.Resta
 		restwithcat := dto.ToRestaurantWithCategories(rest, cats)
 		restswithcategories = append(restswithcategories, restwithcat)
 	}
-	return restswithcategories, nil
+
+	var respRestWithCategories dto.RestaurantWithCategoriesSlice
+
+	for _, rest := range restswithcategories {
+		respRestWithCategories = append(respRestWithCategories, rest)
+	}
+	return &respRestWithCategories, nil
 }
 
-func (res restaurantUsecase) GetCategories() (*[]string, error) {
+func (res restaurantUsecase) GetCategories() (*dto.StringSlice, error) {
 	cats, err := res.restaurantRepo.GetCategories()
 	categories := dto.TransformCategoriesToStringSlice(cats)
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}
-	return categories, nil
+
+	var respRestWithCategories dto.StringSlice
+
+	for _, rest := range *categories {
+		respRestWithCategories = append(respRestWithCategories, &rest)
+	}
+	return &respRestWithCategories, nil
 }
 
-func (res restaurantUsecase) Search(word string) ([]*dto.RestaurantWithCategoriesAndProducts, error) {
+func (res restaurantUsecase) Search(word string) (*dto.RestaurantWithCategoriesAndProductsSlice, error) {
 	rests, err := res.restaurantRepo.SearchRestaurants(word)
 	if err != nil {
 		return nil, entity.ErrInternalServerError
@@ -209,10 +233,16 @@ func (res restaurantUsecase) Search(word string) ([]*dto.RestaurantWithCategorie
 			}
 		}
 	}
-	return restsWithCategoriesAndProducts, nil
+
+	var respRestWithCategories dto.RestaurantWithCategoriesAndProductsSlice
+
+	for _, rest := range restsWithCategoriesAndProducts {
+		respRestWithCategories = append(respRestWithCategories, rest)
+	}
+	return &respRestWithCategories, nil
 }
 
-func (res restaurantUsecase) GetRestaurantTips(SessionToken string) ([]*dto.RestaurantWithCategories, error) {
+func (res restaurantUsecase) GetRestaurantTips(SessionToken string) (*dto.RestaurantWithCategoriesSlice, error) {
 	cookie, err := res.sessionRepo.Check(SessionToken)
 	if err != nil {
 		return nil, err
@@ -289,5 +319,11 @@ func (res restaurantUsecase) GetRestaurantTips(SessionToken string) ([]*dto.Rest
 		}
 	}
 
-	return tiprests, nil
+	var respRestWithCategories dto.RestaurantWithCategoriesSlice
+
+	for _, rest := range tiprests {
+		respRestWithCategories = append(respRestWithCategories, rest)
+	}
+
+	return &respRestWithCategories, nil
 }

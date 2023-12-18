@@ -1,9 +1,6 @@
 package delivery
 
 import (
-	//"encoding/json"
-
-	//"io/ioutil"
 	"net/http"
 	orderUsecase "server/internal/Order/usecase"
 	sessionUsecase "server/internal/Session/usecase"
@@ -58,15 +55,8 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 
 	userId, _ := handler.sessionUC.GetIdByCookie(cookie.Value)
 
-	//jsonbody, err := ioutil.ReadAll(r.Body)
-	// if err != nil {
-	// 	handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
-	// 	w.WriteHeader(http.StatusBadRequest)
-	// 	return
-	// }
-
 	reqOrder := dto.ReqCreateOrder{UserId: userId}
-	//err = json.Unmarshal(jsonbody, &reqOrder)
+
 	err := easyjson.UnmarshalFromReader(r.Body, &reqOrder)
 	if err != nil {
 		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
@@ -91,7 +81,7 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	//err = json.NewEncoder(w).Encode(&Result{Body: respOrder})
+
 	_, err = easyjson.MarshalToWriter(respOrder, w)
 	if err != nil {
 		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
@@ -101,18 +91,9 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 }
 
 func (handler *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
-	//w.Header().Set("Content-Type", "application/json")
-
-	// jsonbody, err := ioutil.ReadAll(r.Body)
-	// if err != nil {
-
-	// 	handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
-	// 	w.WriteHeader(http.StatusBadRequest)
-	// 	return
-	// }
 
 	reqOrder := dto.ReqUpdateOrder{}
-	//err = json.Unmarshal(jsonbody, &reqOrder)
+
 	err := easyjson.UnmarshalFromReader(r.Body, &reqOrder)
 	if err != nil {
 		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
@@ -140,7 +121,6 @@ func (handler *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//err = json.NewEncoder(w).Encode(&Result{Body: respOrders})
 	_, err = easyjson.MarshalToWriter(respOrders, w)
 	if err != nil {
 		handler.logger.LogError("order: problems while marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
@@ -200,8 +180,6 @@ func (handler *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	//err = json.NewEncoder(w).Encode(&Result{Body: respOrder})
 	_, err = easyjson.MarshalToWriter(respOrder, w)
 	if err != nil {
 		handler.logger.LogError("order: problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)

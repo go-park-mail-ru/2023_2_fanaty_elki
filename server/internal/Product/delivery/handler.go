@@ -1,9 +1,9 @@
 package delivery
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	easyjson "github.com/mailru/easyjson"
 	"net/http"
 	productUsecase "server/internal/Product/usecase"
 	"server/internal/domain/entity"
@@ -47,7 +47,6 @@ func (handler *ProductHandler) GetProduct(w http.ResponseWriter, r *http.Request
 	id64, err := strconv.ParseUint(strid, 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		err = json.NewEncoder(w).Encode(&RespError{Err: "id is not a number"})
 		return
 	}
 
@@ -62,18 +61,15 @@ func (handler *ProductHandler) GetProduct(w http.ResponseWriter, r *http.Request
 			return
 		}
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&RespError{Err: "data base error"})
 		return
 	}
 
 	body := product
 
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(&Result{Body: body})
+	_, err = easyjson.MarshalToWriter(body, w)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&RespError{Err: "error while marshalling JSON"})
 		return
 	}
 

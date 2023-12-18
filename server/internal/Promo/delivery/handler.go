@@ -1,7 +1,6 @@
 package delivery
 
 import (
-	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"net/http"
@@ -10,6 +9,8 @@ import (
 	mw "server/internal/middleware"
 
 	"github.com/gorilla/mux"
+	easyjson "github.com/mailru/easyjson"
+	easyjsonopt "github.com/mailru/easyjson/opt"
 )
 
 type Result struct {
@@ -55,15 +56,15 @@ func (handler *PromoHandler) UsePromo(w http.ResponseWriter, r *http.Request) {
 
 	cookie, _ := r.Cookie("session_id")
 
-	var promocode string
-	err = json.Unmarshal(jsonbody, &promocode)
+	var promocode easyjsonopt.String
+	err = promocode.UnmarshalJSON(jsonbody)
 	if err != nil {
 		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	promo, err := handler.promoUsecase.UsePromo(cookie.Value, promocode)
+	promo, err := handler.promoUsecase.UsePromo(cookie.Value, promocode.V)
 
 	if err != nil {
 		if err == entity.ErrNotFound {
@@ -85,18 +86,15 @@ func (handler *PromoHandler) UsePromo(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&RespError{Err: "data base error"})
 		return
 	}
 
 	body := promo
 
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(&Result{Body: body})
+	_, err = easyjson.MarshalToWriter(body, w)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&RespError{Err: "error while marshalling JSON"})
 		return
 	}
 
@@ -125,7 +123,6 @@ func (handler *PromoHandler) DeletePromo(w http.ResponseWriter, r *http.Request)
 		}
 
 		w.WriteHeader(http.StatusInternalServerError)
-		err = json.NewEncoder(w).Encode(&RespError{Err: "data base error"})
 		return
 	}
 
