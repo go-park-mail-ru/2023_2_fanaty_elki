@@ -23,7 +23,9 @@ func NewSessionManager(conn redis.Conn) *sessionManager {
 func (sm *sessionManager) Create(cookie *entity.Cookie) error {
 	dataSerialized, _ := json.Marshal(cookie.UserID)
 	mkey := "sessions:" + cookie.SessionToken
+	sm.mu.Lock()
 	result, err := redis.String(sm.redisConn.Do("SET", mkey, dataSerialized, "EX", 540000))
+	sm.mu.Unlock()
 	if err != nil || result != "OK" {
 
 		return entity.ErrInternalServerError
@@ -81,7 +83,9 @@ func (sm *sessionManager) Expire(cookie *entity.Cookie) error {
 func (sm *sessionManager) CreateCsrf(sessionToken string, csrfToken string) error {
 	dataSerialized, _ := json.Marshal(csrfToken)
 	mkey := "csrf:" + sessionToken
+	sm.mu.Lock()
 	result, err := redis.String(sm.redisConn.Do("SET", mkey, dataSerialized, "EX", 540000))
+	sm.mu.Unlock()
 	if err != nil || result != "OK" {
 		return entity.ErrInternalServerError
 	}
