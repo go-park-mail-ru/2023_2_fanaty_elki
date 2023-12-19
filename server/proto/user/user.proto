@@ -47,7 +47,7 @@ message Nothing {
 }
 
 service UserRPC {
-  rpc FindUserById (ID) returns (DBGetUser);
+  rpc FindUserByID (ID) returns (DBGetUser);
   rpc CreateUser (DBCreateUser) returns (ID);
   rpc UpdateUser (DBUpdateUser) returns (Nothing);
   rpc FindUserByUsername (Value) returns (DBGetUser);

@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+//SessionUsecaseI interface
 type SessionUsecaseI interface {
 	Create(grpccookie *auth.Cookie) (*auth.Nothing, error)
 	Check(grpcsessionToken *auth.SessionToken) (*auth.Cookie, error)
@@ -17,17 +18,20 @@ type SessionUsecaseI interface {
 	GetCsrf(grpcsessionToken *auth.SessionToken) (*auth.CsrfToken, error)
 }
 
-type sessionUsecase struct {
+//SessionUsecase struct
+type SessionUsecase struct {
 	sessionRepo sessionRep.SessionRepositoryI
 }
 
-func NewSessionUsecase(sessionRep sessionRep.SessionRepositoryI) *sessionUsecase {
-	return &sessionUsecase{
+//NewSessionUsecase creates session usecase 
+func NewSessionUsecase(sessionRep sessionRep.SessionRepositoryI) *SessionUsecase {
+	return &SessionUsecase{
 		sessionRepo: sessionRep,
 	}
 }
 
-func (su sessionUsecase) Create(grpccookie *auth.Cookie) (*auth.Nothing, error) {
+//Create creates session
+func (su SessionUsecase) Create(grpccookie *auth.Cookie) (*auth.Nothing, error) {
 	cookie := &entity.Cookie{
 		UserID:       uint(grpccookie.UserID),
 		SessionToken: grpccookie.SessionToken,
@@ -42,7 +46,8 @@ func (su sessionUsecase) Create(grpccookie *auth.Cookie) (*auth.Nothing, error) 
 	return &auth.Nothing{Dummy: true}, nil
 }
 
-func (su sessionUsecase) Check(grpcsessionToken *auth.SessionToken) (*auth.Cookie, error) {
+//Check checks session
+func (su SessionUsecase) Check(grpcsessionToken *auth.SessionToken) (*auth.Cookie, error) {
 	cookie, err := su.sessionRepo.Check(grpcsessionToken.Token)
 
 	if err != nil {
@@ -62,7 +67,8 @@ func (su sessionUsecase) Check(grpcsessionToken *auth.SessionToken) (*auth.Cooki
 	return grpccookie, nil
 }
 
-func (su sessionUsecase) Delete(grpccookie *auth.DBDeleteCookie) (*auth.Nothing, error) {
+//Delete deletes session
+func (su SessionUsecase) Delete(grpccookie *auth.DBDeleteCookie) (*auth.Nothing, error) {
 	cookie := &dto.DBDeleteCookie{
 		SessionToken: grpccookie.SessionToken,
 	}
@@ -76,7 +82,8 @@ func (su sessionUsecase) Delete(grpccookie *auth.DBDeleteCookie) (*auth.Nothing,
 	return &auth.Nothing{Dummy: true}, nil
 }
 
-func (su sessionUsecase) Expire(grpccookie *auth.Cookie) (*auth.Nothing, error) {
+//Expire updates cookie
+func (su SessionUsecase) Expire(grpccookie *auth.Cookie) (*auth.Nothing, error) {
 	cookie := &entity.Cookie{
 		UserID:       uint(grpccookie.UserID),
 		SessionToken: grpccookie.SessionToken,
@@ -92,7 +99,8 @@ func (su sessionUsecase) Expire(grpccookie *auth.Cookie) (*auth.Nothing, error) 
 	return &auth.Nothing{Dummy: true}, nil
 }
 
-func (su sessionUsecase) CreateCsrf(grpcSessionAndCsrf *auth.SesionAndCsrf) (*auth.Nothing, error) {
+//CreateCsrf creates csrf
+func (su SessionUsecase) CreateCsrf(grpcSessionAndCsrf *auth.SesionAndCsrf) (*auth.Nothing, error) {
 	sessionToken := grpcSessionAndCsrf.SessionToken
 	csrfToken := grpcSessionAndCsrf.CsrfToken
 
@@ -105,7 +113,8 @@ func (su sessionUsecase) CreateCsrf(grpcSessionAndCsrf *auth.SesionAndCsrf) (*au
 	return &auth.Nothing{Dummy: true}, nil
 }
 
-func (su sessionUsecase) GetCsrf(grpcsessionToken *auth.SessionToken) (*auth.CsrfToken, error) {
+//GetCsrf gets csrf
+func (su SessionUsecase) GetCsrf(grpcsessionToken *auth.SessionToken) (*auth.CsrfToken, error) {
 	sessionToken := grpcsessionToken.Token
 
 	csrfToken, err := su.sessionRepo.GetCsrf(sessionToken)

@@ -2,9 +2,10 @@ package repository
 
 import "ProductService/entity"
 
+//ProductRepositoryI interface
 type ProductRepositoryI interface {
-	GetProductsByMenuTypeId(id uint) ([]*entity.Product, error)
+	GetProductsByMenuTypeID(id uint) ([]*entity.Product, error)
 	GetProductByID(id uint) (*entity.Product, error)
 	SearchProducts(word string) ([]*entity.Product, error)
-	GetRestaurantIdByProduct(id uint) (uint, error)
+	GetRestaurantIDByProduct(id uint) (uint, error)
 }

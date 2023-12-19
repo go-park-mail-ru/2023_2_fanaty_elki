@@ -1,32 +1,35 @@
 package usecase
 
 import (
-	//"ProductService/entity"
 	productRep "ProductService/internal/repository"
 	product "ProductService/proto"
 )
 
+//ProductUsecaseI interface
 type ProductUsecaseI interface {
-	GetProductsByMenuTypeId(grpcid *product.ID) (*product.ProductSlice, error)
+	GetProductsByMenuTypeID(grpcid *product.ID) (*product.ProductSlice, error)
 	GetProductByID(grpcid *product.ID) (*product.Product, error)
 	SearchProducts(grpcword *product.Word) (*product.ProductSlice, error)
-	GetRestaurantIdByProduct(grpcid *product.ID) (*product.ID, error)
+	GetRestaurantIDByProduct(grpcid *product.ID) (*product.ID, error)
 }
 
-type productUsecase struct {
+//ProductUsecase struct
+type ProductUsecase struct {
 	productRepo productRep.ProductRepositoryI
 }
 
-func NewProductUsecase(productRep productRep.ProductRepositoryI) *productUsecase {
-	return &productUsecase{
+//NewProductUsecase create product usecase 
+func NewProductUsecase(productRep productRep.ProductRepositoryI) *ProductUsecase {
+	return &ProductUsecase{
 		productRepo: productRep,
 	}
 }
 
-func (pu productUsecase) GetProductsByMenuTypeId(grpcid *product.ID) (*product.ProductSlice, error) {
+//GetProductsByMenuTypeID gets products by menu type
+func (pu ProductUsecase) GetProductsByMenuTypeID(grpcid *product.ID) (*product.ProductSlice, error) {
 	id := uint(grpcid.ID)
 
-	products, err := pu.productRepo.GetProductsByMenuTypeId(id)
+	products, err := pu.productRepo.GetProductsByMenuTypeID(id)
 
 	if err != nil {
 		return nil, err
@@ -50,7 +53,8 @@ func (pu productUsecase) GetProductsByMenuTypeId(grpcid *product.ID) (*product.P
 	return productSlice, err
 }
 
-func (pu productUsecase) GetProductByID(grpcid *product.ID) (*product.Product, error) {
+//GetProductByID gets product by id
+func (pu ProductUsecase) GetProductByID(grpcid *product.ID) (*product.Product, error) {
 	id := uint(grpcid.ID)
 
 	entproduct, err := pu.productRepo.GetProductByID(id)
@@ -72,7 +76,8 @@ func (pu productUsecase) GetProductByID(grpcid *product.ID) (*product.Product, e
 	return grpcproduct, nil
 }
 
-func (pu productUsecase) SearchProducts(grpcword *product.Word) (*product.ProductSlice, error) {
+//SearchProducts searches products
+func (pu ProductUsecase) SearchProducts(grpcword *product.Word) (*product.ProductSlice, error) {
 	word := grpcword.Word
 
 	products, err := pu.productRepo.SearchProducts(word)
@@ -100,10 +105,11 @@ func (pu productUsecase) SearchProducts(grpcword *product.Word) (*product.Produc
 
 }
 
-func (pu productUsecase) GetRestaurantIdByProduct(grpcid *product.ID) (*product.ID, error) {
+//GetRestaurantIDByProduct gets restaurant id by product
+func (pu ProductUsecase) GetRestaurantIDByProduct(grpcid *product.ID) (*product.ID, error) {
 	id := uint(grpcid.ID)
 
-	restid, err := pu.productRepo.GetRestaurantIdByProduct(id)
+	restid, err := pu.productRepo.GetRestaurantIDByProduct(id)
 
 	if err != nil {
 		return nil, err

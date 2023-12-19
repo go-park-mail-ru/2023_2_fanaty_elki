@@ -31,10 +31,10 @@ message Nothing {
 }
 
 service ProductRPC {
-  rpc GetProductsByMenuTypeId (ID) returns (ProductSlice);
+  rpc GetProductsByMenuTypeID (ID) returns (ProductSlice);
   rpc GetProductByID (ID) returns (Product);
   rpc SearchProducts (Word) returns (ProductSlice);
-  rpc GetRestaurantIdByProduct (ID) returns (ID);
+  rpc GetRestaurantIDByProduct (ID) returns (ID);
 }
 
 
