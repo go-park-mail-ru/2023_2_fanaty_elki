@@ -17,7 +17,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &orderRepo{
+	repo := &OrderRepo{
 		DB: db,
 	}
 
@@ -113,7 +113,7 @@ func TestUpdateOrderSuccess(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &orderRepo{
+	repo := &OrderRepo{
 		DB: db,
 	}
 
@@ -141,7 +141,7 @@ func TestGetOrdersSuccess(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &orderRepo{
+	repo := &OrderRepo{
 		DB: db,
 	}
 
@@ -205,7 +205,7 @@ func TestGetOrderSuccess(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &orderRepo{
+	repo := &OrderRepo{
 		DB: db,
 	}
 

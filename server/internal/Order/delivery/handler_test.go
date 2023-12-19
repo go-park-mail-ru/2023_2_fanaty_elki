@@ -26,7 +26,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 	defer ctrl.Finish()
 	apiPath := "/api/orders"
 	mockO := mockO.NewMockUsecaseI(ctrl)
-	mockS := mockS.NewMockUsecaseI(ctrl)
+	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	var logger *mw.ACLog
 	handler := NewOrderHandler(mockO, mockS, logger)
 
@@ -62,7 +62,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 		DeliveryTime: 30,
 	}
 
-	mockS.EXPECT().GetIdByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
+	mockS.EXPECT().GetIDByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
 	mockO.EXPECT().CreateOrder(reqorder).Return(resporder, nil)
 
 	body, err := json.Marshal(reqorder)
@@ -137,7 +137,7 @@ func TestCreateOrderFail(t *testing.T) {
 	defer ctrl.Finish()
 	apiPath := "/api/orders"
 	mockO := mockO.NewMockUsecaseI(ctrl)
-	mockS := mockS.NewMockUsecaseI(ctrl)
+	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	handler := NewOrderHandler(mockO, mockS, logger)
 
 	cookie := &entity.Cookie{
@@ -155,7 +155,7 @@ func TestCreateOrderFail(t *testing.T) {
 		},
 	}
 
-	mockS.EXPECT().GetIdByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
+	mockS.EXPECT().GetIDByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
 	mockO.EXPECT().CreateOrder(reqorder).Return(nil, entity.ErrInternalServerError)
 
 	body, err := json.Marshal(reqorder)
@@ -174,7 +174,7 @@ func TestCreateOrderFail(t *testing.T) {
 
 	require.Equal(t, 500, resp.StatusCode)
 
-	mockS.EXPECT().GetIdByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
+	mockS.EXPECT().GetIDByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
 	mockO.EXPECT().CreateOrder(reqorder).Return(nil, entity.ErrBadRequest)
 
 	body, err = json.Marshal(reqorder)
@@ -215,7 +215,7 @@ func TestUpdateOrderSuccess(t *testing.T) {
 	defer ctrl.Finish()
 	apiPath := "/api/orders"
 	mockO := mockO.NewMockUsecaseI(ctrl)
-	mockS := mockS.NewMockUsecaseI(ctrl)
+	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	var logger *mw.ACLog
 	handler := NewOrderHandler(mockO, mockS, logger)
 
@@ -303,7 +303,7 @@ func TestUpdateOrderFail(t *testing.T) {
 	defer ctrl.Finish()
 	apiPath := "/api/orders"
 	mockO := mockO.NewMockUsecaseI(ctrl)
-	mockS := mockS.NewMockUsecaseI(ctrl)
+	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	handler := NewOrderHandler(mockO, mockS, logger)
 
 	cookie := &entity.Cookie{
@@ -341,7 +341,7 @@ func TestGetOrdersSuccess(t *testing.T) {
 	defer ctrl.Finish()
 	apiPath := "/api/orders"
 	mockO := mockO.NewMockUsecaseI(ctrl)
-	mockS := mockS.NewMockUsecaseI(ctrl)
+	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	var logger *mw.ACLog
 	handler := NewOrderHandler(mockO, mockS, logger)
 
@@ -380,7 +380,7 @@ func TestGetOrdersSuccess(t *testing.T) {
 		},
 	}
 
-	mockS.EXPECT().GetIdByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
+	mockS.EXPECT().GetIDByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
 	mockO.EXPECT().GetOrders(cookie.UserID).Return(resporders, nil)
 
 	req := httptest.NewRequest("GET", apiPath, nil)
@@ -450,7 +450,7 @@ func TestGetOrdersFail(t *testing.T) {
 	defer ctrl.Finish()
 	apiPath := "/api/orders"
 	mockO := mockO.NewMockUsecaseI(ctrl)
-	mockS := mockS.NewMockUsecaseI(ctrl)
+	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	handler := NewOrderHandler(mockO, mockS, logger)
 
 	cookie := &entity.Cookie{
@@ -458,7 +458,7 @@ func TestGetOrdersFail(t *testing.T) {
 		SessionToken: "HJJvgsvd",
 	}
 
-	mockS.EXPECT().GetIdByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
+	mockS.EXPECT().GetIDByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
 	mockO.EXPECT().GetOrders(cookie.UserID).Return(nil, entity.ErrInternalServerError)
 
 	req := httptest.NewRequest("GET", apiPath, nil)
@@ -478,7 +478,7 @@ func TestGetOrderSuccess(t *testing.T) {
 	defer ctrl.Finish()
 	apiPath := "/api/orders/1"
 	mockO := mockO.NewMockUsecaseI(ctrl)
-	mockS := mockS.NewMockUsecaseI(ctrl)
+	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	var logger *mw.ACLog
 	handler := NewOrderHandler(mockO, mockS, logger)
 
@@ -522,7 +522,7 @@ func TestGetOrderSuccess(t *testing.T) {
 		DeliveryTime: 30,
 	}
 
-	mockS.EXPECT().GetIdByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
+	mockS.EXPECT().GetIDByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
 	mockO.EXPECT().GetOrder(&reqOrder).Return(resporder, nil)
 
 	req := httptest.NewRequest("GET", apiPath, nil)
@@ -597,7 +597,7 @@ func TestGetOrderFail(t *testing.T) {
 	defer ctrl.Finish()
 	apiPath := "/api/orders/1"
 	mockO := mockO.NewMockUsecaseI(ctrl)
-	mockS := mockS.NewMockUsecaseI(ctrl)
+	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	handler := NewOrderHandler(mockO, mockS, logger)
 
 	cookie := &entity.Cookie{
@@ -610,7 +610,7 @@ func TestGetOrderFail(t *testing.T) {
 		OrderID: 1,
 	}
 
-	mockS.EXPECT().GetIdByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
+	mockS.EXPECT().GetIDByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
 	mockO.EXPECT().GetOrder(&reqOrder).Return(nil, entity.ErrInternalServerError)
 
 	req := httptest.NewRequest("GET", apiPath, nil)
@@ -630,7 +630,7 @@ func TestGetOrderFail(t *testing.T) {
 
 	require.Equal(t, 500, resp.StatusCode)
 
-	mockS.EXPECT().GetIdByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
+	mockS.EXPECT().GetIDByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
 	mockO.EXPECT().GetOrder(&reqOrder).Return(nil, entity.ErrNotFound)
 
 	req = httptest.NewRequest("GET", apiPath, nil)

@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserRPCClient interface {
-	FindUserById(ctx context.Context, in *ID, opts ...grpc.CallOption) (*DBGetUser, error)
+	FindUserByID(ctx context.Context, in *ID, opts ...grpc.CallOption) (*DBGetUser, error)
 	CreateUser(ctx context.Context, in *DBCreateUser, opts ...grpc.CallOption) (*ID, error)
 	UpdateUser(ctx context.Context, in *DBUpdateUser, opts ...grpc.CallOption) (*Nothing, error)
 	FindUserByUsername(ctx context.Context, in *Value, opts ...grpc.CallOption) (*DBGetUser, error)
@@ -38,9 +38,9 @@ func NewUserRPCClient(cc grpc.ClientConnInterface) UserRPCClient {
 	return &userRPCClient{cc}
 }
 
-func (c *userRPCClient) FindUserById(ctx context.Context, in *ID, opts ...grpc.CallOption) (*DBGetUser, error) {
+func (c *userRPCClient) FindUserByID(ctx context.Context, in *ID, opts ...grpc.CallOption) (*DBGetUser, error) {
 	out := new(DBGetUser)
-	err := c.cc.Invoke(ctx, "/user.UserRPC/FindUserById", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/user.UserRPC/FindUserByID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (c *userRPCClient) FindUserByPhone(ctx context.Context, in *Value, opts ...
 // All implementations should embed UnimplementedUserRPCServer
 // for forward compatibility
 type UserRPCServer interface {
-	FindUserById(context.Context, *ID) (*DBGetUser, error)
+	FindUserByID(context.Context, *ID) (*DBGetUser, error)
 	CreateUser(context.Context, *DBCreateUser) (*ID, error)
 	UpdateUser(context.Context, *DBUpdateUser) (*Nothing, error)
 	FindUserByUsername(context.Context, *Value) (*DBGetUser, error)
@@ -108,8 +108,8 @@ type UserRPCServer interface {
 type UnimplementedUserRPCServer struct {
 }
 
-func (UnimplementedUserRPCServer) FindUserById(context.Context, *ID) (*DBGetUser, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FindUserById not implemented")
+func (UnimplementedUserRPCServer) FindUserByID(context.Context, *ID) (*DBGetUser, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FindUserByID not implemented")
 }
 func (UnimplementedUserRPCServer) CreateUser(context.Context, *DBCreateUser) (*ID, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
@@ -138,20 +138,20 @@ func RegisterUserRPCServer(s grpc.ServiceRegistrar, srv UserRPCServer) {
 	s.RegisterService(&UserRPC_ServiceDesc, srv)
 }
 
-func _UserRPC_FindUserById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UserRPC_FindUserByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ID)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserRPCServer).FindUserById(ctx, in)
+		return srv.(UserRPCServer).FindUserByID(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/user.UserRPC/FindUserById",
+		FullMethod: "/user.UserRPC/FindUserByID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserRPCServer).FindUserById(ctx, req.(*ID))
+		return srv.(UserRPCServer).FindUserByID(ctx, req.(*ID))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -254,8 +254,8 @@ var UserRPC_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*UserRPCServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "FindUserById",
-			Handler:    _UserRPC_FindUserById_Handler,
+			MethodName: "FindUserByID",
+			Handler:    _UserRPC_FindUserByID_Handler,
 		},
 		{
 			MethodName: "CreateUser",

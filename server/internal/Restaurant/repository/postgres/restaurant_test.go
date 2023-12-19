@@ -16,7 +16,7 @@ func TestGetRestaurantsSuccess(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &restaurantRepo{
+	repo := &RestaurantRepo{
 		DB: db,
 	}
 
@@ -75,7 +75,7 @@ func TestGetRestaurantsFail(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &restaurantRepo{
+	repo := &RestaurantRepo{
 		DB: db,
 	}
 
@@ -102,7 +102,7 @@ func TestGetRestaurantByIdSuccess(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &restaurantRepo{
+	repo := &RestaurantRepo{
 		DB: db,
 	}
 
@@ -124,7 +124,7 @@ func TestGetRestaurantByIdSuccess(t *testing.T) {
 		ExpectQuery("SELECT id, name, rating, comments_count, icon FROM restaurant WHERE").WithArgs(elemID).
 		WillReturnRows(row)
 
-	restaurant, err := repo.GetRestaurantById(uint(elemID))
+	restaurant, err := repo.GetRestaurantByID(uint(elemID))
 	if err != nil {
 		t.Errorf("unexpected err: %s", err)
 		return
@@ -140,7 +140,7 @@ func TestGetRestaurantByIdSuccess(t *testing.T) {
 	mock.ExpectQuery("SELECT id, name, rating, comments_count, icon FROM restaurant").WithArgs(elemID).
 		WillReturnRows(emptyrows)
 
-	restaurant, err = repo.GetRestaurantById(uint(elemID))
+	restaurant, err = repo.GetRestaurantByID(uint(elemID))
 	if err != entity.ErrNotFound {
 		t.Errorf("unexpected err: %s", err)
 		return
@@ -155,7 +155,7 @@ func TestGetRestaurantByIdFail(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &restaurantRepo{
+	repo := &RestaurantRepo{
 		DB: db,
 	}
 
@@ -165,7 +165,7 @@ func TestGetRestaurantByIdFail(t *testing.T) {
 	mock.ExpectQuery("SELECT id, name, rating, comments_count,  icon FROM restaurant").WithArgs(elemID).
 		WillReturnError(testErr)
 
-	restaurants, err := repo.GetRestaurantById(uint(elemID))
+	restaurants, err := repo.GetRestaurantByID(uint(elemID))
 	if err != entity.ErrInternalServerError {
 		t.Errorf("unexpected err: %s", err)
 		return
@@ -183,7 +183,7 @@ func TestGetMenuTypesByRestaurantIdSuccess(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &restaurantRepo{
+	repo := &RestaurantRepo{
 		DB: db,
 	}
 
@@ -210,7 +210,7 @@ func TestGetMenuTypesByRestaurantIdSuccess(t *testing.T) {
 		ExpectQuery("SELECT id, name, restaurant_id FROM menu_type WHERE").WithArgs(elemID).
 		WillReturnRows(rows)
 
-	menuTypes, err := repo.GetMenuTypesByRestaurantId(uint(elemID))
+	menuTypes, err := repo.GetMenuTypesByRestaurantID(uint(elemID))
 	if err != nil {
 		t.Errorf("unexpected err: %s", err)
 		return
@@ -226,7 +226,7 @@ func TestGetMenuTypesByRestaurantIdSuccess(t *testing.T) {
 	mock.ExpectQuery("SELECT id, name, restaurant_id FROM menu_type WHERE").WithArgs(elemID).
 		WillReturnRows(emptyrows)
 
-	menuTypes, err = repo.GetMenuTypesByRestaurantId(uint(elemID))
+	menuTypes, err = repo.GetMenuTypesByRestaurantID(uint(elemID))
 	if err != entity.ErrNotFound {
 		t.Errorf("unexpected err: %s", err)
 		return
@@ -240,7 +240,7 @@ func TestGetMenuTypesByRestaurantIdFail(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &restaurantRepo{
+	repo := &RestaurantRepo{
 		DB: db,
 	}
 
@@ -250,7 +250,7 @@ func TestGetMenuTypesByRestaurantIdFail(t *testing.T) {
 	mock.ExpectQuery("SELECT id, name, restaurant_id FROM menu_type WHERE").WithArgs(elemID).
 		WillReturnError(testErr)
 
-	restaurants, err := repo.GetMenuTypesByRestaurantId(uint(elemID))
+	restaurants, err := repo.GetMenuTypesByRestaurantID(uint(elemID))
 	if err != testErr {
 		t.Errorf("unexpected err: %s", err)
 		return
@@ -268,7 +268,7 @@ func TestGetCategoriesByRestaurantIdSuccess(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &restaurantRepo{
+	repo := &RestaurantRepo{
 		DB: db,
 	}
 
@@ -296,7 +296,7 @@ func TestGetCategoriesByRestaurantIdSuccess(t *testing.T) {
 		WHERE`).WithArgs(elemID).
 		WillReturnRows(rows)
 
-	categories, err := repo.GetCategoriesByRestaurantId(uint(elemID))
+	categories, err := repo.GetCategoriesByRestaurantID(uint(elemID))
 	if err != nil {
 		t.Errorf("unexpected err: %s", err)
 		return
@@ -315,7 +315,7 @@ func TestGetCategoriesByRestaurantIdSuccess(t *testing.T) {
 	WHERE`).WithArgs(elemID).
 		WillReturnRows(emptyrows)
 
-	categories, err = repo.GetCategoriesByRestaurantId(uint(elemID))
+	categories, err = repo.GetCategoriesByRestaurantID(uint(elemID))
 	if err != entity.ErrNotFound {
 		t.Errorf("unexpected err: %s", err)
 		return
@@ -329,7 +329,7 @@ func TestGetCategoriesByRestaurantIdFail(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &restaurantRepo{
+	repo := &RestaurantRepo{
 		DB: db,
 	}
 
@@ -359,7 +359,7 @@ func TestGetCategoriesByRestaurantIdFail(t *testing.T) {
 		WHERE`).WithArgs(elemID).
 		WillReturnError(testErr)
 
-	_, err = repo.GetCategoriesByRestaurantId(uint(elemID))
+	_, err = repo.GetCategoriesByRestaurantID(uint(elemID))
 	if err != testErr {
 		t.Errorf("unexpected err: %s", err)
 		return
@@ -374,7 +374,7 @@ func TestGetRestaurantsByCategorySuccess(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &restaurantRepo{
+	repo := &RestaurantRepo{
 		DB: db,
 	}
 
@@ -439,7 +439,7 @@ func TestGetRestaurantsByCategoryFail(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &restaurantRepo{
+	repo := &RestaurantRepo{
 		DB: db,
 	}
 
@@ -490,7 +490,7 @@ func TestGetCategoriesSuccess(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &restaurantRepo{
+	repo := &RestaurantRepo{
 		DB: db,
 	}
 
@@ -532,7 +532,7 @@ func TestGetCategoriesFail(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &restaurantRepo{
+	repo := &RestaurantRepo{
 		DB: db,
 	}
 
@@ -571,7 +571,7 @@ func TestSearchRestaurantsSuccess(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &restaurantRepo{
+	repo := &RestaurantRepo{
 		DB: db,
 	}
 
@@ -622,7 +622,7 @@ func TestSearchCategoriesSuccess(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &restaurantRepo{
+	repo := &RestaurantRepo{
 		DB: db,
 	}
 

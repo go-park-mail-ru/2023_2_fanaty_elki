@@ -5,8 +5,8 @@ import (
 	userRep "server/internal/User/repository"
 	"server/internal/domain/dto"
 	//"server/internal/domain/entity"
-	userProto "server/proto/user"
 	"fmt"
+	userProto "server/proto/user"
 )
 
 //UserMicroService provides management with user microservice
@@ -16,7 +16,7 @@ type UserMicroService struct {
 
 //NewUserMicroService creates new UserRepository interface
 func NewUserMicroService(client userProto.UserRPCClient) userRep.UserRepositoryI {
-	return &UserMicroService {
+	return &UserMicroService{
 		client: client,
 	}
 }
@@ -27,11 +27,11 @@ func (us *UserMicroService) FindUserByID(id uint) (*dto.DBGetUser, error) {
 
 	grpcid := userProto.ID{ID: uint64(id)}
 
-	grpcUser, err := us.client.FindUserById(ctx, &grpcid)
+	grpcUser, err := us.client.FindUserByID(ctx, &grpcid)
 	if err != nil {
 		return nil, err
 	}
-	if grpcUser.Username ==  "@" {
+	if grpcUser.Username == "@" {
 		fmt.Println("HFS")
 		return nil, nil
 	}
@@ -39,7 +39,7 @@ func (us *UserMicroService) FindUserByID(id uint) (*dto.DBGetUser, error) {
 }
 
 //CreateUser creates user in db
-func(us *UserMicroService) CreateUser(user *dto.DBCreateUser) (uint, error) {
+func (us *UserMicroService) CreateUser(user *dto.DBCreateUser) (uint, error) {
 	ctx := context.Background()
 
 	grpcUser := dto.ToRespCreateUser(user)
@@ -76,8 +76,8 @@ func (us *UserMicroService) FindUserByUsername(value string) (*dto.DBGetUser, er
 	if err != nil {
 		return nil, err
 	}
-	
-	if grpcUser.Username ==  "@" {
+
+	if grpcUser.Username == "@" {
 		fmt.Println("HFS")
 		return nil, nil
 	}
@@ -94,7 +94,7 @@ func (us *UserMicroService) FindUserByEmail(value string) (*dto.DBGetUser, error
 	if err != nil {
 		return nil, err
 	}
-	if grpcUser.Username ==  "@" {
+	if grpcUser.Username == "@" {
 		fmt.Println("HFS")
 		return nil, nil
 	}
@@ -111,7 +111,7 @@ func (us *UserMicroService) FindUserByPhone(value string) (*dto.DBGetUser, error
 	if err != nil {
 		return nil, err
 	}
-	if grpcUser.Username ==  "@" {
+	if grpcUser.Username == "@" {
 		fmt.Println("HFS")
 		return nil, nil
 	}

@@ -32,7 +32,7 @@ type RestaurantUsecase struct {
 	orderRepo      orderRep.OrderRepositoryI
 }
 
-//NewRestaurantUsecase creates new restaurant usecase 
+//NewRestaurantUsecase creates new restaurant usecase
 func NewRestaurantUsecase(resRep restRep.RestaurantRepositoryI, productRep productRep.ProductRepositoryI, sessionRep sessionRep.SessionRepositoryI, orderRep orderRep.OrderRepositoryI) *RestaurantUsecase {
 	return &RestaurantUsecase{
 		restaurantRepo: resRep,
@@ -327,7 +327,8 @@ func (res RestaurantUsecase) GetRestaurantTips(SessionToken string) ([]*dto.Rest
 	return tiprests, nil
 }
 
-func (res restaurantUsecase) GetRandomRestaurantTips() ([]*dto.RestaurantWithCategories, error) {
+//GetRandomRestaurantTips gets random restaurants as a tip
+func (res RestaurantUsecase) GetRandomRestaurantTips() ([]*dto.RestaurantWithCategories, error) {
 	restaurants, err := res.restaurantRepo.GetRestaurants()
 
 	if err != nil {
@@ -369,7 +370,7 @@ func (res restaurantUsecase) GetRandomRestaurantTips() ([]*dto.RestaurantWithCat
 			rest.MinDeliveryTime = mindeltime
 			rest.MaxDeliveryTime = maxdeltime
 			rest.DeliveryPrice = delprice
-			cats, err := res.restaurantRepo.GetCategoriesByRestaurantId(rest.ID)
+			cats, err := res.restaurantRepo.GetCategoriesByRestaurantID(rest.ID)
 			if err != nil {
 				if err != entity.ErrNotFound {
 					return nil, entity.ErrInternalServerError

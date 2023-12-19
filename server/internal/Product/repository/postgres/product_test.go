@@ -16,7 +16,7 @@ func TestGetProductsByMenuTypeIdSuccess(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &productRepo{
+	repo := &ProductRepo{
 		DB: db,
 	}
 
@@ -50,7 +50,7 @@ func TestGetProductsByMenuTypeIdSuccess(t *testing.T) {
 		ExpectQuery("SELECT p.id, name, price, cooking_time, portion, description, icon  FROM product p INNER JOIN").WithArgs(uint(1)).
 		WillReturnRows(rows)
 
-	products, err := repo.GetProductsByMenuTypeId(uint(1))
+	products, err := repo.GetProductsByMenuTypeID(uint(1))
 	if err != nil {
 		t.Errorf("unexpected err: %s", err)
 		return
@@ -70,7 +70,7 @@ func TestGetProductsByMenuTypeIdFail(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &productRepo{
+	repo := &ProductRepo{
 		DB: db,
 	}
 
@@ -106,7 +106,7 @@ func TestGetProductsByMenuTypeIdFail(t *testing.T) {
 		ExpectQuery("SELECT p.id, name, price, cooking_time, portion, description, icon  FROM product p INNER JOIN").WithArgs(uint(1)).
 		WillReturnError(testErr)
 
-	_, err = repo.GetProductsByMenuTypeId(uint(1))
+	_, err = repo.GetProductsByMenuTypeID(uint(1))
 	if err != testErr {
 		t.Errorf("unexpected err: %s", err)
 		return
@@ -121,7 +121,7 @@ func TestGetProductByIDSuccess(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &productRepo{
+	repo := &ProductRepo{
 		DB: db,
 	}
 
@@ -162,7 +162,7 @@ func TestGetProductByIDFail(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &productRepo{
+	repo := &ProductRepo{
 		DB: db,
 	}
 
@@ -200,7 +200,7 @@ func TestSearchProductsSuccess(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &productRepo{
+	repo := &ProductRepo{
 		DB: db,
 	}
 
@@ -257,7 +257,7 @@ func TestSearchProductsFail(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &productRepo{
+	repo := &ProductRepo{
 		DB: db,
 	}
 
@@ -310,7 +310,7 @@ func TestGetRestaurantIdByProductSuccess(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &productRepo{
+	repo := &ProductRepo{
 		DB: db,
 	}
 
@@ -329,7 +329,7 @@ func TestGetRestaurantIdByProductSuccess(t *testing.T) {
 		ExpectQuery("SELECT restaurant_id FROM product_menu_type JOIN menu_type on menu_type.id = menu_type_id where").WithArgs(uint(1)).
 		WillReturnRows(rows)
 
-	restid, err := repo.GetRestaurantIdByProduct(id)
+	restid, err := repo.GetRestaurantIDByProduct(id)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err)
 		return
@@ -349,7 +349,7 @@ func TestGetRestaurantIdByProductFail(t *testing.T) {
 	}
 	defer db.Close()
 
-	repo := &productRepo{
+	repo := &ProductRepo{
 		DB: db,
 	}
 
@@ -370,7 +370,7 @@ func TestGetRestaurantIdByProductFail(t *testing.T) {
 		ExpectQuery("SELECT restaurant_id FROM product_menu_type JOIN menu_type on menu_type.id = menu_type_id where").WithArgs(uint(1)).
 		WillReturnError(testErr)
 
-	_, err = repo.GetRestaurantIdByProduct(id)
+	_, err = repo.GetRestaurantIDByProduct(id)
 	if err != entity.ErrInternalServerError {
 		t.Errorf("unexpected err: %s", err)
 		return

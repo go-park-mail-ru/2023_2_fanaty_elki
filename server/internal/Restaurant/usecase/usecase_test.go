@@ -2,8 +2,10 @@ package usecase
 
 import (
 	"errors"
+	mockO "server/internal/Order/repository/mock_repository"
 	mockP "server/internal/Product/repository/mock_repository"
 	mockR "server/internal/Restaurant/repository/mock_repository"
+	mockS "server/internal/Session/repository/mock_repository"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 	"testing"
@@ -18,7 +20,9 @@ func TestGetRestaurantsSucces(t *testing.T) {
 
 	mockRest := mockR.NewMockRestaurantRepositoryI(ctrl)
 	mockProd := mockP.NewMockProductRepositoryI(ctrl)
-	usecase := NewRestaurantUsecase(mockRest, mockProd)
+	mockSess := mockS.NewMockSessionRepositoryI(ctrl)
+	mockOrd := mockO.NewMockOrderRepositoryI(ctrl)
+	usecase := NewRestaurantUsecase(mockRest, mockProd, mockSess, mockOrd)
 
 	res := []*dto.RestaurantWithCategories{
 		{ID: 1,
@@ -64,8 +68,8 @@ func TestGetRestaurantsSucces(t *testing.T) {
 	}
 
 	mockRest.EXPECT().GetRestaurants().Return(rest, nil)
-	mockRest.EXPECT().GetCategoriesByRestaurantId(rest[0].ID).Return(categories, nil)
-	mockRest.EXPECT().GetCategoriesByRestaurantId(rest[1].ID).Return(categories, nil)
+	mockRest.EXPECT().GetCategoriesByRestaurantID(rest[0].ID).Return(categories, nil)
+	mockRest.EXPECT().GetCategoriesByRestaurantID(rest[1].ID).Return(categories, nil)
 	actual, err := usecase.GetRestaurants()
 	assert.Equal(t, res[0].Name, actual[0].Name)
 	assert.Nil(t, err)
@@ -78,7 +82,9 @@ func TestGetRestaurantsFail(t *testing.T) {
 
 	mockRest := mockR.NewMockRestaurantRepositoryI(ctrl)
 	mockProd := mockP.NewMockProductRepositoryI(ctrl)
-	usecase := NewRestaurantUsecase(mockRest, mockProd)
+	mockSess := mockS.NewMockSessionRepositoryI(ctrl)
+	mockOrd := mockO.NewMockOrderRepositoryI(ctrl)
+	usecase := NewRestaurantUsecase(mockRest, mockProd, mockSess, mockOrd)
 
 	testErr := errors.New("test")
 
@@ -94,7 +100,9 @@ func TestGetRestaurantByIdSuccess(t *testing.T) {
 
 	mockRest := mockR.NewMockRestaurantRepositoryI(ctrl)
 	mockProd := mockP.NewMockProductRepositoryI(ctrl)
-	usecase := NewRestaurantUsecase(mockRest, mockProd)
+	mockSess := mockS.NewMockSessionRepositoryI(ctrl)
+	mockOrd := mockO.NewMockOrderRepositoryI(ctrl)
+	usecase := NewRestaurantUsecase(mockRest, mockProd, mockSess, mockOrd)
 
 	rest := &entity.Restaurant{
 		ID:            1,
@@ -117,8 +125,8 @@ func TestGetRestaurantByIdSuccess(t *testing.T) {
 		},
 	}
 
-	mockRest.EXPECT().GetRestaurantById(uint(elemID)).Return(rest, nil)
-	mockRest.EXPECT().GetCategoriesByRestaurantId(uint(elemID)).Return(categories, nil)
+	mockRest.EXPECT().GetRestaurantByID(uint(elemID)).Return(rest, nil)
+	mockRest.EXPECT().GetCategoriesByRestaurantID(uint(elemID)).Return(categories, nil)
 	actual, err := usecase.GetRestaurantByID(uint(elemID))
 	assert.Equal(t, rest.Name, actual.Name)
 	assert.Nil(t, err)
@@ -130,12 +138,14 @@ func TestGetRestaurantByIdFail(t *testing.T) {
 
 	mockRest := mockR.NewMockRestaurantRepositoryI(ctrl)
 	mockProd := mockP.NewMockProductRepositoryI(ctrl)
-	usecase := NewRestaurantUsecase(mockRest, mockProd)
+	mockSess := mockS.NewMockSessionRepositoryI(ctrl)
+	mockOrd := mockO.NewMockOrderRepositoryI(ctrl)
+	usecase := NewRestaurantUsecase(mockRest, mockProd, mockSess, mockOrd)
 
 	testErr := errors.New("test")
 	var elemID = 1
 
-	mockRest.EXPECT().GetRestaurantById(uint(elemID)).Return(&entity.Restaurant{}, testErr)
+	mockRest.EXPECT().GetRestaurantByID(uint(elemID)).Return(&entity.Restaurant{}, testErr)
 	actual, err := usecase.GetRestaurantByID(uint(elemID))
 	assert.Empty(t, actual)
 	assert.Equal(t, testErr, err)
@@ -148,7 +158,9 @@ func TestGetRestaurantProductsSuccess(t *testing.T) {
 
 	mockRest := mockR.NewMockRestaurantRepositoryI(ctrl)
 	mockProd := mockP.NewMockProductRepositoryI(ctrl)
-	usecase := NewRestaurantUsecase(mockRest, mockProd)
+	mockSess := mockS.NewMockSessionRepositoryI(ctrl)
+	mockOrd := mockO.NewMockOrderRepositoryI(ctrl)
+	usecase := NewRestaurantUsecase(mockRest, mockProd, mockSess, mockOrd)
 
 	menutypes := []*entity.MenuType{
 		{
@@ -193,8 +205,8 @@ func TestGetRestaurantProductsSuccess(t *testing.T) {
 
 	var elemID = 1
 
-	mockRest.EXPECT().GetMenuTypesByRestaurantId(uint(elemID)).Return(menutypes, nil)
-	mockProd.EXPECT().GetProductsByMenuTypeId(uint(elemID)).Return(products, nil)
+	mockRest.EXPECT().GetMenuTypesByRestaurantID(uint(elemID)).Return(menutypes, nil)
+	mockProd.EXPECT().GetProductsByMenuTypeID(uint(elemID)).Return(products, nil)
 	actual, err := usecase.GetRestaurantProducts(uint(elemID))
 	assert.Equal(t, res, actual)
 	assert.Nil(t, err)
@@ -206,7 +218,9 @@ func TestGetRestaurantProductsFail(t *testing.T) {
 
 	mockRest := mockR.NewMockRestaurantRepositoryI(ctrl)
 	mockProd := mockP.NewMockProductRepositoryI(ctrl)
-	usecase := NewRestaurantUsecase(mockRest, mockProd)
+	mockSess := mockS.NewMockSessionRepositoryI(ctrl)
+	mockOrd := mockO.NewMockOrderRepositoryI(ctrl)
+	usecase := NewRestaurantUsecase(mockRest, mockProd, mockSess, mockOrd)
 
 	menutypes := []*entity.MenuType{
 		{
@@ -219,13 +233,13 @@ func TestGetRestaurantProductsFail(t *testing.T) {
 	testErr := errors.New("test")
 	var elemID = 1
 
-	mockRest.EXPECT().GetMenuTypesByRestaurantId(uint(elemID)).Return([]*entity.MenuType{}, testErr)
+	mockRest.EXPECT().GetMenuTypesByRestaurantID(uint(elemID)).Return([]*entity.MenuType{}, testErr)
 	actual, err := usecase.GetRestaurantProducts(uint(elemID))
 	assert.Empty(t, actual)
 	assert.Equal(t, testErr, err)
 
-	mockRest.EXPECT().GetMenuTypesByRestaurantId(uint(elemID)).Return(menutypes, nil)
-	mockProd.EXPECT().GetProductsByMenuTypeId(uint(elemID)).Return([]*entity.Product{}, testErr)
+	mockRest.EXPECT().GetMenuTypesByRestaurantID(uint(elemID)).Return(menutypes, nil)
+	mockProd.EXPECT().GetProductsByMenuTypeID(uint(elemID)).Return([]*entity.Product{}, testErr)
 	actual, err = usecase.GetRestaurantProducts(uint(elemID))
 	assert.Empty(t, actual)
 	assert.Equal(t, entity.ErrInternalServerError, err)

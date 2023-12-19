@@ -50,49 +50,64 @@ func (mr *MockRestaurantRepositoryIMockRecorder) GetCategories() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCategories", reflect.TypeOf((*MockRestaurantRepositoryI)(nil).GetCategories))
 }
 
-// GetCategoriesByRestaurantId mocks base method.
-func (m *MockRestaurantRepositoryI) GetCategoriesByRestaurantId(id uint) ([]*entity.Category, error) {
+// GetCategoriesByRestaurantID mocks base method.
+func (m *MockRestaurantRepositoryI) GetCategoriesByRestaurantID(id uint) ([]*entity.Category, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCategoriesByRestaurantId", id)
+	ret := m.ctrl.Call(m, "GetCategoriesByRestaurantID", id)
 	ret0, _ := ret[0].([]*entity.Category)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetCategoriesByRestaurantId indicates an expected call of GetCategoriesByRestaurantId.
-func (mr *MockRestaurantRepositoryIMockRecorder) GetCategoriesByRestaurantId(id interface{}) *gomock.Call {
+// GetCategoriesByRestaurantID indicates an expected call of GetCategoriesByRestaurantID.
+func (mr *MockRestaurantRepositoryIMockRecorder) GetCategoriesByRestaurantID(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCategoriesByRestaurantId", reflect.TypeOf((*MockRestaurantRepositoryI)(nil).GetCategoriesByRestaurantId), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCategoriesByRestaurantID", reflect.TypeOf((*MockRestaurantRepositoryI)(nil).GetCategoriesByRestaurantID), id)
 }
 
-// GetMenuTypesByRestaurantId mocks base method.
-func (m *MockRestaurantRepositoryI) GetMenuTypesByRestaurantId(id uint) ([]*entity.MenuType, error) {
+// GetMenuTypesByRestaurantID mocks base method.
+func (m *MockRestaurantRepositoryI) GetMenuTypesByRestaurantID(id uint) ([]*entity.MenuType, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetMenuTypesByRestaurantId", id)
+	ret := m.ctrl.Call(m, "GetMenuTypesByRestaurantID", id)
 	ret0, _ := ret[0].([]*entity.MenuType)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetMenuTypesByRestaurantId indicates an expected call of GetMenuTypesByRestaurantId.
-func (mr *MockRestaurantRepositoryIMockRecorder) GetMenuTypesByRestaurantId(id interface{}) *gomock.Call {
+// GetMenuTypesByRestaurantID indicates an expected call of GetMenuTypesByRestaurantID.
+func (mr *MockRestaurantRepositoryIMockRecorder) GetMenuTypesByRestaurantID(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMenuTypesByRestaurantId", reflect.TypeOf((*MockRestaurantRepositoryI)(nil).GetMenuTypesByRestaurantId), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMenuTypesByRestaurantID", reflect.TypeOf((*MockRestaurantRepositoryI)(nil).GetMenuTypesByRestaurantID), id)
 }
 
-// GetRestaurantById mocks base method.
-func (m *MockRestaurantRepositoryI) GetRestaurantById(id uint) (*entity.Restaurant, error) {
+// GetRestaurantByID mocks base method.
+func (m *MockRestaurantRepositoryI) GetRestaurantByID(id uint) (*entity.Restaurant, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetRestaurantById", id)
+	ret := m.ctrl.Call(m, "GetRestaurantByID", id)
 	ret0, _ := ret[0].(*entity.Restaurant)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetRestaurantById indicates an expected call of GetRestaurantById.
-func (mr *MockRestaurantRepositoryIMockRecorder) GetRestaurantById(id interface{}) *gomock.Call {
+// GetRestaurantByID indicates an expected call of GetRestaurantByID.
+func (mr *MockRestaurantRepositoryIMockRecorder) GetRestaurantByID(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRestaurantById", reflect.TypeOf((*MockRestaurantRepositoryI)(nil).GetRestaurantById), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRestaurantByID", reflect.TypeOf((*MockRestaurantRepositoryI)(nil).GetRestaurantByID), id)
+}
+
+// GetRestaurantByName mocks base method.
+func (m *MockRestaurantRepositoryI) GetRestaurantByName(name string) (*entity.Restaurant, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRestaurantByName", name)
+	ret0, _ := ret[0].(*entity.Restaurant)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRestaurantByName indicates an expected call of GetRestaurantByName.
+func (mr *MockRestaurantRepositoryIMockRecorder) GetRestaurantByName(name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRestaurantByName", reflect.TypeOf((*MockRestaurantRepositoryI)(nil).GetRestaurantByName), name)
 }
 
 // GetRestaurants mocks base method.
