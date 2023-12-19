@@ -1,7 +1,6 @@
 package delivery
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 	restaurantUsecase "server/internal/Restaurant/usecase"
@@ -11,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 )
 
 type Result struct {
@@ -69,8 +69,7 @@ func (handler *RestaurantHandler) GetRestaurantList(w http.ResponseWriter, r *ht
 
 	body := rests
 
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(&Result{Body: body})
+	_, err = easyjson.MarshalToWriter(body, w)
 
 	if err != nil {
 		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
@@ -103,7 +102,6 @@ func (handler *RestaurantHandler) GetRestaurantById(w http.ResponseWriter, r *ht
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		handler.logger.LogError("problems with parameters", errors.New("id is not number"), w.Header().Get("request-id"), r.URL.Path)
-		err = json.NewEncoder(w).Encode(&RespError{Err: "id is not a number"})
 		return
 	}
 
@@ -124,8 +122,7 @@ func (handler *RestaurantHandler) GetRestaurantById(w http.ResponseWriter, r *ht
 
 	body := rest
 
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(&Result{Body: body})
+	_, err = easyjson.MarshalToWriter(body, w)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -149,7 +146,6 @@ func (handler *RestaurantHandler) GetRestaurantProducts(w http.ResponseWriter, r
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		handler.logger.LogError("problems with parameters", errors.New("id is not number"), w.Header().Get("request-id"), r.URL.Path)
-		err = json.NewEncoder(w).Encode(&RespError{Err: "id is not a number"})
 		return
 	}
 
@@ -170,8 +166,7 @@ func (handler *RestaurantHandler) GetRestaurantProducts(w http.ResponseWriter, r
 
 	body := menu
 
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(&Result{Body: body})
+	_, err = easyjson.MarshalToWriter(body, w)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -207,8 +202,7 @@ func (handler *RestaurantHandler) GetRestaurantListByCategory(w http.ResponseWri
 
 	body := rests
 
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(&Result{Body: body})
+	_, err = easyjson.MarshalToWriter(body, w)
 
 	if err != nil {
 		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
@@ -231,8 +225,7 @@ func (handler *RestaurantHandler) GetCategoryList(w http.ResponseWriter, r *http
 
 	body := cats
 
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(&Result{Body: body})
+	_, err = easyjson.MarshalToWriter(body, w)
 
 	if err != nil {
 		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
@@ -266,8 +259,7 @@ func (handler *RestaurantHandler) Search(w http.ResponseWriter, r *http.Request)
 
 	body := rests
 
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(&Result{Body: body})
+	_, err = easyjson.MarshalToWriter(body, w)
 
 	if err != nil {
 		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
@@ -281,7 +273,7 @@ func (handler *RestaurantHandler) GetRestaurantTipList(w http.ResponseWriter, r 
 
 	cookie, _ := r.Cookie("session_id")
 
-	var rests []*dto.RestaurantWithCategories
+	var rests *dto.RestaurantWithCategoriesSlice
 	var err error
 
 	if cookie == nil {
@@ -298,8 +290,7 @@ func (handler *RestaurantHandler) GetRestaurantTipList(w http.ResponseWriter, r 
 
 	body := rests
 
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(&Result{Body: body})
+	_, err = easyjson.MarshalToWriter(body, w)
 
 	if err != nil {
 		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)

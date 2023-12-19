@@ -1,10 +1,6 @@
 package delivery
 
 import (
-	"encoding/json"
-
-	"io/ioutil"
-
 	"net/http"
 
 	sessionUsecase "server/internal/Session/usecase"
@@ -15,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 )
 
 type Result struct {
@@ -73,16 +70,9 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonbody, err := ioutil.ReadAll(r.Body)
-
-	if err != nil {
-		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	reqUser := dto.ReqCreateUser{}
-	err = json.Unmarshal(jsonbody, &reqUser)
+
+	err := easyjson.UnmarshalFromReader(r.Body, &reqUser)
 
 	if err != nil {
 		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
@@ -115,11 +105,10 @@ func (handler *SessionHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	body := map[string]interface{}{
-		"ID": id,
-	}
 
-	err = json.NewEncoder(w).Encode(&Result{Body: body})
+	body := &dto.RespID{ID: id}
+
+	_, err = easyjson.MarshalToWriter(body, w)
 	if err != nil {
 		handler.logger.LogError("problems marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -150,16 +139,9 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonbody, err := ioutil.ReadAll(r.Body)
-
-	if err != nil {
-		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	reqUser := dto.ReqLoginUser{}
-	err = json.Unmarshal(jsonbody, &reqUser)
+
+	err := easyjson.UnmarshalFromReader(r.Body, &reqUser)
 
 	if err != nil {
 		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
@@ -197,7 +179,7 @@ func (handler *SessionHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.NewEncoder(w).Encode(&Result{Body: user})
+	_, err = easyjson.MarshalToWriter(user, w)
 	if err != nil {
 		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -272,7 +254,8 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		handler.logger.LogError("problems with auth cookie", err, w.Header().Get("request-id"), r.URL.Path)
 	}
-	err = json.NewEncoder(w).Encode(&Result{Body: user})
+
+	_, err = easyjson.MarshalToWriter(user, w)
 	if err != nil {
 		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -301,7 +284,7 @@ func (handler *SessionHandler) Profile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.NewEncoder(w).Encode(&Result{Body: user})
+	_, err = easyjson.MarshalToWriter(user, w)
 	if err != nil {
 		handler.logger.LogError("problems with marshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -321,15 +304,9 @@ func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Requ
 	cookie, _ := r.Cookie("session_id")
 	id, _ := handler.sessions.GetIdByCookie(cookie.Value)
 
-	jsonbody, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		handler.logger.LogError("problems with reading json", err, w.Header().Get("request-id"), r.URL.Path)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	updatedUser := &dto.ReqUpdateUser{}
-	err = json.Unmarshal(jsonbody, &updatedUser)
+
+	err := easyjson.UnmarshalFromReader(r.Body, updatedUser)
 	if err != nil {
 		handler.logger.LogError("prbolems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)

@@ -31,6 +31,10 @@ type ReqLoginUser struct {
 	Password string `json:"Password"`
 }
 
+type RespID struct {
+	ID uint `json:"ID"`
+}
+
 type ReqUpdateUser struct {
 	Username    string `json:"Username"`
 	Password    string `json:"Password"`
