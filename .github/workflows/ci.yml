@@ -107,32 +107,32 @@ jobs:
   #         GOFLAGS: -buildvcs=false
   #       run: make coverage
 
-  # build:
-  #   needs: [linter]
+  build:
+    # needs: [linter]
   
-  #   runs-on: ubuntu-latest
-  #   container: golang
+    runs-on: ubuntu-latest
+    container: golang
 
-  #   steps:
-  #     - uses: actions/checkout@v3
+    steps:
+      - uses: actions/checkout@v3
 
-  #     - name: Build
-  #       env:
-  #         GOOS: linux
-  #         GOARCH: amd64
-  #         CGO_ENABLED: 0
-  #       run: mkdir build && go build -buildvcs=false -o build kudago/cmd/...
+      - name: Build
+        env:
+          GOOS: linux
+          GOARCH: amd64
+          CGO_ENABLED: 0
+        run: make build
 
-  #     - name: Upload artifacts
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: build-data
-  #         path: |
-  #           build
-  #           configs
-  #           web
-  #           deploy/postgres
-  #           deploy/prod
+      # - name: Upload artifacts
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: build-data
+      #     path: |
+      #       build
+      #       configs
+      #       web
+      #       deploy/postgres
+      #       deploy/prod
 
   deploy:
     # needs: [build]
@@ -145,20 +145,20 @@ jobs:
       #     name: build-data
       #     path: .
 
-      # - name: Push build data
-      #   uses: appleboy/scp-action@v0.1.4
-      #   with:
-      #     host: event-radar.ru
-      #     username: centos
-      #     overwrite: true
-      #     key: ${{ secrets.VM_RSA_KEY }}
-      #     source: "build/*,configs/config_deploy.json,configs/access-control/*,web/templates/*,deploy/postgres/Dockerfile,deploy/prod/docker-compose.yml,deploy/prod/*/Dockerfile"
-      #     target: /home/centos/deploy/backend
+      - name: Push build data
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: prinesy-poday.ru
+          username: ubuntu
+          overwrite: true
+          key: ${{ secrets.SSH_ACTIONS }}
+          source: "build/*, docker-compose.yml, Dockerfile"
+          target: /home/ubuntu/2023_2_fanaty_elki
       
       - name: Deploy
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: prinesy-poday.ru
           username: ubuntu
-          key: ${{ secrets.VM_RSA_KEY }}
-          script: ls #cd /home/centos/deploy/backend && ./deploy.sh
+          key: ${{ secrets.SSH_ACTIONS }}
+          script: cd /home/centos/deploy/backend && ./deploy.sh
