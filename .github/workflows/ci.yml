@@ -1,51 +1,149 @@
-name: ci
+# name: ci
 
-on:
-  push:
-    branches: [ci]
-  pull_request:
-    branches: [ci]
+# on:
+#   push:
+#     branches: [ci]
+#   pull_request:
+#     branches: [ci]
 
-jobs:
+# jobs:
+#   ci:
+#     runs-on: ubuntu-22.04
+#     steps:
+#     - uses: actions/checkout@v2
 
-  ci:
-    runs-on: ubuntu-22.04
-    steps:
-    - uses: actions/checkout@v2
+#     - name: Set up Go
+#       uses: actions/setup-go@v2
+#       with:
+#         go-version: 1.21
 
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.21
-
-    - name: Verify dependencies
-      run: find -name go.mod -execdir go mod verify \;
+#     - name: Verify dependencies
+#       run: find -name go.mod -execdir go mod verify \;
 
         
 
-    # - name: Run go vet
-    #   run: go vet ./...
+#     # - name: Run go vet
+#     #   run: go vet ./...
 
-    # - name: Install staticcheck
-    #   run: go install honnef.co/go/tools/cmd/staticcheck@latest
+#     # - name: Install staticcheck
+#     #   run: go install honnef.co/go/tools/cmd/staticcheck@latest
 
-    # - name: Run staticcheck
-    #   run: staticcheck ./...
+#     # - name: Run staticcheck
+#     #   run: staticcheck ./...
 
-    - name: Install golint
-      run: go install golang.org/x/lint/golint@latest
+#     - name: Install golint
+#       run: go install golang.org/x/lint/golint@latest
 
-    - name: Run golint
-      run: find -name go.mod -execdir golint ./... \;
+#     - name: Run golint
+#       run: find -name go.mod -execdir golint ./... \;
 
-    # - name: Run tests
-    #   run: go test -race -vet=off ./...
+#   prepare_ssh:
+#     before_script:
+#       - "command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )"
+#       - eval $(ssh-agent -s)
+#       - echo "$SSH_KEY_REMOTE_VM" | ssh-add -
+  
+#       - mkdir -p ~/.ssh
+#       - chmod 700 ~/.ssh
+#       - ssh-keyscan -t rsa 212.233.72.6 >> ~/.ssh/known_hosts
+  
+  
+#   deploy:
+#     extends: .prepare_ssh
+#     image: docker
+#     services:
+#       - docker:dind
+#     stage: deploy
+#     script:
+#       - ssh centos@212.233.72.6 'cd ./hw_10; sudo docker-compose -f ./docker-compose.yml down; sudo git pull origin main; nohup sudo ./start.sh > /dev/null 2>&1 &'
+  
+#     environment:
+#       name: production
+#       url: http://212.233.72.6
+#     only:
+#       - main
 
-    - name: SSH and deploy
-      env: 
-        SSH_PRIVATE_KEY:  ${{ secrets.VM_RSA_KEY }}
-      run: |
-        mkdir -p ~/.ssh/
-        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh ubuntu@84.23.53.216 'ls'   
+
+name: ci
+on:
+  push:
+    branches: [ci]
+
+jobs:
+  golangci-lint:
+    runs-on: ubuntu-latest
+    container: golang
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3.4.0
+
+  # test:
+  #   runs-on: ubuntu-latest
+  #   container: golang
+
+  #   steps:
+  #     - uses: actions/checkout@v3
+
+  #     - name: Run tests
+  #       env:
+  #         GOFLAGS: -buildvcs=false
+  #       run: make coverage
+
+  # build:
+  #   needs: [golangci-lint, test]
+  
+  #   runs-on: ubuntu-latest
+  #   container: golang
+
+  #   steps:
+  #     - uses: actions/checkout@v3
+
+  #     - name: Build
+  #       env:
+  #         GOOS: linux
+  #         GOARCH: amd64
+  #         CGO_ENABLED: 0
+  #       run: mkdir build && go build -buildvcs=false -o build kudago/cmd/...
+
+  #     - name: Upload artifacts
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: build-data
+  #         path: |
+  #           build
+  #           configs
+  #           web
+  #           deploy/postgres
+  #           deploy/prod
+
+  # deploy:
+  #   needs: [build]
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Download build data
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: build-data
+  #         path: .
+
+  #     - name: Push build data
+  #       uses: appleboy/scp-action@v0.1.4
+  #       with:
+  #         host: event-radar.ru
+  #         username: centos
+  #         overwrite: true
+  #         key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #         source: "build/*,configs/config_deploy.json,configs/access-control/*,web/templates/*,deploy/postgres/Dockerfile,deploy/prod/docker-compose.yml,deploy/prod/*/Dockerfile"
+  #         target: /home/centos/deploy/backend
+      
+  #     - name: Deploy
+  #       uses: appleboy/ssh-action@v0.1.10
+  #       with:
+  #         host: event-radar.ru
+  #         username: centos
+  #         key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #         script: cd /home/centos/deploy/backend && ./deploy.sh
