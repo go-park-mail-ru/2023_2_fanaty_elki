@@ -30,7 +30,7 @@ func TestSignUpSuccess(t *testing.T) {
 	defer ctrl.Finish()
 	var logger *mw.ACLog
 	apiPath := "/api/users"
-	mockSes := mockS.NewMockUsecaseI(ctrl)
+	mockSes := mockS.NewMockSessionUsecaseI(ctrl)
 	mockUs := mockU.NewMockUsecaseI(ctrl)
 	handler := NewSessionHandler(mockSes, mockUs, logger)
 
@@ -95,7 +95,7 @@ func TestSignUpFail(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/users"
-	mockSes := mockS.NewMockUsecaseI(ctrl)
+	mockSes := mockS.NewMockSessionUsecaseI(ctrl)
 	mockUs := mockU.NewMockUsecaseI(ctrl)
 	handler := NewSessionHandler(mockSes, mockUs, logger)
 
@@ -264,7 +264,7 @@ func TestLoginSuccess(t *testing.T) {
 	defer ctrl.Finish()
 	var logger *mw.ACLog
 	apiPath := "/api/login"
-	mockSes := mockS.NewMockUsecaseI(ctrl)
+	mockSes := mockS.NewMockSessionUsecaseI(ctrl)
 	mockUs := mockU.NewMockUsecaseI(ctrl)
 	handler := NewSessionHandler(mockSes, mockUs, logger)
 
@@ -333,7 +333,7 @@ func TestLoginFail(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/login"
-	mockSes := mockS.NewMockUsecaseI(ctrl)
+	mockSes := mockS.NewMockSessionUsecaseI(ctrl)
 	mockUs := mockU.NewMockUsecaseI(ctrl)
 	handler := NewSessionHandler(mockSes, mockUs, logger)
 
@@ -474,7 +474,7 @@ func TestLogoutSuccess(t *testing.T) {
 	defer ctrl.Finish()
 	var logger *mw.ACLog
 	apiPath := "/api/logout"
-	mockSes := mockS.NewMockUsecaseI(ctrl)
+	mockSes := mockS.NewMockSessionUsecaseI(ctrl)
 	mockUs := mockU.NewMockUsecaseI(ctrl)
 	handler := NewSessionHandler(mockSes, mockUs, logger)
 
@@ -515,7 +515,7 @@ func TestLogoutFail(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/logout"
-	mockSes := mockS.NewMockUsecaseI(ctrl)
+	mockSes := mockS.NewMockSessionUsecaseI(ctrl)
 	mockUs := mockU.NewMockUsecaseI(ctrl)
 	handler := NewSessionHandler(mockSes, mockUs, logger)
 
@@ -542,7 +542,7 @@ func TestAuthSuccess(t *testing.T) {
 	defer ctrl.Finish()
 	var logger *mw.ACLog
 	apiPath := "/api/auth"
-	mockSes := mockS.NewMockUsecaseI(ctrl)
+	mockSes := mockS.NewMockSessionUsecaseI(ctrl)
 	mockUs := mockU.NewMockUsecaseI(ctrl)
 	handler := NewSessionHandler(mockSes, mockUs, logger)
 
@@ -575,7 +575,7 @@ func TestProfileSuccess(t *testing.T) {
 	defer ctrl.Finish()
 	var logger *mw.ACLog
 	apiPath := "/api/me"
-	mockSes := mockS.NewMockUsecaseI(ctrl)
+	mockSes := mockS.NewMockSessionUsecaseI(ctrl)
 	mockUs := mockU.NewMockUsecaseI(ctrl)
 	handler := NewSessionHandler(mockSes, mockUs, logger)
 
@@ -607,7 +607,7 @@ func TestUpdateProfileSuccess(t *testing.T) {
 	defer ctrl.Finish()
 	var logger *mw.ACLog
 	apiPath := "/api/me"
-	mockSes := mockS.NewMockUsecaseI(ctrl)
+	mockSes := mockS.NewMockSessionUsecaseI(ctrl)
 	mockUs := mockU.NewMockUsecaseI(ctrl)
 	handler := NewSessionHandler(mockSes, mockUs, logger)
 
@@ -625,7 +625,7 @@ func TestUpdateProfileSuccess(t *testing.T) {
 		"Email": "ani@mail.ru",
 	}
 
-	mockSes.EXPECT().GetIdByCookie(cookie.SessionToken).Return(uint(1), nil)
+	mockSes.EXPECT().GetIDByCookie(cookie.SessionToken).Return(uint(1), nil)
 	mockUs.EXPECT().UpdateUser(user).Return(nil)
 
 	body, err := json.Marshal(jsonuser)

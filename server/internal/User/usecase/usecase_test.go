@@ -41,7 +41,7 @@ func TestGetUserByIdSucces(t *testing.T) {
 		Icon:        "dificon",
 	}
 
-	mockUs.EXPECT().FindUserById(uint(1)).Return(dbuser, nil)
+	mockUs.EXPECT().FindUserByID(uint(1)).Return(dbuser, nil)
 	actual, err := usecase.GetUserByID(uint(1))
 	assert.Equal(t, user, actual)
 	assert.Nil(t, err)
@@ -127,7 +127,7 @@ func TestUpdateUserSucces(t *testing.T) {
 	mockUs.EXPECT().FindUserByUsername(dbuser.Username).Return(nil, nil)
 	mockUs.EXPECT().FindUserByEmail(dbuser.Email).Return(nil, nil)
 	mockUs.EXPECT().FindUserByPhone(dbuser.PhoneNumber).Return(nil, nil)
-	mockUs.EXPECT().FindUserById(uint(1)).Return(dbgetuser, nil)
+	mockUs.EXPECT().FindUserByID(uint(1)).Return(dbgetuser, nil)
 	mockUs.EXPECT().UpdateUser(dbuser).Return(nil)
 	err := usecase.UpdateUser(user)
 	assert.Nil(t, err)
