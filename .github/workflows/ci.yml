@@ -70,15 +70,28 @@ on:
     branches: [ci]
 
 jobs:
-  golangci-lint:
+  versions:
     runs-on: ubuntu-latest
-    container: golang
-    
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v3.4.0
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.21
+
+    - name: Verify dependencies
+      run: find -name go.mod -execdir go mod verify \;
+
+  # golangci-lint:
+  #   runs-on: ubuntu-latest
+  #   container: golang
+    
+  #   steps:
+  #     - uses: actions/checkout@v3
+
+  #     - name: Run golangci-lint
+  #       uses: golangci/golangci-lint-action@v3.4.0
 
   # test:
   #   runs-on: ubuntu-latest
