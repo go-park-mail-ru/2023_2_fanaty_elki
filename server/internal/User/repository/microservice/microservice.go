@@ -27,7 +27,7 @@ func (us *UserMicroService) FindUserByID(id uint) (*dto.DBGetUser, error) {
 
 	grpcid := userProto.ID{ID: uint64(id)}
 
-	grpcUser, err := us.client.FindUserById(ctx, &grpcid)
+	grpcUser, err := us.client.FindUserByID(ctx, &grpcid)
 	if err != nil {
 		return nil, err
 	}

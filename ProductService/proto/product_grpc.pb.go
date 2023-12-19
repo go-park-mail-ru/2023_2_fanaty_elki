@@ -22,10 +22,10 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ProductRPCClient interface {
-	GetProductsByMenuTypeId(ctx context.Context, in *ID, opts ...grpc.CallOption) (*ProductSlice, error)
+	GetProductsByMenuTypeID(ctx context.Context, in *ID, opts ...grpc.CallOption) (*ProductSlice, error)
 	GetProductByID(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Product, error)
 	SearchProducts(ctx context.Context, in *Word, opts ...grpc.CallOption) (*ProductSlice, error)
-	GetRestaurantIdByProduct(ctx context.Context, in *ID, opts ...grpc.CallOption) (*ID, error)
+	GetRestaurantIDByProduct(ctx context.Context, in *ID, opts ...grpc.CallOption) (*ID, error)
 }
 
 type productRPCClient struct {
@@ -36,9 +36,9 @@ func NewProductRPCClient(cc grpc.ClientConnInterface) ProductRPCClient {
 	return &productRPCClient{cc}
 }
 
-func (c *productRPCClient) GetProductsByMenuTypeId(ctx context.Context, in *ID, opts ...grpc.CallOption) (*ProductSlice, error) {
+func (c *productRPCClient) GetProductsByMenuTypeID(ctx context.Context, in *ID, opts ...grpc.CallOption) (*ProductSlice, error) {
 	out := new(ProductSlice)
-	err := c.cc.Invoke(ctx, "/product.ProductRPC/GetProductsByMenuTypeId", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/product.ProductRPC/GetProductsByMenuTypeID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -63,9 +63,9 @@ func (c *productRPCClient) SearchProducts(ctx context.Context, in *Word, opts ..
 	return out, nil
 }
 
-func (c *productRPCClient) GetRestaurantIdByProduct(ctx context.Context, in *ID, opts ...grpc.CallOption) (*ID, error) {
+func (c *productRPCClient) GetRestaurantIDByProduct(ctx context.Context, in *ID, opts ...grpc.CallOption) (*ID, error) {
 	out := new(ID)
-	err := c.cc.Invoke(ctx, "/product.ProductRPC/GetRestaurantIdByProduct", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/product.ProductRPC/GetRestaurantIDByProduct", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -76,18 +76,18 @@ func (c *productRPCClient) GetRestaurantIdByProduct(ctx context.Context, in *ID,
 // All implementations should embed UnimplementedProductRPCServer
 // for forward compatibility
 type ProductRPCServer interface {
-	GetProductsByMenuTypeId(context.Context, *ID) (*ProductSlice, error)
+	GetProductsByMenuTypeID(context.Context, *ID) (*ProductSlice, error)
 	GetProductByID(context.Context, *ID) (*Product, error)
 	SearchProducts(context.Context, *Word) (*ProductSlice, error)
-	GetRestaurantIdByProduct(context.Context, *ID) (*ID, error)
+	GetRestaurantIDByProduct(context.Context, *ID) (*ID, error)
 }
 
 // UnimplementedProductRPCServer should be embedded to have forward compatible implementations.
 type UnimplementedProductRPCServer struct {
 }
 
-func (UnimplementedProductRPCServer) GetProductsByMenuTypeId(context.Context, *ID) (*ProductSlice, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetProductsByMenuTypeId not implemented")
+func (UnimplementedProductRPCServer) GetProductsByMenuTypeID(context.Context, *ID) (*ProductSlice, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProductsByMenuTypeID not implemented")
 }
 func (UnimplementedProductRPCServer) GetProductByID(context.Context, *ID) (*Product, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProductByID not implemented")
@@ -95,8 +95,8 @@ func (UnimplementedProductRPCServer) GetProductByID(context.Context, *ID) (*Prod
 func (UnimplementedProductRPCServer) SearchProducts(context.Context, *Word) (*ProductSlice, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchProducts not implemented")
 }
-func (UnimplementedProductRPCServer) GetRestaurantIdByProduct(context.Context, *ID) (*ID, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRestaurantIdByProduct not implemented")
+func (UnimplementedProductRPCServer) GetRestaurantIDByProduct(context.Context, *ID) (*ID, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRestaurantIDByProduct not implemented")
 }
 
 // UnsafeProductRPCServer may be embedded to opt out of forward compatibility for this service.
@@ -110,20 +110,20 @@ func RegisterProductRPCServer(s grpc.ServiceRegistrar, srv ProductRPCServer) {
 	s.RegisterService(&ProductRPC_ServiceDesc, srv)
 }
 
-func _ProductRPC_GetProductsByMenuTypeId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ProductRPC_GetProductsByMenuTypeID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ID)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProductRPCServer).GetProductsByMenuTypeId(ctx, in)
+		return srv.(ProductRPCServer).GetProductsByMenuTypeID(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/product.ProductRPC/GetProductsByMenuTypeId",
+		FullMethod: "/product.ProductRPC/GetProductsByMenuTypeID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProductRPCServer).GetProductsByMenuTypeId(ctx, req.(*ID))
+		return srv.(ProductRPCServer).GetProductsByMenuTypeID(ctx, req.(*ID))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -164,20 +164,20 @@ func _ProductRPC_SearchProducts_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ProductRPC_GetRestaurantIdByProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ProductRPC_GetRestaurantIDByProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ID)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ProductRPCServer).GetRestaurantIdByProduct(ctx, in)
+		return srv.(ProductRPCServer).GetRestaurantIDByProduct(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/product.ProductRPC/GetRestaurantIdByProduct",
+		FullMethod: "/product.ProductRPC/GetRestaurantIDByProduct",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProductRPCServer).GetRestaurantIdByProduct(ctx, req.(*ID))
+		return srv.(ProductRPCServer).GetRestaurantIDByProduct(ctx, req.(*ID))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -190,8 +190,8 @@ var ProductRPC_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ProductRPCServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetProductsByMenuTypeId",
-			Handler:    _ProductRPC_GetProductsByMenuTypeId_Handler,
+			MethodName: "GetProductsByMenuTypeID",
+			Handler:    _ProductRPC_GetProductsByMenuTypeID_Handler,
 		},
 		{
 			MethodName: "GetProductByID",
@@ -202,8 +202,8 @@ var ProductRPC_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ProductRPC_SearchProducts_Handler,
 		},
 		{
-			MethodName: "GetRestaurantIdByProduct",
-			Handler:    _ProductRPC_GetRestaurantIdByProduct_Handler,
+			MethodName: "GetRestaurantIDByProduct",
+			Handler:    _ProductRPC_GetRestaurantIDByProduct_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

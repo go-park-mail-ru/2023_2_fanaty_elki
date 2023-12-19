@@ -40,3 +40,12 @@ jobs:
 
     # - name: Run tests
     #   run: go test -race -vet=off ./...
+
+    - name: SSH and deploy
+      env: 
+        SSH_PRIVATE_KEY:  ${{ secrets.VM_RSA_KEY }}
+      run: |
+        mkdir -p ~/.ssh/
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh ubuntu@84.23.53.216 'ls'   
