@@ -1,38 +1,38 @@
 package dto
 
 import (
-	"database/sql"
 	proto "UserService/proto"
+	"database/sql"
 )
 
 type DBCreateUser struct {
-	ID          uint           
-	Username    string         
-	Password    string         
+	ID          uint
+	Username    string
+	Password    string
 	Birthday    sql.NullString
-	PhoneNumber string         
-	Email       string         
-	Icon        sql.NullString 
+	PhoneNumber string
+	Email       string
+	Icon        sql.NullString
 }
 
 type DBUpdateUser struct {
-	ID          uint           
-	Username    string         
-	Password    string         
+	ID          uint
+	Username    string
+	Password    string
 	Birthday    sql.NullString
-	PhoneNumber string         
-	Email       string         
-	Icon        sql.NullString 
+	PhoneNumber string
+	Email       string
+	Icon        sql.NullString
 }
 
 type DBGetUser struct {
-	ID          uint           
-	Username    string         
-	Password    string         
+	ID          uint
+	Username    string
+	Password    string
 	Birthday    sql.NullString
-	PhoneNumber string         
-	Email       string         
-	Icon        sql.NullString 
+	PhoneNumber string
+	Email       string
+	Icon        sql.NullString
 }
 
 func ToRespGetUser(user *DBGetUser) *proto.DBGetUser {
@@ -40,13 +40,13 @@ func ToRespGetUser(user *DBGetUser) *proto.DBGetUser {
 		return nil
 	}
 	return &proto.DBGetUser{
-		ID: uint64(user.ID),
-		Username: user.Username,
-		Password: user.Password,
-		Birthday:    transformSqlStringToString(user.Birthday),
-		PhoneNumber: user.PhoneNumber,         
-		Email:       user.Email,         
-		Icon:        transformSqlStringToString(user.Icon), 
+		ID:          uint64(user.ID),
+		Username:    user.Username,
+		Password:    user.Password,
+		Birthday:    transformSQLStringToString(user.Birthday),
+		PhoneNumber: user.PhoneNumber,
+		Email:       user.Email,
+		Icon:        transformSQLStringToString(user.Icon),
 	}
 }
 
@@ -55,13 +55,13 @@ func ToDBGetUser(user *proto.DBGetUser) *DBGetUser {
 		return nil
 	}
 	return &DBGetUser{
-		ID: uint(user.ID),
-		Password: user.Password,
-		Username: user.Username,
-		Birthday:    *transformStringToSqlString(user.Birthday),
-		PhoneNumber: user.PhoneNumber,         
-		Email:       user.Email,         
-		Icon:        *transformStringToSqlString(user.Icon), 
+		ID:          uint(user.ID),
+		Password:    user.Password,
+		Username:    user.Username,
+		Birthday:    *transformStringToSQLString(user.Birthday),
+		PhoneNumber: user.PhoneNumber,
+		Email:       user.Email,
+		Icon:        *transformStringToSQLString(user.Icon),
 	}
 }
 
@@ -70,13 +70,13 @@ func ToRespCreateUser(user *DBCreateUser) *proto.DBCreateUser {
 		return nil
 	}
 	return &proto.DBCreateUser{
-		ID:			 uint64(user.ID),
-		Username: 	 user.Username,
-		Password: 	 user.Password,
-		Birthday:    transformSqlStringToString(user.Birthday),
-		PhoneNumber: user.PhoneNumber,         
-		Email:       user.Email,         
-		Icon:        transformSqlStringToString(user.Icon), 
+		ID:          uint64(user.ID),
+		Username:    user.Username,
+		Password:    user.Password,
+		Birthday:    transformSQLStringToString(user.Birthday),
+		PhoneNumber: user.PhoneNumber,
+		Email:       user.Email,
+		Icon:        transformSQLStringToString(user.Icon),
 	}
 }
 
@@ -85,13 +85,13 @@ func ToDBCreateUser(user *proto.DBCreateUser) *DBCreateUser {
 		return nil
 	}
 	return &DBCreateUser{
-		ID:			 uint(user.ID),
-		Username: 	 user.Username,
-		Password: 	 user.Password,
-		Birthday:    *transformStringToSqlString(user.Birthday),
-		PhoneNumber: user.PhoneNumber,         
-		Email:       user.Email,         
-		Icon:        *transformStringToSqlString(user.Icon), 
+		ID:          uint(user.ID),
+		Username:    user.Username,
+		Password:    user.Password,
+		Birthday:    *transformStringToSQLString(user.Birthday),
+		PhoneNumber: user.PhoneNumber,
+		Email:       user.Email,
+		Icon:        *transformStringToSQLString(user.Icon),
 	}
 }
 
@@ -100,13 +100,13 @@ func ToRespUpdateUser(user *DBUpdateUser) *proto.DBUpdateUser {
 		return nil
 	}
 	return &proto.DBUpdateUser{
-		ID:			 uint64(user.ID),
-		Username: 	 user.Username,
+		ID:          uint64(user.ID),
+		Username:    user.Username,
 		Password:    user.Password,
-		Birthday:    transformSqlStringToString(user.Birthday),
-		PhoneNumber: user.PhoneNumber,         
-		Email:       user.Email,         
-		Icon:        transformSqlStringToString(user.Icon), 
+		Birthday:    transformSQLStringToString(user.Birthday),
+		PhoneNumber: user.PhoneNumber,
+		Email:       user.Email,
+		Icon:        transformSQLStringToString(user.Icon),
 	}
 }
 
@@ -115,27 +115,26 @@ func ToDBUpdateUser(user *proto.DBUpdateUser) *DBUpdateUser {
 		return nil
 	}
 	return &DBUpdateUser{
-		ID:		     uint(user.ID),
-		Username: 	 user.Username,
+		ID:          uint(user.ID),
+		Username:    user.Username,
 		Password:    user.Password,
-		Birthday:    *transformStringToSqlString(user.Birthday),
-		PhoneNumber: user.PhoneNumber,         
-		Email:       user.Email,         
-		Icon:        *transformStringToSqlString(user.Icon), 
+		Birthday:    *transformStringToSQLString(user.Birthday),
+		PhoneNumber: user.PhoneNumber,
+		Email:       user.Email,
+		Icon:        *transformStringToSQLString(user.Icon),
 	}
 }
 
-func transformStringToSqlString(str string) *sql.NullString {
+func transformStringToSQLString(str string) *sql.NullString {
 	if str != "" {
 		return &sql.NullString{String: str, Valid: true}
 	}
 	return &sql.NullString{Valid: false}
 }
 
-func transformSqlStringToString(str sql.NullString) string {
+func transformSQLStringToString(str sql.NullString) string {
 	if str.Valid {
 		return str.String
 	}
 	return ""
 }
-

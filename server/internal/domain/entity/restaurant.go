@@ -1,5 +1,6 @@
 package entity
 
+//Restaurant entity
 type Restaurant struct {
 	ID              uint
 	Name            string

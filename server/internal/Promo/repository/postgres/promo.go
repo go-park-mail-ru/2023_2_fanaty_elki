@@ -20,7 +20,7 @@ func NewPromoRepo(db *sql.DB) repository.PromoRepositoryI {
 func (repo *PromoRepo) GetPromo(code string) (*entity.Promo, error) {
 	promo := &dto.DBGetPromo{}
 	row := repo.DB.QueryRow("SELECT id, code, promo_type, sale, restaurant_id, active_from, active_to FROM promo WHERE code = $1", code)
-	err := row.Scan(&promo.ID, &promo.Code, &promo.PromoType, &promo.Sale, &promo.RestaurantId, &promo.ActiveFrom, &promo.ActiveTo)
+	err := row.Scan(&promo.ID, &promo.Code, &promo.PromoType, &promo.Sale, &promo.RestaurantID, &promo.ActiveFrom, &promo.ActiveTo)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -30,10 +30,10 @@ func (repo *PromoRepo) GetPromo(code string) (*entity.Promo, error) {
 	return dto.ToEntityGetPromo(promo), nil
 }
 
-func (repo *PromoRepo) GetPromoById(promoId uint) (*entity.Promo, error) {
+func (repo *PromoRepo) GetPromoById(PromoID uint) (*entity.Promo, error) {
 	promo := &dto.DBGetPromo{}
-	row := repo.DB.QueryRow("SELECT id, code, promo_type, sale, restaurant_id, active_from, active_to FROM promo WHERE id = $1", promoId)
-	err := row.Scan(&promo.ID, &promo.Code, &promo.PromoType, &promo.Sale, &promo.RestaurantId, &promo.ActiveFrom, &promo.ActiveTo)
+	row := repo.DB.QueryRow("SELECT id, code, promo_type, sale, restaurant_id, active_from, active_to FROM promo WHERE id = $1", PromoID)
+	err := row.Scan(&promo.ID, &promo.Code, &promo.PromoType, &promo.Sale, &promo.RestaurantID, &promo.ActiveFrom, &promo.ActiveTo)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -43,30 +43,30 @@ func (repo *PromoRepo) GetPromoById(promoId uint) (*entity.Promo, error) {
 	return dto.ToEntityGetPromo(promo), nil
 }
 
-func (repo *PromoRepo) UsePromo(userId uint, promoId uint) error {
+func (repo *PromoRepo) UsePromo(UserID uint, PromoID uint) error {
 	insertPromo := `INSERT INTO user_promo (user_id, promo_id) VALUES ($1, $2)`
-	_, err := repo.DB.Exec(insertPromo, userId, promoId)
+	_, err := repo.DB.Exec(insertPromo, UserID, PromoID)
 	if err != nil {
 		return entity.ErrInternalServerError
 	}
 	return nil
 }
 
-func (repo *PromoRepo) SetPromoToCart(cartId uint, promoId uint) error {
+func (repo *PromoRepo) SetPromoToCart(cartId uint, PromoID uint) error {
 	insertPromo := `INSERT INTO cart_promo (cart_id, promo_id) VALUES ($1, $2)`
-	_, err := repo.DB.Exec(insertPromo, cartId, promoId)
+	_, err := repo.DB.Exec(insertPromo, cartId, PromoID)
 	if err != nil {
 		return entity.ErrInternalServerError
 	}
 	return nil
 }
 
-func (repo *PromoRepo) CheckPromo(userId uint, promoId uint) (bool, error) {
+func (repo *PromoRepo) CheckPromo(UserID uint, PromoID uint) (bool, error) {
 	userPromo := &entity.UserPromo{}
-	row := repo.DB.QueryRow("SELECT  user_id, promo_id FROM user_promo WHERE user_id = $1 and promo_id = $2", userId, promoId)
+	row := repo.DB.QueryRow("SELECT  user_id, promo_id FROM user_promo WHERE user_id = $1 and promo_id = $2", UserID, PromoID)
 	err := row.Scan(
-		&userPromo.UserId,
-		&userPromo.PromoId,
+		&userPromo.UserID,
+		&userPromo.PromoID,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -78,18 +78,18 @@ func (repo *PromoRepo) CheckPromo(userId uint, promoId uint) (bool, error) {
 	return true, nil
 }
 
-func (repo *PromoRepo) DeletePromo(userId uint, promoId uint) error {
+func (repo *PromoRepo) DeletePromo(UserID uint, PromoID uint) error {
 	deletePromo := `DELETE FROM user_promo WHERE user_id = $1 AND promo_id = $2`
-	_, err := repo.DB.Exec(deletePromo, userId, promoId)
+	_, err := repo.DB.Exec(deletePromo, UserID, PromoID)
 	if err != nil {
 		return entity.ErrInternalServerError
 	}
 	return nil
 }
 
-func (repo *PromoRepo) DeletePromoFromCart(cartId uint, promoId uint) error {
+func (repo *PromoRepo) DeletePromoFromCart(cartId uint, PromoID uint) error {
 	deletePromo := `DELETE FROM cart_promo WHERE cart_id = $1 AND promo_id = $2`
-	_, err := repo.DB.Exec(deletePromo, cartId, promoId)
+	_, err := repo.DB.Exec(deletePromo, cartId, PromoID)
 	if err != nil {
 		return entity.ErrInternalServerError
 	}

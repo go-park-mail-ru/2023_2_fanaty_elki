@@ -7,23 +7,26 @@ import (
 	"time"
 )
 
+//SessionMiddleware provides work with sessions of user
 type SessionMiddleware struct {
-	sessionUC sessionUsecase.UsecaseI
-	logger *ACLog
+	sessionUC sessionUsecase.SessionUsecaseI
+	logger    *ACLog
 }
 
-func NewSessionMiddleware(sessionUC sessionUsecase.UsecaseI, logger *ACLog) *SessionMiddleware {
+//NewSessionMiddleware creates new SessionMiddleware object
+func NewSessionMiddleware(sessionUC sessionUsecase.SessionUsecaseI, logger *ACLog) *SessionMiddleware {
 	return &SessionMiddleware{
 		sessionUC: sessionUC,
-		logger: logger,
+		logger:    logger,
 	}
 }
 
+//AuthMiddleware checks authorization of user
 func (mw *SessionMiddleware) AuthMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Access-Control-Allow-Credentials", "true")
 		cookie, err := r.Cookie("session_id")
-		
+
 		if err == http.ErrNoCookie {
 			mw.logger.LogError("no cookie", err, w.Header().Get("request-id"), r.URL.Path)
 			w.WriteHeader(http.StatusUnauthorized)
@@ -33,20 +36,20 @@ func (mw *SessionMiddleware) AuthMiddleware(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
-		userId, err := mw.sessionUC.Check(cookie.Value)
+		UserID, err := mw.sessionUC.Check(cookie.Value)
 		if err != nil {
 			mw.logger.LogError("problems with getting user by cookie", err, w.Header().Get("request-id"), r.URL.Path)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		if userId == 0 {
+		if UserID == 0 {
 			mw.logger.LogError("user not found", err, w.Header().Get("request-id"), r.URL.Path)
 			cookie.Expires = time.Now().AddDate(0, 0, -1)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
-		if r.Method != http.MethodGet && r.URL.Path != "/api/csrf"{
+		if r.Method != http.MethodGet && r.URL.Path != "/api/csrf" {
 			csrfToken := r.Header.Get("X-CSRF-Token")
 			err = mw.sessionUC.CheckCsrf(cookie.Value, csrfToken)
 			if err != nil {
@@ -55,7 +58,7 @@ func (mw *SessionMiddleware) AuthMiddleware(next http.Handler) http.Handler {
 					w.WriteHeader(entity.StatusFailCSRF)
 					return
 				}
-			
+
 				mw.logger.LogError("problems with checking csrf on server", err, w.Header().Get("request-id"), r.URL.Path)
 				w.WriteHeader(http.StatusInternalServerError)
 				return

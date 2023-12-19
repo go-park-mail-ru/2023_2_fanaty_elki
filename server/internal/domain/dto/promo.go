@@ -8,22 +8,25 @@ import (
 	"time"
 )
 
+//DBGetPromo dto
 type DBGetPromo struct {
 	ID           uint
 	Code         string
 	PromoType    int
 	Sale         sql.NullString
-	RestaurantId sql.NullString
+	RestaurantID sql.NullString
 	ActiveFrom   time.Time
 	ActiveTo     time.Time
 }
 
+//RespPromo dto
 type RespPromo struct {
 	Type     int
 	Discount uint
 	Promo    string
 }
 
+//ToRespPromo transforms Promo to RespPromo
 func ToRespPromo(promo *entity.Promo) *RespPromo {
 	if promo == nil {
 		return nil
@@ -35,6 +38,7 @@ func ToRespPromo(promo *entity.Promo) *RespPromo {
 	}
 }
 
+//ToEntityGetPromo transforms DBGetPromo to Promo
 func ToEntityGetPromo(dbPromo *DBGetPromo) *entity.Promo {
 	if dbPromo == nil {
 		return nil
@@ -43,14 +47,14 @@ func ToEntityGetPromo(dbPromo *DBGetPromo) *entity.Promo {
 		ID:           dbPromo.ID,
 		Code:         dbPromo.Code,
 		PromoType:    dbPromo.PromoType,
-		Sale:         transformSqlStringToUint(dbPromo.Sale),
-		RestaurantId: transformSqlStringToUint(dbPromo.RestaurantId),
+		Sale:         transformSQLStringToUint(dbPromo.Sale),
+		RestaurantID: transformSQLStringToUint(dbPromo.RestaurantID),
 		ActiveFrom:   dbPromo.ActiveFrom,
 		ActiveTo:     dbPromo.ActiveTo,
 	}
 }
 
-func transformSqlStringToUint(str sql.NullString) uint {
+func transformSQLStringToUint(str sql.NullString) uint {
 	if str.Valid {
 		num, err := strconv.ParseUint(str.String, 10, 64)
 		if err != nil {

@@ -65,18 +65,18 @@ func (mr *MockUsecaseIMockRecorder) GetOrder(reqOrder interface{}) *gomock.Call 
 }
 
 // GetOrders mocks base method.
-func (m *MockUsecaseI) GetOrders(userId uint) ([]*dto.RespGetOrder, error) {
+func (m *MockUsecaseI) GetOrders(UserID uint) ([]*dto.RespGetOrder, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetOrders", userId)
+	ret := m.ctrl.Call(m, "GetOrders", UserID)
 	ret0, _ := ret[0].([]*dto.RespGetOrder)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetOrders indicates an expected call of GetOrders.
-func (mr *MockUsecaseIMockRecorder) GetOrders(userId interface{}) *gomock.Call {
+func (mr *MockUsecaseIMockRecorder) GetOrders(UserID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrders", reflect.TypeOf((*MockUsecaseI)(nil).GetOrders), userId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrders", reflect.TypeOf((*MockUsecaseI)(nil).GetOrders), UserID)
 }
 
 // UpdateOrder mocks base method.

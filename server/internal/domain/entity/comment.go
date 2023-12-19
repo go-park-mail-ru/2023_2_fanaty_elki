@@ -4,11 +4,12 @@ import (
 	"time"
 )
 
+//Comment entity
 type Comment struct {
-	Id			 uint
-	Text 		 string
-	RestaurantId uint
-	UserId		 uint
-	Rating 		 uint8
-	Date		 time.Time
+	ID           uint
+	Text         string
+	RestaurantID uint
+	UserID       uint
+	Rating       uint8
+	Date         time.Time
 }

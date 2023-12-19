@@ -1,29 +1,29 @@
 package usecase
 
 import (
+	"fmt"
 	addressRep "server/internal/Address/repository"
 	sessionRep "server/internal/Session/repository"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
-	"fmt"
 )
 
 type UsecaseI interface {
 	CreateAddress(reqAddress *dto.ReqCreateAddress) error
 	DeleteAddress(id uint, sessionToken string) error
-	//GetAddresses(userId uint) (*dto.RespGetAddresses, error)
-	SetAddress(id uint, sessionToken string) error 
+	//GetAddresses(UserID uint) (*dto.RespGetAddresses, error)
+	SetAddress(id uint, sessionToken string) error
 }
 
 type addressUsecase struct {
 	addressRepo addressRep.AddressRepositoryI
-	sessionRepo  sessionRep.SessionRepositoryI
+	sessionRepo sessionRep.SessionRepositoryI
 }
 
 func NewAddressUsecase(addressRepI addressRep.AddressRepositoryI, sessionRepI sessionRep.SessionRepositoryI) *addressUsecase {
 	return &addressUsecase{
 		addressRepo: addressRepI,
-		sessionRepo:  sessionRepI,
+		sessionRepo: sessionRepI,
 	}
 }
 
@@ -52,10 +52,10 @@ func (ad *addressUsecase) CreateAddress(reqAddress *dto.ReqCreateAddress) error 
 		for _, checkAd := range addresses.Addresses {
 			if checkAd.City == address.City && checkAd.Street == address.Street && checkAd.House == address.House && checkAd.Flat == address.Flat {
 				return entity.ErrAddressAlreadyExist
-			} 
+			}
 		}
 	}
-	return ad.addressRepo.CreateAddress(dto.ToDBCreateAddress(address, cookie.UserID)) 
+	return ad.addressRepo.CreateAddress(dto.ToDBCreateAddress(address, cookie.UserID))
 }
 
 func (ad *addressUsecase) DeleteAddress(id uint, sessionToken string) error {
@@ -68,15 +68,15 @@ func (ad *addressUsecase) DeleteAddress(id uint, sessionToken string) error {
 	}
 
 	address := &dto.DBReqDeleteUserAddress{
-		UserId: cookie.UserID,
-		AddressId: id,
+		UserID:    cookie.UserID,
+		AddressID: id,
 	}
 
 	return ad.addressRepo.DeleteAddress(address)
 }
 
-func (ad *addressUsecase) SetAddress(id uint, sessionToken string) error  {
-	
+func (ad *addressUsecase) SetAddress(id uint, sessionToken string) error {
+
 	cookie, err := ad.sessionRepo.Check(sessionToken)
 	if err != nil {
 		return err
@@ -86,10 +86,9 @@ func (ad *addressUsecase) SetAddress(id uint, sessionToken string) error  {
 	}
 
 	address := &dto.DBReqUpdateUserAddress{
-		UserId: cookie.UserID,
-		AddressId: id,
+		UserID:    cookie.UserID,
+		AddressID: id,
 	}
 
 	return ad.addressRepo.SetAddress(address)
 }
-

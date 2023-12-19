@@ -9,7 +9,7 @@ import (
 )
 
 type UsecaseI interface {
-	GetOrders(userId uint) ([]*dto.RespGetOrder, error)
+	GetOrders(UserID uint) ([]*dto.RespGetOrder, error)
 	CreateOrder(reqOrder *dto.ReqCreateOrder) (*dto.RespCreateOrder, error)
 	UpdateOrder(reqOrder *dto.ReqUpdateOrder) error
 	GetOrder(reqOrder *dto.ReqGetOneOrder) (*dto.RespGetOneOrder, error)
@@ -37,7 +37,7 @@ func (or *orderUsecase) CreateOrder(reqOrder *dto.ReqCreateOrder) (*dto.RespCrea
 
 	order := dto.ToEntityCreateOrder(reqOrder)
 
-	cart, err := or.cartRepo.GetCartByUserID(reqOrder.UserId)
+	cart, err := or.cartRepo.GetCartByUserID(reqOrder.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -79,8 +79,8 @@ func (or *orderUsecase) UpdateOrder(reqOrder *dto.ReqUpdateOrder) error {
 	return nil
 }
 
-func (or *orderUsecase) GetOrders(userId uint) ([]*dto.RespGetOrder, error) {
-	return or.orderRepo.GetOrders(userId)
+func (or *orderUsecase) GetOrders(UserID uint) ([]*dto.RespGetOrder, error) {
+	return or.orderRepo.GetOrders(UserID)
 }
 
 func (or *orderUsecase) GetOrder(reqOrder *dto.ReqGetOneOrder) (*dto.RespGetOneOrder, error) {

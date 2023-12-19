@@ -37,8 +37,8 @@ func (pu promoUsecase) UsePromo(SessionToken string, promocode string) (*dto.Res
 		return nil, err
 	}
 
-	userID := cookie.UserID
-	cart, err := pu.cartRepo.GetCartByUserID(userID)
+	UserID := cookie.UserID
+	cart, err := pu.cartRepo.GetCartByUserID(UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -62,13 +62,13 @@ func (pu promoUsecase) UsePromo(SessionToken string, promocode string) (*dto.Res
 		return nil, entity.ErrActionConditionsNotMet
 	}
 
-	if promo.RestaurantId != 0 {
-		if cartWithRestaurant.RestaurantId != promo.RestaurantId {
+	if promo.RestaurantID != 0 {
+		if cartWithRestaurant.RestaurantID != promo.RestaurantID {
 			return nil, entity.ErrActionConditionsNotMet
 		}
 	}
 
-	haspromo, err := pu.promoRepo.CheckPromo(userID, promo.ID)
+	haspromo, err := pu.promoRepo.CheckPromo(UserID, promo.ID)
 
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func (pu promoUsecase) UsePromo(SessionToken string, promocode string) (*dto.Res
 		return nil, entity.ErrPromoIsAlreadyApplied
 	}
 
-	err = pu.promoRepo.UsePromo(userID, promo.ID)
+	err = pu.promoRepo.UsePromo(UserID, promo.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -97,9 +97,9 @@ func (pu promoUsecase) DeletePromo(SessionToken string, promocode string) error 
 		return err
 	}
 
-	userID := cookie.UserID
+	UserID := cookie.UserID
 
-	cart, err := pu.cartRepo.GetCartByUserID(userID)
+	cart, err := pu.cartRepo.GetCartByUserID(UserID)
 	if err != nil {
 		return err
 	}
@@ -113,7 +113,7 @@ func (pu promoUsecase) DeletePromo(SessionToken string, promocode string) error 
 		return entity.ErrNotFound
 	}
 
-	haspromo, err := pu.promoRepo.CheckPromo(userID, promo.ID)
+	haspromo, err := pu.promoRepo.CheckPromo(UserID, promo.ID)
 
 	if err != nil {
 		return err
@@ -121,17 +121,17 @@ func (pu promoUsecase) DeletePromo(SessionToken string, promocode string) error 
 
 	if !haspromo {
 		return entity.ErrNotFound
-	} else {
-		err := pu.promoRepo.DeletePromo(userID, promo.ID)
-		if err != nil {
-			return err
-		}
-
-		err = pu.promoRepo.DeletePromoFromCart(cart.ID, promo.ID)
-		if err != nil {
-			return err
-		}
 	}
+	err = pu.promoRepo.DeletePromo(UserID, promo.ID)
+	if err != nil {
+		return err
+	}
+
+	err = pu.promoRepo.DeletePromoFromCart(cart.ID, promo.ID)
+	if err != nil {
+		return err
+	}
+	
 
 	return nil
 }

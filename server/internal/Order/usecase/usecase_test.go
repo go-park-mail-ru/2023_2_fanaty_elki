@@ -8,9 +8,10 @@ import (
 	"server/internal/domain/entity"
 	"testing"
 
+	"time"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"time"
 )
 
 func TestCreateOrderSuccess(t *testing.T) {
@@ -27,7 +28,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 
 	timenow := time.Now()
 	reqorder := &dto.ReqCreateOrder{
-		UserId: 1,
+		UserID: 1,
 		Address: &dto.ReqCreateOrderAddress{
 			City:   "Moscow",
 			Street: "Tverskaya",
@@ -44,10 +45,10 @@ func TestCreateOrderSuccess(t *testing.T) {
 		UserID: 1,
 	}
 
-	mockCart.EXPECT().GetCartByUserID(order.UserId).Return(cart, nil)
+	mockCart.EXPECT().GetCartByUserID(order.UserID).Return(cart, nil)
 
 	cartwithrest := &entity.CartWithRestaurant{
-		RestaurantId: 1,
+		RestaurantID: 1,
 		Products: []*entity.CartProduct{
 			{
 				ID:        1,
@@ -80,7 +81,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 	order.Price += uint(product.Price) * uint(cartwithrest.Products[0].ItemCount)
 
 	resporder := &dto.RespCreateOrder{
-		Id:     1,
+		ID:     1,
 		Status: 0,
 		Price:  uint(product.Price) * uint(cartwithrest.Products[0].ItemCount),
 		Date:   timenow,
@@ -95,7 +96,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 	}
 
 	resorder := &dto.RespCreateOrder{
-		Id:           1,
+		ID:           1,
 		Status:       0,
 		Price:        uint(product.Price) * uint(cartwithrest.Products[0].ItemCount),
 		Date:         timenow,
@@ -124,7 +125,7 @@ func TestCreateOrderFail(t *testing.T) {
 	flat = 1
 
 	reqorder := &dto.ReqCreateOrder{
-		UserId: 1,
+		UserID: 1,
 		Address: &dto.ReqCreateOrderAddress{
 			City:   "",
 			Street: "Tverskaya",
@@ -148,12 +149,12 @@ func TestUpdateOrderSuccess(t *testing.T) {
 	usecase := NewOrderUsecase(mockOrder, mockCart, mockProduct)
 
 	dbreqorder := dto.ReqUpdateOrder{
-		Id:     1,
+		ID:     1,
 		Status: 1,
 	}
 
 	reqorder := dto.ReqUpdateOrder{
-		Id:     1,
+		ID:     1,
 		Status: 1,
 	}
 
@@ -183,7 +184,7 @@ func TestGetOrdersSuccess(t *testing.T) {
 
 	resporders := []*dto.RespGetOrder{
 		{
-			Id:     1,
+			ID:     1,
 			Status: 0,
 			Date:   timenow,
 			Address: &dto.RespOrderAddress{
@@ -195,7 +196,7 @@ func TestGetOrdersSuccess(t *testing.T) {
 			Price: 100,
 		},
 		{
-			Id:     2,
+			ID:     2,
 			Status: 0,
 			Date:   timenow,
 			Address: &dto.RespOrderAddress{
@@ -227,12 +228,12 @@ func TestGetOrderSuccess(t *testing.T) {
 	timenow := time.Now()
 
 	reqorder := &dto.ReqGetOneOrder{
-		OrderId: 1,
-		UserId:  1,
+		OrderID: 1,
+		UserID:  1,
 	}
 
 	products := &dto.RespGetOrderProduct{
-		Id:    1,
+		ID:    1,
 		Name:  "Burger",
 		Price: 100,
 		Icon:  "def",
@@ -245,7 +246,7 @@ func TestGetOrderSuccess(t *testing.T) {
 	}
 
 	resporder := &dto.RespGetOneOrder{
-		Id:     1,
+		ID:     1,
 		Status: 0,
 		Date:   timenow,
 		Address: &dto.RespOrderAddress{

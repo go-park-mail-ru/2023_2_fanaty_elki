@@ -3,8 +3,8 @@ package repository
 import entity "server/internal/domain/entity"
 
 type CartRepositoryI interface {
-	CreateCart(userID uint) (uint, error)
-	GetCartByUserID(userID uint) (*entity.Cart, error)
+	CreateCart(UserID uint) (uint, error)
+	GetCartByUserID(UserID uint) (*entity.Cart, error)
 	GetCartProductsByCartID(cartID uint) (*entity.CartWithRestaurant, error)
 	AddProductToCart(cartID uint, productID uint) error
 	DeleteProductFromCart(cartID uint, productID uint) error

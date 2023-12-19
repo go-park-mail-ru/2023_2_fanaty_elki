@@ -48,8 +48,8 @@ func TestCheckSuccess(t *testing.T) {
 
 	sestok := "Uuehdbye"
 
-	var userID uint
-	userID = 1
+	var UserID uint
+	UserID = 1
 
 	cookie := entity.Cookie{
 		UserID:       1,
@@ -64,7 +64,7 @@ func TestCheckSuccess(t *testing.T) {
 	}
 
 	mockSes.EXPECT().Check(sestok).Return(&cookie, nil)
-	mockUs.EXPECT().FindUserById(userID).Return(dbuser, nil)
+	mockUs.EXPECT().FindUserById(UserID).Return(dbuser, nil)
 	actual, err := usecase.Check(sestok)
 	assert.Equal(t, cookie.UserID, actual)
 	assert.Nil(t, err)
@@ -139,7 +139,7 @@ func TestGetIdByCookieSuccess(t *testing.T) {
 	}
 
 	mockSes.EXPECT().Check(cookie.SessionToken).Return(&cookie, nil)
-	actual, err := usecase.GetIdByCookie(cookie.SessionToken)
+	actual, err := usecase.GetIDByCookie(cookie.SessionToken)
 	assert.Equal(t, cookie.UserID, actual)
 	assert.Nil(t, err)
 }

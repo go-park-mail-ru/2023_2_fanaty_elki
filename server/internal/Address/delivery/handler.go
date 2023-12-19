@@ -23,11 +23,11 @@ type RespError struct {
 
 type AddressHandler struct {
 	addressUC   addressUsecase.UsecaseI
-	sessionUC sessionUsecase.UsecaseI
+	sessionUC sessionUsecase.SessionUsecaseI
 	logger    *mw.ACLog
 }
 
-func NewAddressHandler(addressUC addressUsecase.UsecaseI, sessionUC sessionUsecase.UsecaseI, logger *mw.ACLog) *AddressHandler {
+func NewAddressHandler(addressUC addressUsecase.UsecaseI, sessionUC sessionUsecase.SessionUsecaseI, logger *mw.ACLog) *AddressHandler {
 	return &AddressHandler{
 		addressUC:   addressUC,
 		sessionUC: sessionUC,

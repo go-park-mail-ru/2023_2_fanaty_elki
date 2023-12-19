@@ -9,17 +9,20 @@ import (
 	"fmt"
 )
 
+//UserMicroService provides management with user microservice
 type UserMicroService struct {
 	client userProto.UserRPCClient
 }
 
+//NewUserMicroService creates new UserRepository interface
 func NewUserMicroService(client userProto.UserRPCClient) userRep.UserRepositoryI {
 	return &UserMicroService {
 		client: client,
 	}
 }
 
-func (us *UserMicroService) FindUserById(id uint) (*dto.DBGetUser, error) {
+//FindUserByID finds user by id in db
+func (us *UserMicroService) FindUserByID(id uint) (*dto.DBGetUser, error) {
 	ctx := context.Background()
 
 	grpcid := userProto.ID{ID: uint64(id)}
@@ -35,6 +38,7 @@ func (us *UserMicroService) FindUserById(id uint) (*dto.DBGetUser, error) {
 	return dto.ToDBGetUser(grpcUser), err
 }
 
+//CreateUser creates user in db
 func(us *UserMicroService) CreateUser(user *dto.DBCreateUser) (uint, error) {
 	ctx := context.Background()
 
@@ -50,6 +54,7 @@ func(us *UserMicroService) CreateUser(user *dto.DBCreateUser) (uint, error) {
 	return uint(grpcid.ID), nil
 }
 
+//UpdateUser updates user in db
 func (us *UserMicroService) UpdateUser(user *dto.DBUpdateUser) error {
 	ctx := context.Background()
 
@@ -59,6 +64,7 @@ func (us *UserMicroService) UpdateUser(user *dto.DBUpdateUser) error {
 	return err
 }
 
+//FindUserByUsername finds user by username in db
 func (us *UserMicroService) FindUserByUsername(value string) (*dto.DBGetUser, error) {
 	ctx := context.Background()
 
@@ -78,6 +84,7 @@ func (us *UserMicroService) FindUserByUsername(value string) (*dto.DBGetUser, er
 	return dto.ToDBGetUser(grpcUser), nil
 }
 
+//FindUserByEmail finds user by email in db
 func (us *UserMicroService) FindUserByEmail(value string) (*dto.DBGetUser, error) {
 	ctx := context.Background()
 
@@ -94,6 +101,7 @@ func (us *UserMicroService) FindUserByEmail(value string) (*dto.DBGetUser, error
 	return dto.ToDBGetUser(grpcUser), nil
 }
 
+//FindUserByPhone finds user by phone number in db
 func (us *UserMicroService) FindUserByPhone(value string) (*dto.DBGetUser, error) {
 	ctx := context.Background()
 

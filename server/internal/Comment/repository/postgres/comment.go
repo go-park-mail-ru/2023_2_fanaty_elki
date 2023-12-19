@@ -2,10 +2,10 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
 	"server/internal/Comment/repository"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
-	"fmt"
 )
 
 type commentRepo struct {
@@ -23,17 +23,17 @@ func (repo *commentRepo) Create(comment *dto.DBReqCreateComment) (*entity.Commen
 					  VALUES ($1, $2, $3, $4)
 					  RETURNING ID`
 	var id uint
-	err := repo.DB.QueryRow(insertComment, comment.Text, comment.RestaurantId, comment.UserId, comment.Rating).Scan(&id)
+	err := repo.DB.QueryRow(insertComment, comment.Text, comment.RestaurantID, comment.UserID, comment.Rating).Scan(&id)
 
 	if err != nil {
 		return nil, entity.ErrInternalServerError
-	} 
+	}
 	respComment := &dto.DBRespCreateComment{
-		Text: comment.Text,
-		UserId: comment.UserId,
-		RestaurantId: comment.RestaurantId,
-		Rating: comment.Rating,
-	} 
+		Text:         comment.Text,
+		UserID:       comment.UserID,
+		RestaurantID: comment.RestaurantID,
+		Rating:       comment.Rating,
+	}
 	getCommentDate := `SELECT created_at
 					   FROM comment
 					   WHERE id = $1`

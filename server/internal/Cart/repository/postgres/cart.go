@@ -17,14 +17,14 @@ func NewCartRepo(db *sql.DB) repository.CartRepositoryI {
 	}
 }
 
-func (repo *CartRepo) CreateCart(userID uint) (uint, error) {
+func (repo *CartRepo) CreateCart(UserID uint) (uint, error) {
 	insertCart := `INSERT INTO cart (user_id) VALUES ($1)`
-	_, err := repo.DB.Exec(insertCart, userID)
+	_, err := repo.DB.Exec(insertCart, UserID)
 	if err != nil {
 		return 0, entity.ErrInternalServerError
 	}
 	var ID uint
-	row := repo.DB.QueryRow("SELECT ID FROM cart WHERE user_id = $1", userID)
+	row := repo.DB.QueryRow("SELECT ID FROM cart WHERE user_id = $1", UserID)
 	err = row.Scan(&ID)
 
 	if err != nil {
@@ -34,9 +34,9 @@ func (repo *CartRepo) CreateCart(userID uint) (uint, error) {
 	return ID, nil
 }
 
-func (repo *CartRepo) GetCartByUserID(userID uint) (*entity.Cart, error) {
+func (repo *CartRepo) GetCartByUserID(UserID uint) (*entity.Cart, error) {
 	cart := &entity.Cart{}
-	row := repo.DB.QueryRow("SELECT id, user_id FROM cart WHERE user_id = $1", userID)
+	row := repo.DB.QueryRow("SELECT id, user_id FROM cart WHERE user_id = $1", UserID)
 	err := row.Scan(
 		&cart.ID,
 		&cart.UserID,
@@ -117,19 +117,19 @@ func (repo *CartRepo) GetCartProductsByCartID(cartID uint) (*entity.CartWithRest
 	// defer promoRows.Close()
 
 	// promoRows.Next()
-	var promoId uint
-	err = promoRow.Scan(&promoId)
+	var PromoID uint
+	err = promoRow.Scan(&PromoID)
 	if err != nil {
 		fmt.Println("sacn", err)
 		if err == sql.ErrNoRows {
-			promoId = 0
+			PromoID = 0
 		} else {
 			return nil, err
 		}
 	}
 
-	CartWithRestaurant.RestaurantId = restaurantId
-	CartWithRestaurant.PromoId = promoId
+	CartWithRestaurant.RestaurantID = restaurantId
+	CartWithRestaurant.PromoID = PromoID
 
 	return CartWithRestaurant, nil
 }
