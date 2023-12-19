@@ -42,8 +42,8 @@ func (cu cartUsecase) GetUserCart(SessionToken string) (*dto.CartWithRestaurant,
 		return nil, err
 	}
 
-	userID := cookie.UserID
-	cart, err := cu.cartRepo.GetCartByUserID(userID)
+	UserID := cookie.UserID
+	cart, err := cu.cartRepo.GetCartByUserID(UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -66,20 +66,20 @@ func (cu cartUsecase) GetUserCart(SessionToken string) (*dto.CartWithRestaurant,
 		}
 		CartWithRestaurant.Products = append(CartWithRestaurant.Products, &CartProduct)
 	}
-	if cartWithRestaurant.RestaurantId == 0 {
+	if cartWithRestaurant.RestaurantID == 0 {
 		return CartWithRestaurant, nil
 	}
 
-	restaurant, err := cu.restaurantRepo.GetRestaurantById(cartWithRestaurant.RestaurantId)
+	restaurant, err := cu.restaurantRepo.GetRestaurantByID(cartWithRestaurant.RestaurantID)
 	if err != nil {
 		return nil, err
 	}
 
 	CartWithRestaurant.Restaurant = restaurant
 
-	if cartWithRestaurant.PromoId != 0 {
+	if cartWithRestaurant.PromoID != 0 {
 
-		promo, err := cu.promoRepo.GetPromoById(cartWithRestaurant.PromoId)
+		promo, err := cu.promoRepo.GetPromoById(cartWithRestaurant.PromoID)
 		if err != nil {
 			return nil, err
 		}
@@ -104,8 +104,8 @@ func (cu cartUsecase) AddProductToCart(SessionToken string, productID uint) erro
 		return entity.ErrNotFound
 	}
 
-	userID := cookie.UserID
-	cart, err := cu.cartRepo.GetCartByUserID(userID)
+	UserID := cookie.UserID
+	cart, err := cu.cartRepo.GetCartByUserID(UserID)
 	if err != nil {
 		return err
 	}
@@ -143,8 +143,8 @@ func (cu cartUsecase) DeleteProductFromCart(SessionToken string, productID uint)
 		return entity.ErrNotFound
 	}
 
-	userID := cookie.UserID
-	cart, err := cu.cartRepo.GetCartByUserID(userID)
+	UserID := cookie.UserID
+	cart, err := cu.cartRepo.GetCartByUserID(UserID)
 	if err != nil {
 		return err
 	}
@@ -184,8 +184,8 @@ func (cu cartUsecase) CleanCart(SessionToken string) error {
 		return err
 	}
 
-	userID := cookie.UserID
-	cart, err := cu.cartRepo.GetCartByUserID(userID)
+	UserID := cookie.UserID
+	cart, err := cu.cartRepo.GetCartByUserID(UserID)
 	if err != nil {
 		return err
 	}
@@ -195,7 +195,7 @@ func (cu cartUsecase) CleanCart(SessionToken string) error {
 		return err
 	}
 
-	err = cu.promoRepo.DeletePromoFromCart(cart.ID, cartWithRestaurant.PromoId)
+	err = cu.promoRepo.DeletePromoFromCart(cart.ID, cartWithRestaurant.PromoID)
 	if err != nil {
 		return err
 	}
@@ -214,8 +214,8 @@ func (cu cartUsecase) GetCartTips(SessionToken string) ([]*entity.Product, error
 		return nil, err
 	}
 
-	userID := cookie.UserID
-	cart, err := cu.cartRepo.GetCartByUserID(userID)
+	UserID := cookie.UserID
+	cart, err := cu.cartRepo.GetCartByUserID(UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -231,11 +231,11 @@ func (cu cartUsecase) GetCartTips(SessionToken string) ([]*entity.Product, error
 		prods[product.ProductID] = true
 	}
 
-	if cartWithRestaurant.RestaurantId == 0 {
+	if cartWithRestaurant.RestaurantID == 0 {
 		return nil, entity.ErrNotFound
 	}
 
-	menuTypes, err := cu.restaurantRepo.GetMenuTypesByRestaurantId(cartWithRestaurant.RestaurantId)
+	menuTypes, err := cu.restaurantRepo.GetMenuTypesByRestaurantID(cartWithRestaurant.RestaurantID)
 	if err != nil {
 		return nil, err
 	}

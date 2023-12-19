@@ -42,7 +42,7 @@ func TestGetUserByIdSucces(t *testing.T) {
 	}
 
 	mockUs.EXPECT().FindUserById(uint(1)).Return(dbuser, nil)
-	actual, err := usecase.GetUserById(uint(1))
+	actual, err := usecase.GetUserByID(uint(1))
 	assert.Equal(t, user, actual)
 	assert.Nil(t, err)
 

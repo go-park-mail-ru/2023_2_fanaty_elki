@@ -14,9 +14,10 @@ import (
 	mw "server/internal/middleware"
 	"testing"
 	"time"
-	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/require"
 )
 
@@ -35,7 +36,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 	}
 
 	reqorder := &dto.ReqCreateOrder{
-		UserId:   cookie.UserID,
+		UserID: cookie.UserID,
 		Address: &dto.ReqCreateOrderAddress{
 			City:   "Moscow",
 			Street: "Tverskaya",
@@ -47,9 +48,9 @@ func TestCreateOrderSuccess(t *testing.T) {
 	timenow := time.Now()
 
 	resporder := &dto.RespCreateOrder{
-		Id:     1,
+		ID:     1,
 		Status: 0,
-		Price: 100,
+		Price:  100,
 		Date:   timenow,
 		Address: &entity.Address{
 			City:   "Moscow",
@@ -127,7 +128,7 @@ func TestCreateOrderFail(t *testing.T) {
 		Ok:                  OKHitCounter,
 		InternalServerError: InternalServerErrorCounter,
 		NotFoundError:       NotFoundErrorCounter,
-		UrlMetric:           *hits,
+		URLMetric:           *hits,
 		Timing:              *timerhits,
 	}
 
@@ -145,7 +146,7 @@ func TestCreateOrderFail(t *testing.T) {
 	}
 
 	reqorder := &dto.ReqCreateOrder{
-		UserId:   cookie.UserID,
+		UserID: cookie.UserID,
 		Address: &dto.ReqCreateOrderAddress{
 			City:   "Moscow",
 			Street: "Tverskaya",
@@ -224,7 +225,7 @@ func TestUpdateOrderSuccess(t *testing.T) {
 	}
 
 	reqorder := &dto.ReqUpdateOrder{
-		Id:     1,
+		ID:     1,
 		Status: 1,
 	}
 
@@ -293,7 +294,7 @@ func TestUpdateOrderFail(t *testing.T) {
 		Ok:                  OKHitCounter,
 		InternalServerError: InternalServerErrorCounter,
 		NotFoundError:       NotFoundErrorCounter,
-		UrlMetric:           *hits,
+		URLMetric:           *hits,
 		Timing:              *timerhits,
 	}
 
@@ -311,7 +312,7 @@ func TestUpdateOrderFail(t *testing.T) {
 	}
 
 	reqorder := &dto.ReqUpdateOrder{
-		Id:     1,
+		ID:     1,
 		Status: 1,
 	}
 
@@ -356,7 +357,7 @@ func TestGetOrdersSuccess(t *testing.T) {
 
 	resporders := []*dto.RespGetOrder{
 		{
-			Id:     1,
+			ID:     1,
 			Status: 0,
 			Date:   timenow,
 			Address: &dto.RespOrderAddress{
@@ -367,7 +368,7 @@ func TestGetOrdersSuccess(t *testing.T) {
 			},
 		},
 		{
-			Id:     2,
+			ID:     2,
 			Status: 0,
 			Date:   timenow,
 			Address: &dto.RespOrderAddress{
@@ -440,7 +441,7 @@ func TestGetOrdersFail(t *testing.T) {
 		Ok:                  OKHitCounter,
 		InternalServerError: InternalServerErrorCounter,
 		NotFoundError:       NotFoundErrorCounter,
-		UrlMetric:           *hits,
+		URLMetric:           *hits,
 		Timing:              *timerhits,
 	}
 
@@ -489,35 +490,35 @@ func TestGetOrderSuccess(t *testing.T) {
 	timenow := time.Now()
 
 	reqOrder := dto.ReqGetOneOrder{
-		UserId:  1,
-		OrderId: 1,
+		UserID:  1,
+		OrderID: 1,
 	}
 
 	products := &dto.RespGetOrderProduct{
-		Id: 1,
-		Name: "Burger",
+		ID:    1,
+		Name:  "Burger",
 		Price: 100,
-		Icon: "def",
+		Icon:  "def",
 		Count: 1,
 	}
 
 	orderItems := &dto.OrderItems{
 		RestaurantName: "BK",
-		Products: []*dto.RespGetOrderProduct{products},
+		Products:       []*dto.RespGetOrderProduct{products},
 	}
 
 	resporder := &dto.RespGetOneOrder{
-		Id: 1,
-		Status:      0,
-		Date:        timenow,
+		ID:     1,
+		Status: 0,
+		Date:   timenow,
 		Address: &dto.RespOrderAddress{
 			City:   "Moscow",
 			Street: "Tverskaya",
 			House:  "3",
 			Flat:   1,
 		},
-		OrderItems: []*dto.OrderItems{orderItems},
-		Price:100,
+		OrderItems:   []*dto.OrderItems{orderItems},
+		Price:        100,
 		DeliveryTime: 30,
 	}
 
@@ -588,7 +589,7 @@ func TestGetOrderFail(t *testing.T) {
 		Ok:                  OKHitCounter,
 		InternalServerError: InternalServerErrorCounter,
 		NotFoundError:       NotFoundErrorCounter,
-		UrlMetric:           *hits,
+		URLMetric:           *hits,
 		Timing:              *timerhits,
 	}
 	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
@@ -605,8 +606,8 @@ func TestGetOrderFail(t *testing.T) {
 	}
 
 	reqOrder := dto.ReqGetOneOrder{
-		UserId:  1,
-		OrderId: 1,
+		UserID:  1,
+		OrderID: 1,
 	}
 
 	mockS.EXPECT().GetIdByCookie(cookie.SessionToken).Return(cookie.UserID, nil)

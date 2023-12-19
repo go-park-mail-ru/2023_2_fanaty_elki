@@ -6,9 +6,9 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/rand"
+	addressRep "server/internal/Address/repository"
 	sessionRep "server/internal/Session/repository"
 	userRep "server/internal/User/repository"
-	addressRep "server/internal/Address/repository"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 	"time"
@@ -22,27 +22,30 @@ var (
 	letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 )
 
-type UsecaseI interface {
+//SessionUsecaseI interface of session usecase
+type SessionUsecaseI interface {
 	Login(user *entity.User) (*entity.Cookie, error)
 	Check(SessionToken string) (uint, error)
 	Logout(cookie *entity.Cookie) error
 	GetUserProfile(sessionToken string) (*dto.ReqGetUserProfile, error)
-	GetIdByCookie(SessionToken string) (uint, error)
+	GetIDByCookie(SessionToken string) (uint, error)
 	CreateCookieAuth(cookie *entity.Cookie) (*dto.ReqGetUserProfile, error)
 	CheckCsrf(sessionToken string, csrfToken string) error
 	CreateCsrf(sessionToken string) (string, error)
 }
 
-type sessionUsecase struct {
+//SessionUsecase manage sessions
+type SessionUsecase struct {
 	sessionRepo sessionRep.SessionRepositoryI
 	userRepo    userRep.UserRepositoryI
 	addressRepo addressRep.AddressRepositoryI
 	sanitizer   *bluemonday.Policy
 }
 
-func NewSessionUsecase(sessionRep sessionRep.SessionRepositoryI, userRep userRep.UserRepositoryI, addressRep addressRep.AddressRepositoryI) *sessionUsecase {
+//NewSessionUsecase creates new session usecase object
+func NewSessionUsecase(sessionRep sessionRep.SessionRepositoryI, userRep userRep.UserRepositoryI, addressRep addressRep.AddressRepositoryI) *SessionUsecase {
 	sanitizer := bluemonday.UGCPolicy()
-	return &sessionUsecase{
+	return &SessionUsecase{
 		sessionRepo: sessionRep,
 		userRepo:    userRep,
 		addressRepo: addressRep,
@@ -58,7 +61,8 @@ func randStringRunes(n int) string {
 	return string(b)
 }
 
-func (ss sessionUsecase) Login(user *entity.User) (*entity.Cookie, error) {
+//Login creates session 
+func (ss SessionUsecase) Login(user *entity.User) (*entity.Cookie, error) {
 
 	us, err := ss.userRepo.FindUserByUsername(user.Username)
 	fmt.Println("login err", err)
@@ -91,7 +95,8 @@ func (ss sessionUsecase) Login(user *entity.User) (*entity.Cookie, error) {
 
 }
 
-func (ss sessionUsecase) Check(SessionToken string) (uint, error) {
+//Check checks session of user
+func (ss SessionUsecase) Check(SessionToken string) (uint, error) {
 
 	cookie, err := ss.sessionRepo.Check(SessionToken)
 	if err != nil {
@@ -100,7 +105,7 @@ func (ss sessionUsecase) Check(SessionToken string) (uint, error) {
 	if cookie == nil {
 		return 0, nil
 	}
-	user, err := ss.userRepo.FindUserById(cookie.UserID)
+	user, err := ss.userRepo.FindUserByID(cookie.UserID)
 	if err != nil {
 		return 0, err
 	}
@@ -111,17 +116,19 @@ func (ss sessionUsecase) Check(SessionToken string) (uint, error) {
 	return user.ID, nil
 }
 
-func (ss sessionUsecase) Logout(cookie *entity.Cookie) error {
+//Logout deletes cookie
+func (ss SessionUsecase) Logout(cookie *entity.Cookie) error {
 	return ss.sessionRepo.Delete(dto.ToDBDeleteCookie(cookie))
 }
 
-func (ss sessionUsecase) GetUserProfile(sessionToken string) (*dto.ReqGetUserProfile, error) {
+//GetUserProfile gets user's profile
+func (ss SessionUsecase) GetUserProfile(sessionToken string) (*dto.ReqGetUserProfile, error) {
 	cookie, err := ss.sessionRepo.Check(sessionToken)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := ss.userRepo.FindUserById(cookie.UserID)
+	user, err := ss.userRepo.FindUserByID(cookie.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +139,7 @@ func (ss sessionUsecase) GetUserProfile(sessionToken string) (*dto.ReqGetUserPro
 		return nil, err
 	}
 	reqUser.Addresses = addresses.Addresses
-	reqUser.Current = addresses.CurrentAddressesId
+	reqUser.Current = addresses.CurrentAddressesID
 	reqUser.Email = ss.sanitizer.Sanitize(reqUser.Email)
 	reqUser.Birthday = ss.sanitizer.Sanitize(reqUser.Birthday)
 	//reqUser.Icon = ss.sanitizer.Sanitize(reqUser.Icon)
@@ -142,7 +149,8 @@ func (ss sessionUsecase) GetUserProfile(sessionToken string) (*dto.ReqGetUserPro
 	return reqUser, nil
 }
 
-func (ss sessionUsecase) GetIdByCookie(SessionToken string) (uint, error) {
+//GetIDByCookie gets id of user by cookie
+func (ss SessionUsecase) GetIDByCookie(SessionToken string) (uint, error) {
 
 	cookie, err := ss.sessionRepo.Check(SessionToken)
 	if err != nil || cookie == nil {
@@ -153,7 +161,8 @@ func (ss sessionUsecase) GetIdByCookie(SessionToken string) (uint, error) {
 
 }
 
-func (ss sessionUsecase) CreateCookieAuth(cookie *entity.Cookie) (*dto.ReqGetUserProfile, error) {
+//CreateCookieAuth updates cookie expire
+func (ss SessionUsecase) CreateCookieAuth(cookie *entity.Cookie) (*dto.ReqGetUserProfile, error) {
 	err := ss.sessionRepo.Expire(cookie)
 	if err != nil {
 		return nil, err
@@ -161,7 +170,8 @@ func (ss sessionUsecase) CreateCookieAuth(cookie *entity.Cookie) (*dto.ReqGetUse
 	return ss.GetUserProfile(cookie.SessionToken)
 }
 
-func (ss sessionUsecase) CreateCsrf(sessionToken string) (string, error) {
+//CreateCsrf creates csrf token
+func (ss SessionUsecase) CreateCsrf(sessionToken string) (string, error) {
 	csrfToken := randStringRunes(10)
 	redisCSRFToken := ss.getCSRFHash(csrfToken)
 	err := ss.sessionRepo.CreateCsrf(sessionToken, redisCSRFToken)
@@ -171,7 +181,8 @@ func (ss sessionUsecase) CreateCsrf(sessionToken string) (string, error) {
 	return csrfToken, nil
 }
 
-func (ss sessionUsecase) CheckCsrf(sessionToken string, csrfToken string) error {
+//CheckCsrf checks csrf token
+func (ss SessionUsecase) CheckCsrf(sessionToken string, csrfToken string) error {
 	redisCsrfToken, err := ss.sessionRepo.GetCsrf(sessionToken)
 	hash := ss.getCSRFHash(csrfToken)
 
@@ -186,7 +197,7 @@ func (ss sessionUsecase) CheckCsrf(sessionToken string, csrfToken string) error 
 	return nil
 }
 
-func (ss sessionUsecase) getCSRFHash(csrfToken string) string {
+func (ss SessionUsecase) getCSRFHash(csrfToken string) string {
 	salt := "KOCTbILbSalt"
 	hash := hmac.New(sha256.New, []byte(salt))
 	hash.Write([]byte(csrfToken))

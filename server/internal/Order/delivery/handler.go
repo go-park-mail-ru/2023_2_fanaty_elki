@@ -25,11 +25,11 @@ type RespError struct {
 
 type OrderHandler struct {
 	orderUC   orderUsecase.UsecaseI
-	sessionUC sessionUsecase.UsecaseI
+	sessionUC sessionUsecase.SessionUsecaseI
 	logger    *mw.ACLog
 }
 
-func NewOrderHandler(orderUC orderUsecase.UsecaseI, sessionUC sessionUsecase.UsecaseI, logger *mw.ACLog) *OrderHandler {
+func NewOrderHandler(orderUC orderUsecase.UsecaseI, sessionUC sessionUsecase.SessionUsecaseI, logger *mw.ACLog) *OrderHandler {
 	return &OrderHandler{
 		orderUC:   orderUC,
 		sessionUC: sessionUC,
@@ -55,7 +55,7 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 
 	cookie, _ := r.Cookie("session_id")
 
-	userId, _ := handler.sessionUC.GetIdByCookie(cookie.Value)
+	UserID, _ := handler.sessionUC.GetIDByCookie(cookie.Value)
 
 	jsonbody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -64,7 +64,7 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	reqOrder := dto.ReqCreateOrder{UserId: userId}
+	reqOrder := dto.ReqCreateOrder{UserID: UserID}
 	err = json.Unmarshal(jsonbody, &reqOrder)
 	if err != nil {
 		handler.logger.LogError("problems with unmarshalling json", err, w.Header().Get("request-id"), r.URL.Path)
@@ -127,9 +127,9 @@ func (handler *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request)
 func (handler *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
 
 	cookie, _ := r.Cookie("session_id")
-	userId, _ := handler.sessionUC.GetIdByCookie(cookie.Value)
+	UserID, _ := handler.sessionUC.GetIDByCookie(cookie.Value)
 
-	respOrders, err := handler.orderUC.GetOrders(userId)
+	respOrders, err := handler.orderUC.GetOrders(UserID)
 	if err != nil {
 		handler.logger.LogError("order: problems while getting orders", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -169,23 +169,23 @@ func (handler *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 	// 	w.WriteHeader(http.StatusInternalServerError)
 	// }
 
-	userId, err := handler.sessionUC.GetIdByCookie(cookie.Value)
+	UserID, err := handler.sessionUC.GetIDByCookie(cookie.Value)
 	// if err != nil {
 	// 	w.WriteHeader(http.StatusInternalServerError)
 	// 	return
 	// }
-	// if userId == 0 {
+	// if UserID == 0 {
 	// 	w.WriteHeader(http.StatusUnauthorized)
 	// 	return
 	// }
 
 	reqOrder := dto.ReqGetOneOrder{
-		UserId:  userId,
-		OrderId: uint(orderId),
+		UserID:  UserID,
+		OrderID: uint(orderId),
 	}
 
 	respOrder, err := handler.orderUC.GetOrder(&reqOrder)
-	
+
 	if err != nil {
 		if err == entity.ErrNotFound {
 			handler.logger.LogError("order: not found order", err, w.Header().Get("request-id"), r.URL.Path)

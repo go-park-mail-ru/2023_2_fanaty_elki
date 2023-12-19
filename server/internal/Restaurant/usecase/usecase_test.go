@@ -119,7 +119,7 @@ func TestGetRestaurantByIdSuccess(t *testing.T) {
 
 	mockRest.EXPECT().GetRestaurantById(uint(elemID)).Return(rest, nil)
 	mockRest.EXPECT().GetCategoriesByRestaurantId(uint(elemID)).Return(categories, nil)
-	actual, err := usecase.GetRestaurantById(uint(elemID))
+	actual, err := usecase.GetRestaurantByID(uint(elemID))
 	assert.Equal(t, rest.Name, actual.Name)
 	assert.Nil(t, err)
 }
@@ -136,7 +136,7 @@ func TestGetRestaurantByIdFail(t *testing.T) {
 	var elemID = 1
 
 	mockRest.EXPECT().GetRestaurantById(uint(elemID)).Return(&entity.Restaurant{}, testErr)
-	actual, err := usecase.GetRestaurantById(uint(elemID))
+	actual, err := usecase.GetRestaurantByID(uint(elemID))
 	assert.Empty(t, actual)
 	assert.Equal(t, testErr, err)
 

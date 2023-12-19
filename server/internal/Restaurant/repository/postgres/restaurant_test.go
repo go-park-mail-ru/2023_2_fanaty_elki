@@ -202,22 +202,22 @@ func TestGetMenuTypesByRestaurantIdSuccess(t *testing.T) {
 		},
 	}
 
-	for _, menu_type := range expect {
-		rows = rows.AddRow(menu_type.ID, menu_type.Name, menu_type.RestaurantID)
+	for _, menuType := range expect {
+		rows = rows.AddRow(menuType.ID, menuType.Name, menuType.RestaurantID)
 	}
 
 	mock.
 		ExpectQuery("SELECT id, name, restaurant_id FROM menu_type WHERE").WithArgs(elemID).
 		WillReturnRows(rows)
 
-	menu_types, err := repo.GetMenuTypesByRestaurantId(uint(elemID))
+	menuTypes, err := repo.GetMenuTypesByRestaurantId(uint(elemID))
 	if err != nil {
 		t.Errorf("unexpected err: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(menu_types[0], expect[0]) {
-		t.Errorf("results not match, want %v, have %v", expect[0], menu_types[0])
+	if !reflect.DeepEqual(menuTypes[0], expect[0]) {
+		t.Errorf("results not match, want %v, have %v", expect[0], menuTypes[0])
 		return
 	}
 
@@ -226,7 +226,7 @@ func TestGetMenuTypesByRestaurantIdSuccess(t *testing.T) {
 	mock.ExpectQuery("SELECT id, name, restaurant_id FROM menu_type WHERE").WithArgs(elemID).
 		WillReturnRows(emptyrows)
 
-	menu_types, err = repo.GetMenuTypesByRestaurantId(uint(elemID))
+	menuTypes, err = repo.GetMenuTypesByRestaurantId(uint(elemID))
 	if err != entity.ErrNotFound {
 		t.Errorf("unexpected err: %s", err)
 		return

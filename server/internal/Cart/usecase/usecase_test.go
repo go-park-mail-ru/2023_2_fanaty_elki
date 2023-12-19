@@ -46,7 +46,7 @@ func TestGetUserCartSuccess(t *testing.T) {
 	}
 
 	cartwithrest := &entity.CartWithRestaurant{
-		RestaurantId: 1,
+		RestaurantID: 1,
 		Products: []*entity.CartProduct{
 			{
 				ID:        1,
