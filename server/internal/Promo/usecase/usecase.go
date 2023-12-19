@@ -10,20 +10,23 @@ import (
 	"time"
 )
 
-type UsecaseI interface {
+//PromoUsecaseI interface
+type PromoUsecaseI interface {
 	UsePromo(SessionToken string, promocode string) (*dto.RespPromo, error)
 	DeletePromo(SessionToken string, promocode string) error
 }
 
-type promoUsecase struct {
+//PromoUsecase struct
+type PromoUsecase struct {
 	cartRepo       cartRep.CartRepositoryI
 	promoRepo      promoRep.PromoRepositoryI
 	sessionRepo    sessionRep.SessionRepositoryI
 	restaurantRepo restaurantRep.RestaurantRepositoryI
 }
 
-func NewPromoUsecase(cartRep cartRep.CartRepositoryI, promoRep promoRep.PromoRepositoryI, sessionRep sessionRep.SessionRepositoryI, restaurantRep restaurantRep.RestaurantRepositoryI) *promoUsecase {
-	return &promoUsecase{
+//NewPromoUsecase creates promo usecase 
+func NewPromoUsecase(cartRep cartRep.CartRepositoryI, promoRep promoRep.PromoRepositoryI, sessionRep sessionRep.SessionRepositoryI, restaurantRep restaurantRep.RestaurantRepositoryI) *PromoUsecase {
+	return &PromoUsecase{
 		cartRepo:       cartRep,
 		promoRepo:      promoRep,
 		sessionRepo:    sessionRep,
@@ -31,7 +34,8 @@ func NewPromoUsecase(cartRep cartRep.CartRepositoryI, promoRep promoRep.PromoRep
 	}
 }
 
-func (pu promoUsecase) UsePromo(SessionToken string, promocode string) (*dto.RespPromo, error) {
+//UsePromo uses promocode
+func (pu PromoUsecase) UsePromo(SessionToken string, promocode string) (*dto.RespPromo, error) {
 	cookie, err := pu.sessionRepo.Check(SessionToken)
 	if err != nil {
 		return nil, err
@@ -91,7 +95,8 @@ func (pu promoUsecase) UsePromo(SessionToken string, promocode string) (*dto.Res
 	return dto.ToRespPromo(promo), nil
 }
 
-func (pu promoUsecase) DeletePromo(SessionToken string, promocode string) error {
+//DeletePromo deletes promocode
+func (pu PromoUsecase) DeletePromo(SessionToken string, promocode string) error {
 	cookie, err := pu.sessionRepo.Check(SessionToken)
 	if err != nil {
 		return err

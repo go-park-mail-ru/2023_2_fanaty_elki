@@ -12,31 +12,37 @@ import (
 	"github.com/gorilla/mux"
 )
 
+//Result struct
 type Result struct {
 	Body interface{}
 }
 
+//RespError struct
 type RespError struct {
 	Err string
 }
 
+//PromoHandler struct
 type PromoHandler struct {
-	promoUsecase promoUsecase.UsecaseI
+	promoUsecase promoUsecase.PromoUsecaseI
 	logger       *mw.ACLog
 }
 
-func NewPromoHandler(promoUsecase promoUsecase.UsecaseI, logger *mw.ACLog) *PromoHandler {
+//NewPromoHandler creates new promo handler object
+func NewPromoHandler(promoUsecase promoUsecase.PromoUsecaseI, logger *mw.ACLog) *PromoHandler {
 	return &PromoHandler{
 		promoUsecase: promoUsecase,
 		logger:       logger,
 	}
 }
 
+//RegisterHandler regisers promocode api
 func (handler *PromoHandler) RegisterHandler(router *mux.Router) {
 	router.HandleFunc("/api/promo", handler.UsePromo).Methods(http.MethodPost)
 	router.HandleFunc("/api/promo/{promocode}", handler.DeletePromo).Methods(http.MethodDelete)
 }
 
+//UsePromo handles use promocode request
 func (handler *PromoHandler) UsePromo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	if r.Header.Get("Content-Type") != "application/json" {
@@ -102,6 +108,7 @@ func (handler *PromoHandler) UsePromo(w http.ResponseWriter, r *http.Request) {
 
 }
 
+//DeletePromo handles deletes promocode request
 func (handler *PromoHandler) DeletePromo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

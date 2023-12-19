@@ -2,6 +2,7 @@ package repository
 
 import entity "server/internal/domain/entity"
 
+//CartRepositoryI interface
 type CartRepositoryI interface {
 	CreateCart(UserID uint) (uint, error)
 	GetCartByUserID(UserID uint) (*entity.Cart, error)

@@ -5,21 +5,25 @@ import (
 	"server/internal/domain/entity"
 )
 
-type UsecaseI interface {
+//ProductUsecaseI interface
+type ProductUsecaseI interface {
 	GetProductByID(id uint) (*entity.Product, error)
 }
 
-type productUsecase struct {
+//ProductUsecase struct
+type ProductUsecase struct {
 	productRepo productRep.ProductRepositoryI
 }
 
-func NewProductUsecase(productRep productRep.ProductRepositoryI) *productUsecase {
-	return &productUsecase{
+//NewProductUsecase creates new product usecase 
+func NewProductUsecase(productRep productRep.ProductRepositoryI) *ProductUsecase {
+	return &ProductUsecase{
 		productRepo: productRep,
 	}
 }
 
-func (pu productUsecase) GetProductByID(id uint) (*entity.Product, error) {
+//GetProductByID gets product by id from repository
+func (pu ProductUsecase) GetProductByID(id uint) (*entity.Product, error) {
 	product, err := pu.productRepo.GetProductByID(id)
 	if err != nil {
 		return nil, entity.ErrInternalServerError

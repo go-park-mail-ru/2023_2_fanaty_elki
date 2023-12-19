@@ -12,6 +12,7 @@ type commentRepo struct {
 	DB *sql.DB
 }
 
+//NewCommentRepo creates comment repo
 func NewCommentRepo(db *sql.DB) repository.CommentRepositoryI {
 	return &commentRepo{
 		DB: db,

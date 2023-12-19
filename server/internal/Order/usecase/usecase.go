@@ -8,29 +8,33 @@ import (
 	"server/internal/domain/entity"
 )
 
-type UsecaseI interface {
+//OrderUsecaseI interface
+type OrderUsecaseI interface {
 	GetOrders(UserID uint) ([]*dto.RespGetOrder, error)
 	CreateOrder(reqOrder *dto.ReqCreateOrder) (*dto.RespCreateOrder, error)
 	UpdateOrder(reqOrder *dto.ReqUpdateOrder) error
 	GetOrder(reqOrder *dto.ReqGetOneOrder) (*dto.RespGetOneOrder, error)
 }
 
-type orderUsecase struct {
+//OrderUsecase struct
+type OrderUsecase struct {
 	orderRepo orderRep.OrderRepositoryI
 	cartRepo  cartRep.CartRepositoryI
 	prodRepo  productRep.ProductRepositoryI
 }
 
+//NewOrderUsecase crates order usecase
 func NewOrderUsecase(orderRepI orderRep.OrderRepositoryI, cartRepI cartRep.CartRepositoryI,
-	prodRepI productRep.ProductRepositoryI) *orderUsecase {
-	return &orderUsecase{
+	prodRepI productRep.ProductRepositoryI) *OrderUsecase {
+	return &OrderUsecase{
 		orderRepo: orderRepI,
 		cartRepo:  cartRepI,
 		prodRepo:  prodRepI,
 	}
 }
 
-func (or *orderUsecase) CreateOrder(reqOrder *dto.ReqCreateOrder) (*dto.RespCreateOrder, error) {
+//CreateOrder creates order
+func (or *OrderUsecase) CreateOrder(reqOrder *dto.ReqCreateOrder) (*dto.RespCreateOrder, error) {
 	if len(reqOrder.Address.City) == 0 || len(reqOrder.Address.Street) == 0 || len(reqOrder.Address.House) == 0 {
 		return nil, entity.ErrBadRequest
 	}
@@ -71,7 +75,8 @@ func (or *orderUsecase) CreateOrder(reqOrder *dto.ReqCreateOrder) (*dto.RespCrea
 	return respOrder, nil
 }
 
-func (or *orderUsecase) UpdateOrder(reqOrder *dto.ReqUpdateOrder) error {
+//UpdateOrder updates order
+func (or *OrderUsecase) UpdateOrder(reqOrder *dto.ReqUpdateOrder) error {
 	err := or.orderRepo.UpdateOrder(reqOrder)
 	if err != nil {
 		return err
@@ -79,10 +84,12 @@ func (or *orderUsecase) UpdateOrder(reqOrder *dto.ReqUpdateOrder) error {
 	return nil
 }
 
-func (or *orderUsecase) GetOrders(UserID uint) ([]*dto.RespGetOrder, error) {
+//GetOrders gets orders
+func (or *OrderUsecase) GetOrders(UserID uint) ([]*dto.RespGetOrder, error) {
 	return or.orderRepo.GetOrders(UserID)
 }
 
-func (or *orderUsecase) GetOrder(reqOrder *dto.ReqGetOneOrder) (*dto.RespGetOneOrder, error) {
+//GetOrder gets order
+func (or *OrderUsecase) GetOrder(reqOrder *dto.ReqGetOneOrder) (*dto.RespGetOneOrder, error) {
 	return or.orderRepo.GetOrder(reqOrder)
 }

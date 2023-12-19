@@ -8,27 +8,31 @@ import (
 	"server/internal/domain/entity"
 )
 
-type UsecaseI interface {
+//CommentUsecaseI interface
+type CommentUsecaseI interface {
 	CreateComment(comment *dto.ReqCreateComment) (*dto.RespCreateComment, error)
 	GetComments(id uint) ([]*dto.RespGetComment, error)
 }
 
-type commentUsecase struct {
+//CommentUsecase struct
+type CommentUsecase struct {
 	commentRepo commentRep.CommentRepositoryI
 	userRepo    userRep.UserRepositoryI
 	restRepo    restRep.RestaurantRepositoryI
 }
 
+//NewCommentUsecase crate comment usecase
 func NewCommentUsecase(commentRepI commentRep.CommentRepositoryI, userRepI userRep.UserRepositoryI,
-	restRepI restRep.RestaurantRepositoryI) *commentUsecase {
-	return &commentUsecase{
+	restRepI restRep.RestaurantRepositoryI) *CommentUsecase {
+	return &CommentUsecase{
 		commentRepo: commentRepI,
 		userRepo:    userRepI,
 		restRepo:    restRepI,
 	}
 }
 
-func (c *commentUsecase) CreateComment(comment *dto.ReqCreateComment) (*dto.RespCreateComment, error) {
+//CreateComment creates comment
+func (c *CommentUsecase) CreateComment(comment *dto.ReqCreateComment) (*dto.RespCreateComment, error) {
 	if comment.Rating < 1 || comment.Rating > 5 {
 		return nil, entity.ErrInvalidRating
 	}
@@ -61,7 +65,8 @@ func (c *commentUsecase) CreateComment(comment *dto.ReqCreateComment) (*dto.Resp
 	return respComment, nil
 }
 
-func (c *commentUsecase) GetComments(id uint) ([]*dto.RespGetComment, error) {
+//GetComments gets comments
+func (c *CommentUsecase) GetComments(id uint) ([]*dto.RespGetComment, error) {
 	resp, err := c.commentRepo.Get(id)
 	if err == entity.ErrNotFound {
 		return []*dto.RespGetComment{}, nil

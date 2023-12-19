@@ -8,26 +8,30 @@ import (
 	"server/internal/domain/entity"
 )
 
-type UsecaseI interface {
+//AddressUsecaseI interface
+type AddressUsecaseI interface {
 	CreateAddress(reqAddress *dto.ReqCreateAddress) error
 	DeleteAddress(id uint, sessionToken string) error
 	//GetAddresses(UserID uint) (*dto.RespGetAddresses, error)
 	SetAddress(id uint, sessionToken string) error
 }
 
-type addressUsecase struct {
+//AddressUsecase struct
+type AddressUsecase struct {
 	addressRepo addressRep.AddressRepositoryI
 	sessionRepo sessionRep.SessionRepositoryI
 }
 
-func NewAddressUsecase(addressRepI addressRep.AddressRepositoryI, sessionRepI sessionRep.SessionRepositoryI) *addressUsecase {
-	return &addressUsecase{
+//NewAddressUsecase creates address usecase
+func NewAddressUsecase(addressRepI addressRep.AddressRepositoryI, sessionRepI sessionRep.SessionRepositoryI) *AddressUsecase {
+	return &AddressUsecase{
 		addressRepo: addressRepI,
 		sessionRepo: sessionRepI,
 	}
 }
 
-func (ad *addressUsecase) CreateAddress(reqAddress *dto.ReqCreateAddress) error {
+//CreateAddress creates address
+func (ad *AddressUsecase) CreateAddress(reqAddress *dto.ReqCreateAddress) error {
 	address := dto.ToEntityCreateAddress(reqAddress)
 
 	if len(address.City) == 0 || len(address.Street) == 0 || len(address.House) == 0 {
@@ -58,7 +62,8 @@ func (ad *addressUsecase) CreateAddress(reqAddress *dto.ReqCreateAddress) error 
 	return ad.addressRepo.CreateAddress(dto.ToDBCreateAddress(address, cookie.UserID))
 }
 
-func (ad *addressUsecase) DeleteAddress(id uint, sessionToken string) error {
+//DeleteAddress deletes address
+func (ad *AddressUsecase) DeleteAddress(id uint, sessionToken string) error {
 	cookie, err := ad.sessionRepo.Check(sessionToken)
 	if err != nil {
 		return err
@@ -75,7 +80,8 @@ func (ad *addressUsecase) DeleteAddress(id uint, sessionToken string) error {
 	return ad.addressRepo.DeleteAddress(address)
 }
 
-func (ad *addressUsecase) SetAddress(id uint, sessionToken string) error {
+//SetAddress sets address
+func (ad *AddressUsecase) SetAddress(id uint, sessionToken string) error {
 
 	cookie, err := ad.sessionRepo.Check(sessionToken)
 	if err != nil {

@@ -10,7 +10,8 @@ import (
 	"server/internal/domain/entity"
 )
 
-type UsecaseI interface {
+//CartUsecaseI interface
+type CartUsecaseI interface {
 	GetUserCart(SessionToken string) (*dto.CartWithRestaurant, error)
 	AddProductToCart(SessionToken string, productID uint) error
 	DeleteProductFromCart(SessionToken string, productID uint) error
@@ -18,7 +19,8 @@ type UsecaseI interface {
 	GetCartTips(SessionToken string) ([]*entity.Product, error)
 }
 
-type cartUsecase struct {
+//CartUsecase struct
+type CartUsecase struct {
 	cartRepo       cartRep.CartRepositoryI
 	productRepo    productRep.ProductRepositoryI
 	sessionRepo    sessionRep.SessionRepositoryI
@@ -26,8 +28,9 @@ type cartUsecase struct {
 	promoRepo      promoRep.PromoRepositoryI
 }
 
-func NewCartUsecase(cartRep cartRep.CartRepositoryI, productRep productRep.ProductRepositoryI, sessionRep sessionRep.SessionRepositoryI, restaurantRep restaurantRep.RestaurantRepositoryI, promoRep promoRep.PromoRepositoryI) *cartUsecase {
-	return &cartUsecase{
+//NewCartUsecase creates cart usecase
+func NewCartUsecase(cartRep cartRep.CartRepositoryI, productRep productRep.ProductRepositoryI, sessionRep sessionRep.SessionRepositoryI, restaurantRep restaurantRep.RestaurantRepositoryI, promoRep promoRep.PromoRepositoryI) *CartUsecase {
+	return &CartUsecase{
 		cartRepo:       cartRep,
 		productRepo:    productRep,
 		sessionRepo:    sessionRep,
@@ -36,7 +39,8 @@ func NewCartUsecase(cartRep cartRep.CartRepositoryI, productRep productRep.Produ
 	}
 }
 
-func (cu cartUsecase) GetUserCart(SessionToken string) (*dto.CartWithRestaurant, error) {
+//GetUserCart gets user cart 
+func (cu CartUsecase) GetUserCart(SessionToken string) (*dto.CartWithRestaurant, error) {
 	cookie, err := cu.sessionRepo.Check(SessionToken)
 	if err != nil {
 		return nil, err
@@ -79,7 +83,7 @@ func (cu cartUsecase) GetUserCart(SessionToken string) (*dto.CartWithRestaurant,
 
 	if cartWithRestaurant.PromoID != 0 {
 
-		promo, err := cu.promoRepo.GetPromoById(cartWithRestaurant.PromoID)
+		promo, err := cu.promoRepo.GetPromoByID(cartWithRestaurant.PromoID)
 		if err != nil {
 			return nil, err
 		}
@@ -92,7 +96,8 @@ func (cu cartUsecase) GetUserCart(SessionToken string) (*dto.CartWithRestaurant,
 	return CartWithRestaurant, nil
 }
 
-func (cu cartUsecase) AddProductToCart(SessionToken string, productID uint) error {
+//AddProductToCart adds product to cart
+func (cu CartUsecase) AddProductToCart(SessionToken string, productID uint) error {
 	cookie, err := cu.sessionRepo.Check(SessionToken)
 	if err != nil {
 		return err
@@ -131,7 +136,8 @@ func (cu cartUsecase) AddProductToCart(SessionToken string, productID uint) erro
 	return nil
 }
 
-func (cu cartUsecase) DeleteProductFromCart(SessionToken string, productID uint) error {
+//DeleteProductFromCart deletes product from cart
+func (cu CartUsecase) DeleteProductFromCart(SessionToken string, productID uint) error {
 	cookie, err := cu.sessionRepo.Check(SessionToken)
 	if err != nil {
 		return err
@@ -178,7 +184,8 @@ func (cu cartUsecase) DeleteProductFromCart(SessionToken string, productID uint)
 	return nil
 }
 
-func (cu cartUsecase) CleanCart(SessionToken string) error {
+//CleanCart cleans cart 
+func (cu CartUsecase) CleanCart(SessionToken string) error {
 	cookie, err := cu.sessionRepo.Check(SessionToken)
 	if err != nil {
 		return err
@@ -208,7 +215,8 @@ func (cu cartUsecase) CleanCart(SessionToken string) error {
 	return nil
 }
 
-func (cu cartUsecase) GetCartTips(SessionToken string) ([]*entity.Product, error) {
+//GetCartTips gets cart tips
+func (cu CartUsecase) GetCartTips(SessionToken string) ([]*entity.Product, error) {
 	cookie, err := cu.sessionRepo.Check(SessionToken)
 	if err != nil {
 		return nil, err
@@ -241,7 +249,7 @@ func (cu cartUsecase) GetCartTips(SessionToken string) ([]*entity.Product, error
 	}
 	var restProducts []*entity.Product
 	for _, menu := range menuTypes {
-		products, err := cu.productRepo.GetProductsByMenuTypeId(menu.ID)
+		products, err := cu.productRepo.GetProductsByMenuTypeID(menu.ID)
 		if err != nil {
 			return nil, entity.ErrInternalServerError
 		}

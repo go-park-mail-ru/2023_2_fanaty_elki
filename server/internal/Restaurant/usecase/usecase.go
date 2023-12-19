@@ -96,7 +96,7 @@ func (res RestaurantUsecase) GetRestaurantProducts(id uint) ([]*dto.MenuTypeWith
 	}
 	var menuTypesWithProducts []*dto.MenuTypeWithProducts
 	for _, menu := range menuTypes {
-		products, err := res.productRepo.GetProductsByMenuTypeId(menu.ID)
+		products, err := res.productRepo.GetProductsByMenuTypeID(menu.ID)
 		if err != nil {
 			return nil, entity.ErrInternalServerError
 		}
@@ -173,7 +173,7 @@ func (res RestaurantUsecase) Search(word string) ([]*dto.RestaurantWithCategorie
 	rests = append(rests, restsbycategory...)
 	products, err := res.productRepo.SearchProducts(word)
 	for _, prod := range products {
-		restID, err := res.productRepo.GetRestaurantIdByProduct(prod.ID)
+		restID, err := res.productRepo.GetRestaurantIDByProduct(prod.ID)
 		if err != nil {
 			return nil, entity.ErrInternalServerError
 		}
@@ -208,7 +208,7 @@ func (res RestaurantUsecase) Search(word string) ([]*dto.RestaurantWithCategorie
 		restsWithCategoriesAndProducts = append(restsWithCategoriesAndProducts, restWithCatsAndProducts)
 	}
 	for _, prod := range products {
-		restID, err := res.productRepo.GetRestaurantIdByProduct(prod.ID)
+		restID, err := res.productRepo.GetRestaurantIDByProduct(prod.ID)
 		if err != nil {
 			return nil, entity.ErrInternalServerError
 		}

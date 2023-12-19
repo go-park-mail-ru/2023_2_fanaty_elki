@@ -6,28 +6,31 @@ import (
 	"server/internal/domain/entity"
 )
 
-type orderRepo struct {
+//OrderRepo struct
+type OrderRepo struct {
 	DB *sql.DB
 }
 
-func NewOrderRepo(db *sql.DB) *orderRepo {
-	return &orderRepo{
+//NewOrderRepo create new order repo
+func NewOrderRepo(db *sql.DB) *OrderRepo {
+	return &OrderRepo{
 		DB: db,
 	}
 }
 
-func (repo *orderRepo) CreateOrder(order *dto.DBReqCreateOrder) (*dto.RespCreateOrder, error) {
+//CreateOrder creates order in db
+func (repo *OrderRepo) CreateOrder(order *dto.DBReqCreateOrder) (*dto.RespCreateOrder, error) {
 	insertOrder := `INSERT INTO orders (user_id, order_date, status, price, delivery_time)
 				    VALUES ($1, $2, $3, $4, $5)
 					RETURNING ID`
-	var orderId uint
-	err := repo.DB.QueryRow(insertOrder, order.UserID, order.Date, order.Status, order.Price, order.DeliveryTime).Scan(&orderId)
+	var orderID uint
+	err := repo.DB.QueryRow(insertOrder, order.UserID, order.Date, order.Status, order.Price, order.DeliveryTime).Scan(&orderID)
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}
 	for _, product := range order.Products {
 		insertProduct := `INSERT INTO orders_product (product_id, order_id, item_count) VALUES ($1, $2, $3)`
-		_, err := repo.DB.Exec(insertProduct, product.ProductID, orderId, product.ItemCount)
+		_, err := repo.DB.Exec(insertProduct, product.ProductID, orderID, product.ItemCount)
 		if err != nil {
 			return nil, entity.ErrInternalServerError
 		}
@@ -38,21 +41,21 @@ func (repo *orderRepo) CreateOrder(order *dto.DBReqCreateOrder) (*dto.RespCreate
 	insertAddress := `INSERT INTO address (city, street, house_number, flat_number)
 				      VALUES ($1, $2, $3, $4)
 					  RETURNING ID`
-	var addressId uint
-	err = repo.DB.QueryRow(insertAddress, order.Address.City, order.Address.Street, order.Address.House, order.Address.Flat).Scan(&addressId)
+	var addressID uint
+	err = repo.DB.QueryRow(insertAddress, order.Address.City, order.Address.Street, order.Address.House, order.Address.Flat).Scan(&addressID)
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}
 
 	insertOrderAddress := `INSERT INTO orders_address (orders_id, address_id)
 				      	   VALUES ($1, $2)`
-	_, err = repo.DB.Exec(insertOrderAddress, orderId, addressId)
+	_, err = repo.DB.Exec(insertOrderAddress, orderID, addressID)
 	if err != nil {
 		return nil, entity.ErrInternalServerError
 	}
 
 	return &dto.RespCreateOrder{
-		ID:           orderId,
+		ID:           orderID,
 		Status:       order.Status,
 		Date:         order.Date,
 		Price:        order.Price,
@@ -60,7 +63,8 @@ func (repo *orderRepo) CreateOrder(order *dto.DBReqCreateOrder) (*dto.RespCreate
 	}, nil
 }
 
-func (repo *orderRepo) UpdateOrder(order *dto.ReqUpdateOrder) error {
+//UpdateOrder updates order in db
+func (repo *OrderRepo) UpdateOrder(order *dto.ReqUpdateOrder) error {
 	updateOrder := `UPDATE orders
 					SET status = $1
 					WHERE id = $2`
@@ -71,7 +75,8 @@ func (repo *orderRepo) UpdateOrder(order *dto.ReqUpdateOrder) error {
 	return nil
 }
 
-func (repo *orderRepo) GetOrders(UserID uint) ([]*dto.RespGetOrder, error) {
+//GetOrders get orders from db
+func (repo *OrderRepo) GetOrders(UserID uint) ([]*dto.RespGetOrder, error) {
 	getOrders := `SELECT o.id, o.status, o.created_at, o.price, o.delivery_time, a.city, a.street, a.house_number, a.flat_number
 			 	 FROM orders o
 				 JOIN orders_address oa on o.id = oa.orders_id
@@ -116,7 +121,8 @@ func (repo *orderRepo) GetOrders(UserID uint) ([]*dto.RespGetOrder, error) {
 	return orders, nil
 }
 
-func (repo *orderRepo) GetOrder(reqOrder *dto.ReqGetOneOrder) (*dto.RespGetOneOrder, error) {
+//GetOrder gets order from db
+func (repo *OrderRepo) GetOrder(reqOrder *dto.ReqGetOneOrder) (*dto.RespGetOneOrder, error) {
 	getOrder := `SELECT o.id, o.status, o.order_date, o.price, o.delivery_time, a.city, a.street, a.house_number, a.flat_number
 				FROM orders o
    				JOIN orders_address oa on o.id = oa.orders_id
