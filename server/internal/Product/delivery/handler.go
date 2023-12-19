@@ -11,30 +11,36 @@ import (
 	"strconv"
 )
 
+//Result struct
 type Result struct {
 	Body interface{}
 }
 
+//RespError struct
 type RespError struct {
 	Err string
 }
 
+//ProductHandler struct
 type ProductHandler struct {
-	productUsecase productUsecase.UsecaseI
+	productUsecase productUsecase.ProductUsecaseI
 	logger         *mw.ACLog
 }
 
-func NewProductHandler(productUsecase productUsecase.UsecaseI, logger *mw.ACLog) *ProductHandler {
+//NewProductHandler creates product handler
+func NewProductHandler(productUsecase productUsecase.ProductUsecaseI, logger *mw.ACLog) *ProductHandler {
 	return &ProductHandler{
 		productUsecase: productUsecase,
 		logger:         logger,
 	}
 }
 
+//RegisterHandler registers product handler api
 func (handler *ProductHandler) RegisterHandler(router *mux.Router) {
 	router.HandleFunc("/api/products/{id}", handler.GetProduct).Methods(http.MethodGet)
 }
 
+//GetProduct handles get product request
 func (handler *ProductHandler) GetProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

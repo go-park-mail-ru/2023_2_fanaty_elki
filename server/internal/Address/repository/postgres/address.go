@@ -7,23 +7,26 @@ import (
 	"server/internal/domain/entity"
 )
 
-type addressRepo struct {
+//AddressRepo struct
+type AddressRepo struct {
 	DB *sql.DB
 }
 
-func NewAddressRepo(db *sql.DB) *addressRepo {
-	return &addressRepo{
+//NewAddressRepo creates address repo
+func NewAddressRepo(db *sql.DB) *AddressRepo {
+	return &AddressRepo{
 		DB: db,
 	}
 }
 
-func (repo *addressRepo) CreateAddress(address *dto.DBReqCreateUserAddress) error {
+//CreateAddress creates address in db
+func (repo *AddressRepo) CreateAddress(address *dto.DBReqCreateUserAddress) error {
 
 	insertAddress := `INSERT INTO address (city, street, house_number, flat_number)
 				      VALUES ($1, $2, $3, $4)
 					  RETURNING ID`
-	var addressId uint
-	err := repo.DB.QueryRow(insertAddress, address.City, address.Street, address.House, address.Flat).Scan(&addressId)
+	var addressID uint
+	err := repo.DB.QueryRow(insertAddress, address.City, address.Street, address.House, address.Flat).Scan(&addressID)
 	if err != nil {
 		return entity.ErrInternalServerError
 	}
@@ -37,7 +40,7 @@ func (repo *addressRepo) CreateAddress(address *dto.DBReqCreateUserAddress) erro
 	}
 	insertUserAddress := `INSERT INTO users_address (user_id, address_id, current)
 				      	  VALUES ($1, $2, $3)`
-	_, err = repo.DB.Exec(insertUserAddress, address.UserID, addressId, true)
+	_, err = repo.DB.Exec(insertUserAddress, address.UserID, addressID, true)
 	if err != nil {
 		return entity.ErrInternalServerError
 	}
@@ -45,7 +48,8 @@ func (repo *addressRepo) CreateAddress(address *dto.DBReqCreateUserAddress) erro
 	return nil
 }
 
-func (repo *addressRepo) DeleteAddress(address *dto.DBReqDeleteUserAddress) error {
+//DeleteAddress deletes address from db
+func (repo *AddressRepo) DeleteAddress(address *dto.DBReqDeleteUserAddress) error {
 	deleteAddress := `DELETE FROM users_address
 					WHERE user_id = $1 AND address_id = $2`
 	result, err := repo.DB.Exec(deleteAddress, address.UserID, address.AddressID)
@@ -63,7 +67,8 @@ func (repo *addressRepo) DeleteAddress(address *dto.DBReqDeleteUserAddress) erro
 	return nil
 }
 
-func (repo *addressRepo) GetAddresses(UserID uint) (*dto.RespGetAddresses, error) {
+//GetAddresses get address from db
+func (repo *AddressRepo) GetAddresses(UserID uint) (*dto.RespGetAddresses, error) {
 	getAddresses := `SELECT a.id, a.city, a.street, a.house_number, a.flat_number, ua.current
 			 	 FROM address a
 				 JOIN users_address ua on a.id = ua.address_id
@@ -112,7 +117,8 @@ func (repo *addressRepo) GetAddresses(UserID uint) (*dto.RespGetAddresses, error
 	return respAddresses, nil
 }
 
-func (repo *addressRepo) SetAddress(address *dto.DBReqUpdateUserAddress) error {
+//SetAddress sets address in db
+func (repo *AddressRepo) SetAddress(address *dto.DBReqUpdateUserAddress) error {
 	updateOldAddress := `UPDATE users_address
 					  SET current = false
 					  WHERE current = true AND user_id = $1`

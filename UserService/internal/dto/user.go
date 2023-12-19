@@ -5,6 +5,7 @@ import (
 	"database/sql"
 )
 
+//DBCreateUser struct
 type DBCreateUser struct {
 	ID          uint
 	Username    string
@@ -15,6 +16,7 @@ type DBCreateUser struct {
 	Icon        sql.NullString
 }
 
+//DBUpdateUser struct
 type DBUpdateUser struct {
 	ID          uint
 	Username    string
@@ -25,6 +27,7 @@ type DBUpdateUser struct {
 	Icon        sql.NullString
 }
 
+//DBGetUser struct
 type DBGetUser struct {
 	ID          uint
 	Username    string
@@ -35,6 +38,7 @@ type DBGetUser struct {
 	Icon        sql.NullString
 }
 
+//ToRespGetUser transforms DBGetUser to proto.DBGetUser
 func ToRespGetUser(user *DBGetUser) *proto.DBGetUser {
 	if user == nil {
 		return nil
@@ -50,6 +54,7 @@ func ToRespGetUser(user *DBGetUser) *proto.DBGetUser {
 	}
 }
 
+//ToDBGetUser transforms proto.DBGetUser to DBGetUser
 func ToDBGetUser(user *proto.DBGetUser) *DBGetUser {
 	if user == nil {
 		return nil
@@ -65,6 +70,7 @@ func ToDBGetUser(user *proto.DBGetUser) *DBGetUser {
 	}
 }
 
+//ToRespCreateUser transforms DBCreateUser to proto.DBCreateUser
 func ToRespCreateUser(user *DBCreateUser) *proto.DBCreateUser {
 	if user == nil {
 		return nil
@@ -80,6 +86,7 @@ func ToRespCreateUser(user *DBCreateUser) *proto.DBCreateUser {
 	}
 }
 
+//ToDBCreateUser transforms proto.DBCreateUser to DBCreateUser
 func ToDBCreateUser(user *proto.DBCreateUser) *DBCreateUser {
 	if user == nil {
 		return nil
@@ -95,6 +102,7 @@ func ToDBCreateUser(user *proto.DBCreateUser) *DBCreateUser {
 	}
 }
 
+//ToRespUpdateUser transforms  DBUpdateUser to proto DBUpdateUser
 func ToRespUpdateUser(user *DBUpdateUser) *proto.DBUpdateUser {
 	if user == nil {
 		return nil
@@ -110,6 +118,7 @@ func ToRespUpdateUser(user *DBUpdateUser) *proto.DBUpdateUser {
 	}
 }
 
+//ToDBUpdateUser transforms proto DBUpdateUser to DBUpdateUser
 func ToDBUpdateUser(user *proto.DBUpdateUser) *DBUpdateUser {
 	if user == nil {
 		return nil

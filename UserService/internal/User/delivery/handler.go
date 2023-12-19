@@ -7,19 +7,22 @@ import (
 	"fmt"
 )
 
+//UserManager struct
 type UserManager struct {
 	proto.UnimplementedUserRPCServer
 	userUC userUsecase.UserUsecaseI
 }
 
+//NewUserManager creates user manager
 func NewUserManager(uc userUsecase.UserUsecaseI) proto.UserRPCServer {
 	return UserManager{
 		userUC: uc,
 	}
 }
 
-func (us UserManager) FindUserById(ctx context.Context, grpcid *proto.ID) (*proto.DBGetUser, error) {
-	resp, err := us.userUC.FindUserById(grpcid)
+//FindUserByID handles find user by ID request
+func (us UserManager) FindUserByID(ctx context.Context, grpcid *proto.ID) (*proto.DBGetUser, error) {
+	resp, err := us.userUC.FindUserByID(grpcid)
 	if resp == nil {
 		return &proto.DBGetUser{Username: "@"}, nil
 	}
@@ -27,6 +30,7 @@ func (us UserManager) FindUserById(ctx context.Context, grpcid *proto.ID) (*prot
 	return resp, err
 }
 
+//CreateUser handles create user request
 func (us UserManager) CreateUser(ctx context.Context, grpcUser *proto.DBCreateUser) (*proto.ID, error) {
 	resp, err := us.userUC.CreateUser(grpcUser)
 	fmt.Println("resp cr us", resp)
@@ -34,11 +38,13 @@ func (us UserManager) CreateUser(ctx context.Context, grpcUser *proto.DBCreateUs
 	return resp, err
 }
 
+//UpdateUser handles update user request
 func (us UserManager) UpdateUser(ctx context.Context, grpcuser *proto.DBUpdateUser) (*proto.Nothing, error) {
 	resp, err := us.userUC.UpdateUser(grpcuser) 
 	return resp, err
 }
 
+//FindUserByUsername handles find user by username request
 func (us UserManager) FindUserByUsername(ctx context.Context, value *proto.Value) (*proto.DBGetUser, error){
 	resp, err := us.userUC.FindUserByUsername(value) 
 	if resp == nil {
@@ -48,6 +54,7 @@ func (us UserManager) FindUserByUsername(ctx context.Context, value *proto.Value
 	return resp, err
 }
 
+//FindUserByEmail handles find user by email request
 func (us UserManager) FindUserByEmail(ctx context.Context, value *proto.Value) (*proto.DBGetUser, error){
 	resp, err := us.userUC.FindUserByEmail(value) 
 	if resp == nil {
@@ -56,6 +63,7 @@ func (us UserManager) FindUserByEmail(ctx context.Context, value *proto.Value) (
 	return resp, err
 }
 
+//FindUserByPhone handles find user by phone request
 func (us UserManager) FindUserByPhone(ctx context.Context, value *proto.Value) (*proto.DBGetUser, error){
 	resp, err := us.userUC.FindUserByPhone(value) 
 	fmt.Println("phone resp", resp)

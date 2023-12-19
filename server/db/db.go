@@ -4,6 +4,7 @@ import (
 	"database/sql"
 )
 
+//GetPostgres gets postgres connection
 func GetPostgres(psqlInfo string) (*sql.DB, error) {
 
 	db, err := sql.Open("postgres", psqlInfo)
