@@ -27,7 +27,7 @@ func easyjson16134a91DecodeServerEasy(in *jlexer.Lexer, out *StringSlice) {
 		in.Delim('[')
 		if *out == nil {
 			if !in.IsDelim(']') {
-				*out = make(StringSlice, 0, 8)
+				*out = make(StringSlice, 0, 4)
 			} else {
 				*out = StringSlice{}
 			}
@@ -35,16 +35,8 @@ func easyjson16134a91DecodeServerEasy(in *jlexer.Lexer, out *StringSlice) {
 			*out = (*out)[:0]
 		}
 		for !in.IsDelim(']') {
-			var v1 *string
-			if in.IsNull() {
-				in.Skip()
-				v1 = nil
-			} else {
-				if v1 == nil {
-					v1 = new(string)
-				}
-				*v1 = string(in.String())
-			}
+			var v1 string
+			v1 = string(in.String())
 			*out = append(*out, v1)
 			in.WantComma()
 		}
@@ -63,11 +55,7 @@ func easyjson16134a91EncodeServerEasy(out *jwriter.Writer, in StringSlice) {
 			if v2 > 0 {
 				out.RawByte(',')
 			}
-			if v3 == nil {
-				out.RawString("null")
-			} else {
-				out.String(string(*v3))
-			}
+			out.String(string(v3))
 		}
 		out.RawByte(']')
 	}

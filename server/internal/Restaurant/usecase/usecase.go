@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"fmt"
 	"math/rand"
 
 	orderRep "server/internal/Order/repository"
@@ -172,8 +173,13 @@ func (res restaurantUsecase) GetCategories() (*dto.StringSlice, error) {
 	var respRestWithCategories dto.StringSlice
 
 	for _, rest := range *categories {
-		respRestWithCategories = append(respRestWithCategories, &rest)
+		fmt.Println("usecase ", rest)
+		resp := &rest
+		fmt.Println("usecase ", resp)
+		respRestWithCategories = append(respRestWithCategories, rest)
+		fmt.Println("usecase ", &respRestWithCategories)
 	}
+	fmt.Println(&respRestWithCategories[0], &respRestWithCategories[1], &respRestWithCategories[2])
 	return &respRestWithCategories, nil
 }
 
@@ -258,13 +264,6 @@ func (res restaurantUsecase) Search(word string) (*dto.RestaurantWithCategoriesA
 }
 
 func (res restaurantUsecase) GetRestaurantTips(SessionToken string) (*dto.RestaurantWithCategoriesSlice, error) {
-	cookie, err := res.sessionRepo.Check(SessionToken)
-	if err != nil {
-		return nil, err
-	}
-
-	userID := cookie.UserID
-
 	restaurants, err := res.restaurantRepo.GetRestaurants()
 
 	if err != nil {
@@ -283,10 +282,39 @@ func (res restaurantUsecase) GetRestaurantTips(SessionToken string) (*dto.Restau
 		restvalslice = append(restvalslice, restval)
 	}
 
-	orders, err := res.orderRepo.GetOrders(userID)
-
+	cookie, err := res.sessionRepo.Check(SessionToken)
 	if err != nil {
 		return nil, err
+	}
+
+	fmt.Println("usecase", cookie)
+
+	var orders []*dto.RespGetOrder
+
+	if cookie != nil {
+		userID := cookie.UserID
+
+		orders, err = res.orderRepo.GetOrders(userID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		for _, ord := range orders {
+			order, err := res.orderRepo.GetOrder(&dto.ReqGetOneOrder{OrderId: ord.Id, UserId: userID})
+
+			if err != nil {
+				return nil, err
+			}
+
+			restname := order.OrderItems[0].RestaurantName
+
+			for i, restval := range restvalslice {
+				if restval.Restaurant == restname {
+					restvalslice[i].Value++
+				}
+			}
+		}
 	}
 
 	if len(orders) == 0 {
@@ -294,22 +322,6 @@ func (res restaurantUsecase) GetRestaurantTips(SessionToken string) (*dto.Restau
 			restvalslice[i].Value = rand.Intn(5)
 		}
 		restvalslice = restvalslice[:3]
-	}
-
-	for _, ord := range orders {
-		order, err := res.orderRepo.GetOrder(&dto.ReqGetOneOrder{OrderId: ord.Id, UserId: userID})
-
-		if err != nil {
-			return nil, err
-		}
-
-		restname := order.OrderItems[0].RestaurantName
-
-		for i, restval := range restvalslice {
-			if restval.Restaurant == restname {
-				restvalslice[i].Value++
-			}
-		}
 	}
 
 	sort.Slice(restvalslice, func(i, j int) bool {

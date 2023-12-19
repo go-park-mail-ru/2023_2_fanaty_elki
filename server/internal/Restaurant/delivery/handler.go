@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	restaurantUsecase "server/internal/Restaurant/usecase"
 	"server/internal/domain/dto"
@@ -217,6 +218,8 @@ func (handler *RestaurantHandler) GetCategoryList(w http.ResponseWriter, r *http
 
 	cats, err := handler.restaurants.GetCategories()
 
+	fmt.Println("handler ", cats)
+
 	if err != nil {
 		handler.logger.LogError("problems with getting categories", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -276,7 +279,10 @@ func (handler *RestaurantHandler) GetRestaurantTipList(w http.ResponseWriter, r 
 	var rests *dto.RestaurantWithCategoriesSlice
 	var err error
 
+	fmt.Println("cookie ", cookie)
+
 	if cookie == nil {
+		fmt.Println("cookie nil ", cookie)
 		rests, err = handler.restaurants.GetRandomRestaurantTips()
 	} else {
 		rests, err = handler.restaurants.GetRestaurantTips(cookie.Value)

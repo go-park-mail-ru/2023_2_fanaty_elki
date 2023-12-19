@@ -77,7 +77,7 @@ type RestaurantWithCategoriesSlice []*RestaurantWithCategories
 type MenuTypeWithProductsSlice []*MenuTypeWithProducts
 
 //easyjson:json
-type StringSlice []*string
+type StringSlice []string
 
 //easyjson:json
 type RestaurantWithCategoriesAndProductsSlice []*RestaurantWithCategoriesAndProducts
