@@ -42,7 +42,7 @@ func ToEntityGetPromo(dbPromo *DBGetPromo) *entity.Promo {
 		Code:         dbPromo.Code,
 		PromoType:    dbPromo.PromoType,
 		Sale:         transformSqlStringToUint(dbPromo.Sale),
-		RestaurantId: transformSqlStringToUint(dbPromo.RestaurantId),
+		RestaurantID: transformSqlStringToUint(dbPromo.RestaurantId),
 		ActiveFrom:   dbPromo.ActiveFrom,
 		ActiveTo:     dbPromo.ActiveTo,
 	}

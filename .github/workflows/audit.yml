@@ -2,7 +2,7 @@
 name: audit
 on:
   push:
-    branches: [ci]
+    branches: [ciandeasyjson]
 
 jobs:
   versions:
@@ -30,17 +30,17 @@ jobs:
 
       - name: Run golint
         run: find -name go.mod -execdir golint ./... \;
-  # # test:
-  # #   runs-on: ubuntu-latest
-  # #   container: golang
+  test:
+    runs-on: ubuntu-latest
+    container: golang
 
-  # #   steps:
-  # #     - uses: actions/checkout@v3
+    steps:
+      - uses: actions/checkout@v3
 
-  # #     - name: Run tests
-  # #       env:
-  # #         GOFLAGS: -buildvcs=false
-  # #       run: make coverage
+      - name: Run tests
+        env:
+          GOFLAGS: -buildvcs=false
+        run: make test
 
   build:
     needs: [linter]

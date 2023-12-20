@@ -72,7 +72,7 @@ type RespOrders []*RespGetOrder
 func ToEntityCreateOrder(order *ReqCreateOrder) *entity.Order {
 	return &entity.Order{
 		Status:       0,
-		UserId:       order.UserId,
+		UserID:       order.UserId,
 		Date:         time.Now(),
 		Address:      ToEntityCreateOrderAddress(order.Address),
 		Price:        0,
@@ -82,7 +82,7 @@ func ToEntityCreateOrder(order *ReqCreateOrder) *entity.Order {
 
 func ToDBReqCreateOrder(order *entity.Order, products []*entity.CartProduct) *DBReqCreateOrder {
 	return &DBReqCreateOrder{
-		UserId:       order.UserId,
+		UserId:       order.UserID,
 		Products:     products,
 		Status:       order.Status,
 		Price:        order.Price,

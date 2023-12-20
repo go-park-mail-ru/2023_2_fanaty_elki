@@ -25,3 +25,7 @@ copy:
 	mkdir -p AuthService/build && cp build/auth AuthService/build
 	mkdir -p ProductService/build && cp build/product ProductService/build
 	mkdir -p UserService/build && cp build/user UserService/build
+
+.PHONY: test
+test:
+	cd server && go test -coverprofile=c.out ./... && go tool cover -func c.out | grep total

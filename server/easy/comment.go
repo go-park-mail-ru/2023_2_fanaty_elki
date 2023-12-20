@@ -59,8 +59,8 @@ func (c ReqCreateComment) FromReqToEntCreateComment() *entity.Comment {
 	return &entity.Comment{
 		Text:         c.Text,
 		Rating:       c.Rating,
-		RestaurantId: c.RestaurantId,
-		UserId:       c.UserId,
+		RestaurantID: c.RestaurantId,
+		UserID:       c.UserId,
 	}
 }
 
@@ -69,7 +69,7 @@ func (c DBRespCreateComment) FromDBRespToEntCreateComment() *entity.Comment {
 		Text:   transformSqlStringToString(c.Text),
 		Rating: c.Rating,
 		Date:   c.Date,
-		UserId: c.UserId,
+		UserID: c.UserId,
 	}
 }
 
@@ -77,8 +77,8 @@ func FromEntToDBReqCreateComment(comment *entity.Comment) *DBReqCreateComment {
 	return &DBReqCreateComment{
 		Text:         *transformStringToSqlString(comment.Text),
 		Rating:       comment.Rating,
-		RestaurantId: comment.RestaurantId,
-		UserId:       comment.UserId,
+		RestaurantId: comment.RestaurantID,
+		UserId:       comment.UserID,
 	}
 }
 
