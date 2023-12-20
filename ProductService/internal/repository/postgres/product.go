@@ -5,17 +5,20 @@ import (
 	"database/sql"
 )
 
-type productRepo struct {
+//ProductRepo struct
+type ProductRepo struct {
 	DB *sql.DB
 }
 
-func NewProductRepo(db *sql.DB) *productRepo {
-	return &productRepo{
+//NewProductRepo creates product repo
+func NewProductRepo(db *sql.DB) *ProductRepo {
+	return &ProductRepo{
 		DB: db,
 	}
 }
 
-func (repo *productRepo) GetProductsByMenuTypeId(id uint) ([]*entity.Product, error) {
+//GetProductsByMenuTypeID gets products by menu type from db
+func (repo *ProductRepo) GetProductsByMenuTypeID(id uint) ([]*entity.Product, error) {
 	rows, err := repo.DB.Query(`SELECT p.id, name, price, cooking_time, portion, description, icon  FROM product p 
 	INNER JOIN product_menu_type pm ON pm.product_id = p.id AND menu_type_id = $1;`, id)
 	if err != nil {
@@ -43,14 +46,14 @@ func (repo *productRepo) GetProductsByMenuTypeId(id uint) ([]*entity.Product, er
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
-		} else {
-			return nil, err
-		}
+		} 
+		return nil, err
 	}
 	return Products, nil
 }
 
-func (repo *productRepo) GetProductByID(id uint) (*entity.Product, error) {
+//GetProductByID gets product by id in db
+func (repo *ProductRepo) GetProductByID(id uint) (*entity.Product, error) {
 	product := &entity.Product{}
 	row := repo.DB.QueryRow(`SELECT id, name, price, cooking_time, portion, description, icon FROM product WHERE id = $1`, id)
 	err := row.Scan(
@@ -71,7 +74,8 @@ func (repo *productRepo) GetProductByID(id uint) (*entity.Product, error) {
 	return product, nil
 }
 
-func (repo *productRepo) SearchProducts(word string) ([]*entity.Product, error) {
+//SearchProducts searches products in db
+func (repo *ProductRepo) SearchProducts(word string) ([]*entity.Product, error) {
 	rows, err := repo.DB.Query(`SELECT id, name, price, cooking_time, portion, description, icon FROM product WHERE LOWER(name) LIKE LOWER('%' || $1 || '%')`, word)
 	if err != nil {
 		return nil, err
@@ -98,18 +102,18 @@ func (repo *productRepo) SearchProducts(word string) ([]*entity.Product, error) 
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
-		} else {
-			return nil, err
-		}
+		} 
+		return nil, err
 	}
 	return Products, nil
 }
 
-func (repo *productRepo) GetRestaurantIdByProduct(id uint) (uint, error) {
-	var restId uint
+//GetRestaurantIDByProduct gets restaurant id by product in db
+func (repo *ProductRepo) GetRestaurantIDByProduct(id uint) (uint, error) {
+	var restID uint
 	row := repo.DB.QueryRow(`SELECT restaurant_id FROM product_menu_type JOIN menu_type on menu_type.id = menu_type_id where product_id = $1`, id)
 	err := row.Scan(
-		&restId,
+		&restID,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -117,5 +121,5 @@ func (repo *productRepo) GetRestaurantIdByProduct(id uint) (uint, error) {
 		}
 		return 0, entity.ErrInternalServerError
 	}
-	return restId, nil
+	return restID, nil
 }

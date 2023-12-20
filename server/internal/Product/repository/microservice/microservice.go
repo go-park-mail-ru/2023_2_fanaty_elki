@@ -26,7 +26,7 @@ func (pm *ProductMicroService) GetProductsByMenuTypeID(id uint) ([]*entity.Produ
 
 	grpcid := product.ID{ID: uint64(id)}
 
-	grpcproducts, err := pm.client.GetProductsByMenuTypeId(ctx, &grpcid)
+	grpcproducts, err := pm.client.GetProductsByMenuTypeID(ctx, &grpcid)
 
 	if err != nil {
 		return nil, err
@@ -115,7 +115,7 @@ func (pm *ProductMicroService) GetRestaurantIDByProduct(id uint) (uint, error) {
 
 	grpcid := product.ID{ID: uint64(id)}
 
-	grpcrestid, err := pm.client.GetRestaurantIdByProduct(ctx, &grpcid)
+	grpcrestid, err := pm.client.GetRestaurantIDByProduct(ctx, &grpcid)
 
 	if err != nil {
 		return 0, err

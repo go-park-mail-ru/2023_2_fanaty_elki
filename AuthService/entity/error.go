@@ -2,6 +2,7 @@ package entity
 
 import "errors"
 
+//ErrNotFound errors
 var (
 	ErrNotFound              = errors.New("item is not found")
 	ErrInvalidPassword       = errors.New("invalid password")

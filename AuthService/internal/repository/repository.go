@@ -5,6 +5,7 @@ import (
 	"AuthService/entity"
 )
 
+//SessionRepositoryI interface
 type SessionRepositoryI interface {
 	Create(cookie *entity.Cookie) error
 	Check(sessionToken string) (*entity.Cookie, error)
