@@ -1,5 +1,6 @@
 package entity
 
+//Product struct
 type Product struct {
 	ID          uint
 	Name        string

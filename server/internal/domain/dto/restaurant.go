@@ -2,6 +2,7 @@ package dto
 
 import "server/internal/domain/entity"
 
+//RestaurantWithCategories dto
 type RestaurantWithCategories struct {
 	ID              uint
 	Name            string
@@ -14,6 +15,7 @@ type RestaurantWithCategories struct {
 	DeliveryPrice   int
 }
 
+//ToRestaurantWithCategories creates RestaurantWithCategories from Restaurant and Categories 
 func ToRestaurantWithCategories(restaurant *entity.Restaurant, categories []*entity.Category) *RestaurantWithCategories {
 	return &RestaurantWithCategories{
 		ID:              restaurant.ID,
@@ -28,6 +30,7 @@ func ToRestaurantWithCategories(restaurant *entity.Restaurant, categories []*ent
 	}
 }
 
+//TransformCategoriesToStringSlice transforms categories to string slice
 func TransformCategoriesToStringSlice(categories []*entity.Category) *[]string {
 	categorySlice := []string{}
 	for _, cat := range categories {
@@ -37,11 +40,13 @@ func TransformCategoriesToStringSlice(categories []*entity.Category) *[]string {
 	return &categorySlice
 }
 
+//MenuTypeWithProducts dto
 type MenuTypeWithProducts struct {
 	MenuType *entity.MenuType
 	Products []*entity.Product
 }
 
+//RestaurantWithCategoriesAndProducts dto
 type RestaurantWithCategoriesAndProducts struct {
 	ID              uint
 	Name            string
@@ -55,6 +60,7 @@ type RestaurantWithCategoriesAndProducts struct {
 	Products        []*entity.Product
 }
 
+//ToRestaurantWithCategoriesAndProducts creates RestaurantWithCategoriesAndProducts from RestaurantWithCategories and Products 
 func ToRestaurantWithCategoriesAndProducts(restaurant *RestaurantWithCategories, products []*entity.Product) *RestaurantWithCategoriesAndProducts {
 	return &RestaurantWithCategoriesAndProducts{
 		ID:              restaurant.ID,
@@ -69,3 +75,15 @@ func ToRestaurantWithCategoriesAndProducts(restaurant *RestaurantWithCategories,
 		Products:        products,
 	}
 }
+
+//easyjson:json
+type RestaurantWithCategoriesSlice []*RestaurantWithCategories
+
+//easyjson:json
+type MenuTypeWithProductsSlice []*MenuTypeWithProducts
+
+//easyjson:json
+type StringSlice []string
+
+//easyjson:json
+type RestaurantWithCategoriesAndProductsSlice []*RestaurantWithCategoriesAndProducts

@@ -1,15 +1,17 @@
 package repository
 
 import (
-	"server/internal/domain/entity"
 	"server/internal/domain/dto"
+	"server/internal/domain/entity"
 )
 
+//RestaurantRepositoryI interface
 type RestaurantRepositoryI interface {
 	GetRestaurants() ([]*entity.Restaurant, error)
-	GetRestaurantById(id uint) (*entity.Restaurant, error)
-	GetMenuTypesByRestaurantId(id uint) ([]*entity.MenuType, error)
-	GetCategoriesByRestaurantId(id uint) ([]*entity.Category, error)
+	GetRestaurantByID(id uint) (*entity.Restaurant, error)
+	GetRestaurantByName(name string) (*entity.Restaurant, error)
+	GetMenuTypesByRestaurantID(id uint) ([]*entity.MenuType, error)
+	GetCategoriesByRestaurantID(id uint) ([]*entity.Category, error)
 	GetRestaurantsByCategory(name string) ([]*entity.Restaurant, error)
 	GetCategories() ([]*entity.Category, error)
 	SearchRestaurants(word string) ([]*entity.Restaurant, error)

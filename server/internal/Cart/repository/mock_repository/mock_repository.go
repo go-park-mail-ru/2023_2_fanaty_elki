@@ -93,18 +93,18 @@ func (mr *MockCartRepositoryIMockRecorder) CleanCart(cartID interface{}) *gomock
 }
 
 // CreateCart mocks base method.
-func (m *MockCartRepositoryI) CreateCart(userID uint) (uint, error) {
+func (m *MockCartRepositoryI) CreateCart(UserID uint) (uint, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateCart", userID)
+	ret := m.ctrl.Call(m, "CreateCart", UserID)
 	ret0, _ := ret[0].(uint)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateCart indicates an expected call of CreateCart.
-func (mr *MockCartRepositoryIMockRecorder) CreateCart(userID interface{}) *gomock.Call {
+func (mr *MockCartRepositoryIMockRecorder) CreateCart(UserID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCart", reflect.TypeOf((*MockCartRepositoryI)(nil).CreateCart), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCart", reflect.TypeOf((*MockCartRepositoryI)(nil).CreateCart), UserID)
 }
 
 // DeleteProductFromCart mocks base method.
@@ -122,25 +122,25 @@ func (mr *MockCartRepositoryIMockRecorder) DeleteProductFromCart(cartID, product
 }
 
 // GetCartByUserID mocks base method.
-func (m *MockCartRepositoryI) GetCartByUserID(userID uint) (*entity.Cart, error) {
+func (m *MockCartRepositoryI) GetCartByUserID(UserID uint) (*entity.Cart, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCartByUserID", userID)
+	ret := m.ctrl.Call(m, "GetCartByUserID", UserID)
 	ret0, _ := ret[0].(*entity.Cart)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetCartByUserID indicates an expected call of GetCartByUserID.
-func (mr *MockCartRepositoryIMockRecorder) GetCartByUserID(userID interface{}) *gomock.Call {
+func (mr *MockCartRepositoryIMockRecorder) GetCartByUserID(UserID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCartByUserID", reflect.TypeOf((*MockCartRepositoryI)(nil).GetCartByUserID), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCartByUserID", reflect.TypeOf((*MockCartRepositoryI)(nil).GetCartByUserID), UserID)
 }
 
 // GetCartProductsByCartID mocks base method.
-func (m *MockCartRepositoryI) GetCartProductsByCartID(cartID uint) ([]*entity.CartProduct, error) {
+func (m *MockCartRepositoryI) GetCartProductsByCartID(cartID uint) (*entity.CartWithRestaurant, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCartProductsByCartID", cartID)
-	ret0, _ := ret[0].([]*entity.CartProduct)
+	ret0, _ := ret[0].(*entity.CartWithRestaurant)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

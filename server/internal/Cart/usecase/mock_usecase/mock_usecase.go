@@ -11,31 +11,31 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// MockUsecaseI is a mock of UsecaseI interface.
-type MockUsecaseI struct {
+// MockCartUsecaseI is a mock of CartUsecaseI interface.
+type MockCartUsecaseI struct {
 	ctrl     *gomock.Controller
-	recorder *MockUsecaseIMockRecorder
+	recorder *MockCartUsecaseIMockRecorder
 }
 
-// MockUsecaseIMockRecorder is the mock recorder for MockUsecaseI.
-type MockUsecaseIMockRecorder struct {
-	mock *MockUsecaseI
+// MockCartUsecaseIMockRecorder is the mock recorder for MockCartUsecaseI.
+type MockCartUsecaseIMockRecorder struct {
+	mock *MockCartUsecaseI
 }
 
-// NewMockUsecaseI creates a new mock instance.
-func NewMockUsecaseI(ctrl *gomock.Controller) *MockUsecaseI {
-	mock := &MockUsecaseI{ctrl: ctrl}
-	mock.recorder = &MockUsecaseIMockRecorder{mock}
+// NewMockCartUsecaseI creates a new mock instance.
+func NewMockCartUsecaseI(ctrl *gomock.Controller) *MockCartUsecaseI {
+	mock := &MockCartUsecaseI{ctrl: ctrl}
+	mock.recorder = &MockCartUsecaseIMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockUsecaseI) EXPECT() *MockUsecaseIMockRecorder {
+func (m *MockCartUsecaseI) EXPECT() *MockCartUsecaseIMockRecorder {
 	return m.recorder
 }
 
 // AddProductToCart mocks base method.
-func (m *MockUsecaseI) AddProductToCart(SessionToken string, productID uint) error {
+func (m *MockCartUsecaseI) AddProductToCart(SessionToken string, productID uint) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddProductToCart", SessionToken, productID)
 	ret0, _ := ret[0].(error)
@@ -43,13 +43,13 @@ func (m *MockUsecaseI) AddProductToCart(SessionToken string, productID uint) err
 }
 
 // AddProductToCart indicates an expected call of AddProductToCart.
-func (mr *MockUsecaseIMockRecorder) AddProductToCart(SessionToken, productID interface{}) *gomock.Call {
+func (mr *MockCartUsecaseIMockRecorder) AddProductToCart(SessionToken, productID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddProductToCart", reflect.TypeOf((*MockUsecaseI)(nil).AddProductToCart), SessionToken, productID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddProductToCart", reflect.TypeOf((*MockCartUsecaseI)(nil).AddProductToCart), SessionToken, productID)
 }
 
 // CleanCart mocks base method.
-func (m *MockUsecaseI) CleanCart(SessionToken string) error {
+func (m *MockCartUsecaseI) CleanCart(SessionToken string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CleanCart", SessionToken)
 	ret0, _ := ret[0].(error)
@@ -57,13 +57,13 @@ func (m *MockUsecaseI) CleanCart(SessionToken string) error {
 }
 
 // CleanCart indicates an expected call of CleanCart.
-func (mr *MockUsecaseIMockRecorder) CleanCart(SessionToken interface{}) *gomock.Call {
+func (mr *MockCartUsecaseIMockRecorder) CleanCart(SessionToken interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CleanCart", reflect.TypeOf((*MockUsecaseI)(nil).CleanCart), SessionToken)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CleanCart", reflect.TypeOf((*MockCartUsecaseI)(nil).CleanCart), SessionToken)
 }
 
 // DeleteProductFromCart mocks base method.
-func (m *MockUsecaseI) DeleteProductFromCart(SessionToken string, productID uint) error {
+func (m *MockCartUsecaseI) DeleteProductFromCart(SessionToken string, productID uint) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteProductFromCart", SessionToken, productID)
 	ret0, _ := ret[0].(error)
@@ -71,22 +71,37 @@ func (m *MockUsecaseI) DeleteProductFromCart(SessionToken string, productID uint
 }
 
 // DeleteProductFromCart indicates an expected call of DeleteProductFromCart.
-func (mr *MockUsecaseIMockRecorder) DeleteProductFromCart(SessionToken, productID interface{}) *gomock.Call {
+func (mr *MockCartUsecaseIMockRecorder) DeleteProductFromCart(SessionToken, productID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProductFromCart", reflect.TypeOf((*MockUsecaseI)(nil).DeleteProductFromCart), SessionToken, productID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProductFromCart", reflect.TypeOf((*MockCartUsecaseI)(nil).DeleteProductFromCart), SessionToken, productID)
+}
+
+// GetCartTips mocks base method.
+func (m *MockCartUsecaseI) GetCartTips(SessionToken string) (*dto.ProductSlice, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCartTips", SessionToken)
+	ret0, _ := ret[0].(*dto.ProductSlice)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCartTips indicates an expected call of GetCartTips.
+func (mr *MockCartUsecaseIMockRecorder) GetCartTips(SessionToken interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCartTips", reflect.TypeOf((*MockCartUsecaseI)(nil).GetCartTips), SessionToken)
 }
 
 // GetUserCart mocks base method.
-func (m *MockUsecaseI) GetUserCart(SessionToken string) ([]*dto.CartProduct, error) {
+func (m *MockCartUsecaseI) GetUserCart(SessionToken string) (*dto.CartWithRestaurant, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserCart", SessionToken)
-	ret0, _ := ret[0].([]*dto.CartProduct)
+	ret0, _ := ret[0].(*dto.CartWithRestaurant)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetUserCart indicates an expected call of GetUserCart.
-func (mr *MockUsecaseIMockRecorder) GetUserCart(SessionToken interface{}) *gomock.Call {
+func (mr *MockCartUsecaseIMockRecorder) GetUserCart(SessionToken interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserCart", reflect.TypeOf((*MockUsecaseI)(nil).GetUserCart), SessionToken)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserCart", reflect.TypeOf((*MockCartUsecaseI)(nil).GetUserCart), SessionToken)
 }

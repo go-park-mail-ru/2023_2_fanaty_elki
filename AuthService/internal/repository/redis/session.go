@@ -5,25 +5,30 @@ import (
 	"AuthService/entity"
 	"encoding/json"
 	"fmt"
-	"github.com/gomodule/redigo/redis"
 	"sync"
+	"github.com/gomodule/redigo/redis"
 )
 
-type sessionManager struct {
+//SessionManager struct
+type SessionManager struct {
 	redisConn redis.Conn
 	mu        sync.Mutex
 }
 
-func NewSessionManager(conn redis.Conn) *sessionManager {
-	return &sessionManager{
+//NewSessionManager creates session manager
+func NewSessionManager(conn redis.Conn) *SessionManager {
+	return &SessionManager{
 		redisConn: conn,
 	}
 }
 
-func (sm *sessionManager) Create(cookie *entity.Cookie) error {
+//Create creates session in db
+func (sm *SessionManager) Create(cookie *entity.Cookie) error {
 	dataSerialized, _ := json.Marshal(cookie.UserID)
 	mkey := "sessions:" + cookie.SessionToken
+	sm.mu.Lock()
 	result, err := redis.String(sm.redisConn.Do("SET", mkey, dataSerialized, "EX", 540000))
+	sm.mu.Unlock()
 	if err != nil || result != "OK" {
 
 		return entity.ErrInternalServerError
@@ -32,7 +37,8 @@ func (sm *sessionManager) Create(cookie *entity.Cookie) error {
 	return nil
 }
 
-func (sm *sessionManager) Check(sessionToken string) (*entity.Cookie, error) {
+//Check checks session in db
+func (sm *SessionManager) Check(sessionToken string) (*entity.Cookie, error) {
 	mkey := "sessions:" + sessionToken
 	sm.mu.Lock()
 	data, err := redis.Bytes(sm.redisConn.Do("GET", mkey))
@@ -52,7 +58,8 @@ func (sm *sessionManager) Check(sessionToken string) (*entity.Cookie, error) {
 	return cookie, nil
 }
 
-func (sm *sessionManager) Delete(cookie *dto.DBDeleteCookie) error {
+//Delete deletes session in db
+func (sm *SessionManager) Delete(cookie *dto.DBDeleteCookie) error {
 	mkey := "sessions:" + cookie.SessionToken
 	_, err := redis.Int(sm.redisConn.Do("DEL", mkey))
 	if err != nil {
@@ -65,7 +72,8 @@ func (sm *sessionManager) Delete(cookie *dto.DBDeleteCookie) error {
 	return nil
 }
 
-func (sm *sessionManager) Expire(cookie *entity.Cookie) error {
+//Expire updates session in db
+func (sm *SessionManager) Expire(cookie *entity.Cookie) error {
 	err := sm.Delete(dto.ToDBDeleteCookie(cookie))
 	if err != nil {
 		return entity.ErrDeletingCookie
@@ -78,10 +86,13 @@ func (sm *sessionManager) Expire(cookie *entity.Cookie) error {
 	return nil
 }
 
-func (sm *sessionManager) CreateCsrf(sessionToken string, csrfToken string) error {
+//CreateCsrf creates csrf in db
+func (sm *SessionManager) CreateCsrf(sessionToken string, csrfToken string) error {
 	dataSerialized, _ := json.Marshal(csrfToken)
 	mkey := "csrf:" + sessionToken
+	sm.mu.Lock()
 	result, err := redis.String(sm.redisConn.Do("SET", mkey, dataSerialized, "EX", 540000))
+	sm.mu.Unlock()
 	if err != nil || result != "OK" {
 		return entity.ErrInternalServerError
 	}
@@ -89,10 +100,12 @@ func (sm *sessionManager) CreateCsrf(sessionToken string, csrfToken string) erro
 	return nil
 }
 
-func (sm *sessionManager) GetCsrf(sessionToken string) (string, error) {
+//GetCsrf gets csrf from db
+func (sm *SessionManager) GetCsrf(sessionToken string) (string, error) {
 	mkey := "csrf:" + sessionToken
+	sm.mu.Lock()
 	data, err := redis.Bytes(sm.redisConn.Do("GET", mkey))
-
+	sm.mu.Unlock()
 	if err != nil {
 		if err != redis.ErrNil {
 			return "", entity.ErrInternalServerError

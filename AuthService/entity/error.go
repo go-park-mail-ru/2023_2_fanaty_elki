@@ -2,6 +2,7 @@ package entity
 
 import "errors"
 
+//ErrNotFound errors
 var (
 	ErrNotFound              = errors.New("item is not found")
 	ErrInvalidPassword       = errors.New("invalid password")
@@ -18,7 +19,7 @@ var (
 	ErrInternalServerError   = errors.New("internal server error")
 	ErrPermissionDenied      = errors.New("permission denied")
 	ErrProblemsReadingData   = errors.New("problems with reading data")
-	ErrUnmarshalingJson      = errors.New("problems with unmarshaling json")
+	ErrUnmarshalingJSON      = errors.New("problems with unmarshaling json")
 	ErrBadContentType        = errors.New("bad content-type")
 	ErrCreatingCookie        = errors.New("problems with creating cookie")
 	ErrDeletingCookie        = errors.New("problems with deleting cookie")

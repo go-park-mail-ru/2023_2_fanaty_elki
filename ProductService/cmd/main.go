@@ -14,6 +14,7 @@ import (
 	"time"
 )
 
+//PORT of product microservice
 const PORT = ":8082"
 
 var (
@@ -28,6 +29,7 @@ var (
 		host, port, user, password, dbname)
 )
 
+//GetPostgres gets connections of postgresql
 func GetPostgres(psqlInfo string) (*sql.DB, error) {
 
 	db, err := sql.Open("postgres", psqlInfo)

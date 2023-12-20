@@ -2,8 +2,9 @@ package entity
 
 import "time"
 
+//Cookie entity
 type Cookie struct {
-	UserID uint
+	UserID       uint
 	SessionToken string
 	MaxAge       time.Duration
 }

@@ -12,6 +12,7 @@ import (
 	"net"
 )
 
+//PORT port of auth service
 const PORT = ":8081"
 
 var redisAddr = flag.String("addr", "redis://redis-session:6379/0", "redis addr")

@@ -3,50 +3,63 @@ package usecase
 import (
 	cartRep "server/internal/Cart/repository"
 	productRep "server/internal/Product/repository"
+	promoRep "server/internal/Promo/repository"
+	restaurantRep "server/internal/Restaurant/repository"
 	sessionRep "server/internal/Session/repository"
 	dto "server/internal/domain/dto"
 	"server/internal/domain/entity"
 )
 
-type UsecaseI interface {
-	GetUserCart(SessionToken string) ([]*dto.CartProduct, error)
+//CartUsecaseI interface
+type CartUsecaseI interface {
+	GetUserCart(SessionToken string) (*dto.CartWithRestaurant, error)
 	AddProductToCart(SessionToken string, productID uint) error
 	DeleteProductFromCart(SessionToken string, productID uint) error
 	CleanCart(SessionToken string) error
+	GetCartTips(SessionToken string) (*dto.ProductSlice, error)
 }
 
-type cartUsecase struct {
-	cartRepo    cartRep.CartRepositoryI
-	productRepo productRep.ProductRepositoryI
-	sessionRepo sessionRep.SessionRepositoryI
+//CartUsecase struct
+type CartUsecase struct {
+	cartRepo       cartRep.CartRepositoryI
+	productRepo    productRep.ProductRepositoryI
+	sessionRepo    sessionRep.SessionRepositoryI
+	restaurantRepo restaurantRep.RestaurantRepositoryI
+	promoRepo      promoRep.PromoRepositoryI
 }
 
-func NewCartUsecase(cartRep cartRep.CartRepositoryI, productRep productRep.ProductRepositoryI, sessionRep sessionRep.SessionRepositoryI) *cartUsecase {
-	return &cartUsecase{
-		cartRepo:    cartRep,
-		productRepo: productRep,
-		sessionRepo: sessionRep,
+//NewCartUsecase creates cart usecase
+func NewCartUsecase(cartRep cartRep.CartRepositoryI, productRep productRep.ProductRepositoryI, sessionRep sessionRep.SessionRepositoryI, restaurantRep restaurantRep.RestaurantRepositoryI, promoRep promoRep.PromoRepositoryI) *CartUsecase {
+	return &CartUsecase{
+		cartRepo:       cartRep,
+		productRepo:    productRep,
+		sessionRepo:    sessionRep,
+		restaurantRepo: restaurantRep,
+		promoRepo:      promoRep,
 	}
 }
 
-func (cu cartUsecase) GetUserCart(SessionToken string) ([]*dto.CartProduct, error) {
+//GetUserCart gets user cart
+func (cu CartUsecase) GetUserCart(SessionToken string) (*dto.CartWithRestaurant, error) {
 	cookie, err := cu.sessionRepo.Check(SessionToken)
 	if err != nil {
 		return nil, err
 	}
 
-	userID := cookie.UserID
-	cart, err := cu.cartRepo.GetCartByUserID(userID)
+	UserID := cookie.UserID
+	cart, err := cu.cartRepo.GetCartByUserID(UserID)
 	if err != nil {
 		return nil, err
 	}
 
-	cartProducts, err := cu.cartRepo.GetCartProductsByCartID(cart.ID)
+	cartWithRestaurant, err := cu.cartRepo.GetCartProductsByCartID(cart.ID)
 	if err != nil {
 		return nil, err
 	}
-	var CartProducts []*dto.CartProduct
-	for _, cartProduct := range cartProducts {
+
+	CartWithRestaurant := &dto.CartWithRestaurant{}
+
+	for _, cartProduct := range cartWithRestaurant.Products {
 		product, err := cu.productRepo.GetProductByID(cartProduct.ProductID)
 		if err != nil {
 			return nil, entity.ErrInternalServerError
@@ -55,12 +68,36 @@ func (cu cartUsecase) GetUserCart(SessionToken string) ([]*dto.CartProduct, erro
 			Product:   product,
 			ItemCount: cartProduct.ItemCount,
 		}
-		CartProducts = append(CartProducts, &CartProduct)
+		CartWithRestaurant.Products = append(CartWithRestaurant.Products, &CartProduct)
 	}
-	return CartProducts, nil
+	if cartWithRestaurant.RestaurantID == 0 {
+		return CartWithRestaurant, nil
+	}
+
+	restaurant, err := cu.restaurantRepo.GetRestaurantByID(cartWithRestaurant.RestaurantID)
+	if err != nil {
+		return nil, err
+	}
+
+	CartWithRestaurant.Restaurant = restaurant
+
+	if cartWithRestaurant.PromoID != 0 {
+
+		promo, err := cu.promoRepo.GetPromoByID(cartWithRestaurant.PromoID)
+		if err != nil {
+			return nil, err
+		}
+
+		resppromo := dto.ToRespPromo(promo)
+		CartWithRestaurant.Promo = resppromo
+
+	}
+
+	return CartWithRestaurant, nil
 }
 
-func (cu cartUsecase) AddProductToCart(SessionToken string, productID uint) error {
+//AddProductToCart adds product to cart
+func (cu CartUsecase) AddProductToCart(SessionToken string, productID uint) error {
 	cookie, err := cu.sessionRepo.Check(SessionToken)
 	if err != nil {
 		return err
@@ -72,8 +109,8 @@ func (cu cartUsecase) AddProductToCart(SessionToken string, productID uint) erro
 		return entity.ErrNotFound
 	}
 
-	userID := cookie.UserID
-	cart, err := cu.cartRepo.GetCartByUserID(userID)
+	UserID := cookie.UserID
+	cart, err := cu.cartRepo.GetCartByUserID(UserID)
 	if err != nil {
 		return err
 	}
@@ -99,7 +136,8 @@ func (cu cartUsecase) AddProductToCart(SessionToken string, productID uint) erro
 	return nil
 }
 
-func (cu cartUsecase) DeleteProductFromCart(SessionToken string, productID uint) error {
+//DeleteProductFromCart deletes product from cart
+func (cu CartUsecase) DeleteProductFromCart(SessionToken string, productID uint) error {
 	cookie, err := cu.sessionRepo.Check(SessionToken)
 	if err != nil {
 		return err
@@ -111,8 +149,8 @@ func (cu cartUsecase) DeleteProductFromCart(SessionToken string, productID uint)
 		return entity.ErrNotFound
 	}
 
-	userID := cookie.UserID
-	cart, err := cu.cartRepo.GetCartByUserID(userID)
+	UserID := cookie.UserID
+	cart, err := cu.cartRepo.GetCartByUserID(UserID)
 	if err != nil {
 		return err
 	}
@@ -146,21 +184,89 @@ func (cu cartUsecase) DeleteProductFromCart(SessionToken string, productID uint)
 	return nil
 }
 
-func (cu cartUsecase) CleanCart(SessionToken string) error {
+//CleanCart cleans cart
+func (cu CartUsecase) CleanCart(SessionToken string) error {
 	cookie, err := cu.sessionRepo.Check(SessionToken)
 	if err != nil {
 		return err
 	}
 
-	userID := cookie.UserID
-	cart, err := cu.cartRepo.GetCartByUserID(userID)
+	UserID := cookie.UserID
+	cart, err := cu.cartRepo.GetCartByUserID(UserID)
 	if err != nil {
 		return err
 	}
+
+	cartWithRestaurant, err := cu.cartRepo.GetCartProductsByCartID(cart.ID)
+	if err != nil {
+		return err
+	}
+
+	err = cu.promoRepo.DeletePromoFromCart(cart.ID, cartWithRestaurant.PromoID)
+	if err != nil {
+		return err
+	}
+
 	err = cu.cartRepo.CleanCart(cart.ID)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+//GetCartTips gets cart tips
+func (cu CartUsecase) GetCartTips(SessionToken string) (*dto.ProductSlice, error) {
+	cookie, err := cu.sessionRepo.Check(SessionToken)
+	if err != nil {
+		return nil, err
+	}
+
+	UserID := cookie.UserID
+	cart, err := cu.cartRepo.GetCartByUserID(UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	cartWithRestaurant, err := cu.cartRepo.GetCartProductsByCartID(cart.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	prods := make(map[uint]bool)
+
+	for _, product := range cartWithRestaurant.Products {
+		prods[product.ProductID] = true
+	}
+
+	if cartWithRestaurant.RestaurantID == 0 {
+		return nil, entity.ErrNotFound
+	}
+
+	menuTypes, err := cu.restaurantRepo.GetMenuTypesByRestaurantID(cartWithRestaurant.RestaurantID)
+	if err != nil {
+		return nil, err
+	}
+	var restProducts []*entity.Product
+	for _, menu := range menuTypes {
+		products, err := cu.productRepo.GetProductsByMenuTypeID(menu.ID)
+		if err != nil {
+			return nil, entity.ErrInternalServerError
+		}
+		restProducts = append(restProducts, products...)
+	}
+
+	var tipProducts dto.ProductSlice
+	for _, product := range restProducts {
+		if !prods[product.ID] {
+			tipProducts = append(tipProducts, product)
+		}
+	}
+
+	// productSlice := &dto.ProductSlice{}
+	// for _, product := range tipProducts {
+	// 	productSlice.Products = append(productSlice.Products, product)
+	// }
+
+	return &tipProducts, nil
 }

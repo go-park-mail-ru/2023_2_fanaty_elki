@@ -13,33 +13,38 @@ import (
 	"github.com/minio/minio-go/v6"
 )
 
-type UsecaseI interface {
-	CreateUser(new_user *entity.User) (uint, error)
+//Iusecase is interface of user usecase
+type Iusecase interface {
+	CreateUser(newUser *entity.User) (uint, error)
 	UpdateUser(newUser *entity.User) error
 	UpdateAvatar(file multipart.File, filehandler *multipart.FileHeader, id uint) error
 }
 
-type userUsecase struct {
+//UserUsecase provides usecase layer of User entity
+type UserUsecase struct {
 	userRepo userRep.UserRepositoryI
 	cartRepo cartRep.CartRepositoryI
 }
 
-func NewUserUsecase(userRepI userRep.UserRepositoryI, cartRepI cartRep.CartRepositoryI) *userUsecase {
-	return &userUsecase{
+//NewUserUsecase creates UserUsecase object
+func NewUserUsecase(userRepI userRep.UserRepositoryI, cartRepI cartRep.CartRepositoryI) *UserUsecase {
+	return &UserUsecase{
 		userRepo: userRepI,
 		cartRepo: cartRepI,
 	}
 }
 
-func (us userUsecase) GetUserById(id uint) (*entity.User, error) {
-	user, err := us.userRepo.FindUserById(id)
+//GetUserByID gets user by id
+func (us UserUsecase) GetUserByID(id uint) (*entity.User, error) {
+	user, err := us.userRepo.FindUserByID(id)
 	if err != nil {
 		return nil, err
 	}
 	return dto.ToEntityGetUser(user), nil
 }
 
-func (us userUsecase) CreateUser(newUser *entity.User) (uint, error) {
+//CreateUser creates user
+func (us UserUsecase) CreateUser(newUser *entity.User) (uint, error) {
 
 	err := us.checkUserFieldsCreate(newUser)
 
@@ -68,7 +73,8 @@ func (us userUsecase) CreateUser(newUser *entity.User) (uint, error) {
 	return user, nil
 }
 
-func (us userUsecase) UpdateUser(newUser *entity.User) error {
+//UpdateUser updates user's data
+func (us UserUsecase) UpdateUser(newUser *entity.User) error {
 	err := us.checkUserFieldsUpdate(newUser)
 	if err != nil {
 		return err
@@ -79,7 +85,7 @@ func (us userUsecase) UpdateUser(newUser *entity.User) error {
 		return err
 	}
 
-	user, err := us.GetUserById(newUser.ID)
+	user, err := us.GetUserByID(newUser.ID)
 	if err != nil {
 		return err
 	}
@@ -110,7 +116,7 @@ func (us userUsecase) UpdateUser(newUser *entity.User) error {
 
 }
 
-func (us userUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
+func (us UserUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
 	var user *dto.DBGetUser
 
 	if checkUser.Username != "" {
@@ -150,7 +156,7 @@ func (us userUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
 	return dto.ToEntityGetUser(user), nil
 }
 
-func (us userUsecase) checkUserFieldsCreate(user *entity.User) error {
+func (us UserUsecase) checkUserFieldsCreate(user *entity.User) error {
 	re := regexp.MustCompile(`^[a-zA-Z0-9_]{4,29}$`)
 	if !re.MatchString(user.Username) {
 		return entity.ErrInvalidUsername
@@ -177,7 +183,7 @@ func (us userUsecase) checkUserFieldsCreate(user *entity.User) error {
 	return nil
 }
 
-func (us userUsecase) checkUserFieldsUpdate(user *entity.User) error {
+func (us UserUsecase) checkUserFieldsUpdate(user *entity.User) error {
 	re := regexp.MustCompile(`^[a-zA-Z0-9_]{4,29}$`)
 	if len(user.Username) != 0 && !re.MatchString(user.Username) {
 		return entity.ErrInvalidUsername
@@ -199,7 +205,8 @@ func (us userUsecase) checkUserFieldsUpdate(user *entity.User) error {
 	return nil
 }
 
-func (us userUsecase) UpdateAvatar(file multipart.File, filehandler *multipart.FileHeader, id uint) error {
+//UpdateAvatar updates user's avatar
+func (us UserUsecase) UpdateAvatar(file multipart.File, filehandler *multipart.FileHeader, id uint) error {
 	endpoint := "bring-give.hb.ru-msk.vkcs.cloud"
 	location := "bring-give"
 	accessKeyID := "s7X63TovV3DHPNCcsuhM5H"
@@ -226,7 +233,7 @@ func (us userUsecase) UpdateAvatar(file multipart.File, filehandler *multipart.F
 		return entity.ErrInternalServerError
 	}
 
-	user, err := us.GetUserById(id)
+	user, err := us.GetUserByID(id)
 	if err != nil {
 		return err
 	}
@@ -236,7 +243,7 @@ func (us userUsecase) UpdateAvatar(file multipart.File, filehandler *multipart.F
 	return us.userRepo.UpdateUser(dto.ToRepoUpdateUser(user))
 }
 
-func (us userUsecase) uploadFile(minioClient *minio.Client, bucketName string, location string, objectName string, file multipart.File, filesize int64) error {
+func (us UserUsecase) uploadFile(minioClient *minio.Client, bucketName string, location string, objectName string, file multipart.File, filesize int64) error {
 	err := minioClient.MakeBucket(bucketName, location)
 	if err != nil {
 		exists, errBucketExists := minioClient.BucketExists(bucketName)
@@ -252,3 +259,4 @@ func (us userUsecase) uploadFile(minioClient *minio.Client, bucketName string, l
 
 	return nil
 }
+

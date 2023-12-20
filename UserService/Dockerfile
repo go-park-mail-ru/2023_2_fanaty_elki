@@ -1,17 +1,17 @@
-FROM golang:1.19
+FROM ubuntu:latest
 
 WORKDIR /
 
-COPY . ./app
+COPY ["build/user", "./"]
 
-WORKDIR /app
+# WORKDIR /app
 
-RUN go mod download
-RUN go mod tidy
-RUN go build cmd/main.go
+# RUN go mod download
+# RUN go mod tidy
+# RUN go build cmd/main.go
 
-WORKDIR /
+# WORKDIR /
 
 EXPOSE 8083
 
-CMD [ "./app/main" ]
+CMD [ "./user" ]

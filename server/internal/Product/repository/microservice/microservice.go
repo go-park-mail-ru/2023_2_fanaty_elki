@@ -8,22 +8,25 @@ import (
 	product "server/proto/product"
 )
 
+//ProductMicroService struct
 type ProductMicroService struct {
 	client product.ProductRPCClient
 }
 
+//NewProductMicroService creates new product microserivce
 func NewProductMicroService(client product.ProductRPCClient) productRep.ProductRepositoryI {
 	return &ProductMicroService{
 		client: client,
 	}
 }
 
-func (pm *ProductMicroService) GetProductsByMenuTypeId(id uint) ([]*entity.Product, error) {
+//GetProductsByMenuTypeID gets products by menu type
+func (pm *ProductMicroService) GetProductsByMenuTypeID(id uint) ([]*entity.Product, error) {
 	ctx := context.Background()
 
 	grpcid := product.ID{ID: uint64(id)}
 
-	grpcproducts, err := pm.client.GetProductsByMenuTypeId(ctx, &grpcid)
+	grpcproducts, err := pm.client.GetProductsByMenuTypeID(ctx, &grpcid)
 
 	if err != nil {
 		return nil, err
@@ -49,6 +52,7 @@ func (pm *ProductMicroService) GetProductsByMenuTypeId(id uint) ([]*entity.Produ
 
 }
 
+//GetProductByID gets product by id
 func (pm *ProductMicroService) GetProductByID(id uint) (*entity.Product, error) {
 	ctx := context.Background()
 
@@ -73,6 +77,7 @@ func (pm *ProductMicroService) GetProductByID(id uint) (*entity.Product, error) 
 	return entproduct, nil
 }
 
+//SearchProducts searches products from microservices
 func (pm *ProductMicroService) SearchProducts(word string) ([]*entity.Product, error) {
 	ctx := context.Background()
 
@@ -104,12 +109,13 @@ func (pm *ProductMicroService) SearchProducts(word string) ([]*entity.Product, e
 
 }
 
-func (pm *ProductMicroService) GetRestaurantIdByProduct(id uint) (uint, error) {
+//GetRestaurantIDByProduct gets restaurant id by product
+func (pm *ProductMicroService) GetRestaurantIDByProduct(id uint) (uint, error) {
 	ctx := context.Background()
 
 	grpcid := product.ID{ID: uint64(id)}
 
-	grpcrestid, err := pm.client.GetRestaurantIdByProduct(ctx, &grpcid)
+	grpcrestid, err := pm.client.GetRestaurantIDByProduct(ctx, &grpcid)
 
 	if err != nil {
 		return 0, err

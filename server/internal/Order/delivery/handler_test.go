@@ -3,7 +3,6 @@ package delivery
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 
@@ -18,6 +17,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,8 +25,8 @@ func TestCreateOrderSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/orders"
-	mockO := mockO.NewMockUsecaseI(ctrl)
-	mockS := mockS.NewMockUsecaseI(ctrl)
+	mockO := mockO.NewMockOrderUsecaseI(ctrl)
+	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	var logger *mw.ACLog
 	handler := NewOrderHandler(mockO, mockS, logger)
 
@@ -36,8 +36,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 	}
 
 	reqorder := &dto.ReqCreateOrder{
-		Products: []uint{1, 2, 3},
-		UserId:   cookie.UserID,
+		UserID: cookie.UserID,
 		Address: &dto.ReqCreateOrderAddress{
 			City:   "Moscow",
 			Street: "Tverskaya",
@@ -49,12 +48,21 @@ func TestCreateOrderSuccess(t *testing.T) {
 	timenow := time.Now()
 
 	resporder := &dto.RespCreateOrder{
-		Id:     1,
-		Status: "Wait",
+		ID:     1,
+		Status: 0,
+		Price:  100,
 		Date:   timenow,
+		Address: &entity.Address{
+			City:   "Moscow",
+			Street: "Tverskaya",
+			House:  "2",
+			Flat:   1,
+		},
+
+		DeliveryTime: 30,
 	}
 
-	mockS.EXPECT().GetIdByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
+	mockS.EXPECT().GetIDByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
 	mockO.EXPECT().CreateOrder(reqorder).Return(resporder, nil)
 
 	body, err := json.Marshal(reqorder)
@@ -78,23 +86,58 @@ func TestCreateOrderSuccess(t *testing.T) {
 func TestCreateOrderFail(t *testing.T) {
 	baseLogger, err := config.Cfg.Build()
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	defer baseLogger.Sync()
 
 	errorLogger, err := config.ErrorCfg.Build()
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	defer errorLogger.Sync()
-	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
+	var OKHitCounter = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "ok_request_count",
+			Help: "200 status counter",
+		},
+	)
+
+	var InternalServerErrorCounter = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "internal_server_error_request_count",
+			Help: "500 status counter",
+		},
+	)
+
+	var NotFoundErrorCounter = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "no_found_server_error_request_count",
+			Help: "400 status counter",
+		},
+	)
+
+	var hits = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "hits",
+	}, []string{"status", "path"})
+
+	var timerhits = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "timerhits",
+	}, []string{"status", "path"})
+
+	hitstats := &entity.HitStats{
+		Ok:                  OKHitCounter,
+		InternalServerError: InternalServerErrorCounter,
+		NotFoundError:       NotFoundErrorCounter,
+		URLMetric:           *hits,
+		Timing:              *timerhits,
+	}
+
+	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/orders"
-	mockO := mockO.NewMockUsecaseI(ctrl)
-	mockS := mockS.NewMockUsecaseI(ctrl)
+	mockO := mockO.NewMockOrderUsecaseI(ctrl)
+	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	handler := NewOrderHandler(mockO, mockS, logger)
 
 	cookie := &entity.Cookie{
@@ -103,8 +146,7 @@ func TestCreateOrderFail(t *testing.T) {
 	}
 
 	reqorder := &dto.ReqCreateOrder{
-		Products: []uint{1, 2, 3},
-		UserId:   cookie.UserID,
+		UserID: cookie.UserID,
 		Address: &dto.ReqCreateOrderAddress{
 			City:   "Moscow",
 			Street: "Tverskaya",
@@ -113,7 +155,7 @@ func TestCreateOrderFail(t *testing.T) {
 		},
 	}
 
-	mockS.EXPECT().GetIdByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
+	mockS.EXPECT().GetIDByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
 	mockO.EXPECT().CreateOrder(reqorder).Return(nil, entity.ErrInternalServerError)
 
 	body, err := json.Marshal(reqorder)
@@ -132,7 +174,7 @@ func TestCreateOrderFail(t *testing.T) {
 
 	require.Equal(t, 500, resp.StatusCode)
 
-	mockS.EXPECT().GetIdByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
+	mockS.EXPECT().GetIDByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
 	mockO.EXPECT().CreateOrder(reqorder).Return(nil, entity.ErrBadRequest)
 
 	body, err = json.Marshal(reqorder)
@@ -172,8 +214,8 @@ func TestUpdateOrderSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/orders"
-	mockO := mockO.NewMockUsecaseI(ctrl)
-	mockS := mockS.NewMockUsecaseI(ctrl)
+	mockO := mockO.NewMockOrderUsecaseI(ctrl)
+	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	var logger *mw.ACLog
 	handler := NewOrderHandler(mockO, mockS, logger)
 
@@ -183,8 +225,8 @@ func TestUpdateOrderSuccess(t *testing.T) {
 	}
 
 	reqorder := &dto.ReqUpdateOrder{
-		Id:     1,
-		Status: "Wait",
+		ID:     1,
+		Status: 1,
 	}
 
 	mockO.EXPECT().UpdateOrder(reqorder).Return(nil)
@@ -209,23 +251,59 @@ func TestUpdateOrderSuccess(t *testing.T) {
 func TestUpdateOrderFail(t *testing.T) {
 	baseLogger, err := config.Cfg.Build()
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	defer baseLogger.Sync()
 
 	errorLogger, err := config.ErrorCfg.Build()
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	defer errorLogger.Sync()
-	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
+
+	var OKHitCounter = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "ok_request_count",
+			Help: "200 status counter",
+		},
+	)
+
+	var InternalServerErrorCounter = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "internal_server_error_request_count",
+			Help: "500 status counter",
+		},
+	)
+
+	var NotFoundErrorCounter = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "no_found_server_error_request_count",
+			Help: "400 status counter",
+		},
+	)
+
+	var hits = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "hits",
+	}, []string{"status", "path"})
+
+	var timerhits = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "timerhits",
+	}, []string{"status", "path"})
+
+	hitstats := &entity.HitStats{
+		Ok:                  OKHitCounter,
+		InternalServerError: InternalServerErrorCounter,
+		NotFoundError:       NotFoundErrorCounter,
+		URLMetric:           *hits,
+		Timing:              *timerhits,
+	}
+
+	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/orders"
-	mockO := mockO.NewMockUsecaseI(ctrl)
-	mockS := mockS.NewMockUsecaseI(ctrl)
+	mockO := mockO.NewMockOrderUsecaseI(ctrl)
+	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	handler := NewOrderHandler(mockO, mockS, logger)
 
 	cookie := &entity.Cookie{
@@ -234,8 +312,8 @@ func TestUpdateOrderFail(t *testing.T) {
 	}
 
 	reqorder := &dto.ReqUpdateOrder{
-		Id:     1,
-		Status: "Wait",
+		ID:     1,
+		Status: 1,
 	}
 
 	mockO.EXPECT().UpdateOrder(reqorder).Return(entity.ErrInternalServerError)
@@ -262,8 +340,8 @@ func TestGetOrdersSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/orders"
-	mockO := mockO.NewMockUsecaseI(ctrl)
-	mockS := mockS.NewMockUsecaseI(ctrl)
+	mockO := mockO.NewMockOrderUsecaseI(ctrl)
+	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	var logger *mw.ACLog
 	handler := NewOrderHandler(mockO, mockS, logger)
 
@@ -277,32 +355,32 @@ func TestGetOrdersSuccess(t *testing.T) {
 	var flat uint
 	flat = 1
 
-	resporders := []*dto.RespGetOrder{
+	resporders := &dto.RespOrders{
 		{
-			Id:     1,
-			Status: "Wait",
+			ID:     1,
+			Status: 0,
 			Date:   timenow,
 			Address: &dto.RespOrderAddress{
 				City:   "Moscow",
 				Street: "Tverskaya",
 				House:  "2",
-				Flat:   &flat,
+				Flat:   flat,
 			},
 		},
 		{
-			Id:     2,
-			Status: "Wait",
+			ID:     2,
+			Status: 0,
 			Date:   timenow,
 			Address: &dto.RespOrderAddress{
 				City:   "Moscow",
 				Street: "Tverskaya",
 				House:  "3",
-				Flat:   &flat,
+				Flat:   flat,
 			},
 		},
 	}
 
-	mockS.EXPECT().GetIdByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
+	mockS.EXPECT().GetIDByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
 	mockO.EXPECT().GetOrders(cookie.UserID).Return(resporders, nil)
 
 	req := httptest.NewRequest("GET", apiPath, nil)
@@ -320,23 +398,59 @@ func TestGetOrdersSuccess(t *testing.T) {
 func TestGetOrdersFail(t *testing.T) {
 	baseLogger, err := config.Cfg.Build()
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	defer baseLogger.Sync()
 
 	errorLogger, err := config.ErrorCfg.Build()
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	defer errorLogger.Sync()
-	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
+
+	var OKHitCounter = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "ok_request_count",
+			Help: "200 status counter",
+		},
+	)
+
+	var InternalServerErrorCounter = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "internal_server_error_request_count",
+			Help: "500 status counter",
+		},
+	)
+
+	var NotFoundErrorCounter = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "no_found_server_error_request_count",
+			Help: "400 status counter",
+		},
+	)
+
+	var hits = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "hits",
+	}, []string{"status", "path"})
+
+	var timerhits = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "timerhits",
+	}, []string{"status", "path"})
+
+	hitstats := &entity.HitStats{
+		Ok:                  OKHitCounter,
+		InternalServerError: InternalServerErrorCounter,
+		NotFoundError:       NotFoundErrorCounter,
+		URLMetric:           *hits,
+		Timing:              *timerhits,
+	}
+
+	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/orders"
-	mockO := mockO.NewMockUsecaseI(ctrl)
-	mockS := mockS.NewMockUsecaseI(ctrl)
+	mockO := mockO.NewMockOrderUsecaseI(ctrl)
+	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	handler := NewOrderHandler(mockO, mockS, logger)
 
 	cookie := &entity.Cookie{
@@ -344,7 +458,7 @@ func TestGetOrdersFail(t *testing.T) {
 		SessionToken: "HJJvgsvd",
 	}
 
-	mockS.EXPECT().GetIdByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
+	mockS.EXPECT().GetIDByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
 	mockO.EXPECT().GetOrders(cookie.UserID).Return(nil, entity.ErrInternalServerError)
 
 	req := httptest.NewRequest("GET", apiPath, nil)
@@ -363,8 +477,8 @@ func TestGetOrderSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/orders/1"
-	mockO := mockO.NewMockUsecaseI(ctrl)
-	mockS := mockS.NewMockUsecaseI(ctrl)
+	mockO := mockO.NewMockOrderUsecaseI(ctrl)
+	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	var logger *mw.ACLog
 	handler := NewOrderHandler(mockO, mockS, logger)
 
@@ -376,18 +490,39 @@ func TestGetOrderSuccess(t *testing.T) {
 	timenow := time.Now()
 
 	reqOrder := dto.ReqGetOneOrder{
-		UserId:  1,
-		OrderId: 1,
+		UserID:  1,
+		OrderID: 1,
+	}
+
+	products := &dto.RespGetOrderProduct{
+		ID:    1,
+		Name:  "Burger",
+		Price: 100,
+		Icon:  "def",
+		Count: 1,
+	}
+
+	orderItems := &dto.OrderItems{
+		RestaurantName: "BK",
+		Products:       []*dto.RespGetOrderProduct{products},
 	}
 
 	resporder := &dto.RespGetOneOrder{
-		Status:      "Wait",
-		Date:        timenow,
-		UpdatedDate: timenow,
-		Products:    []*dto.RespGetOrderProduct{},
+		ID:     1,
+		Status: 0,
+		Date:   timenow,
+		Address: &dto.RespOrderAddress{
+			City:   "Moscow",
+			Street: "Tverskaya",
+			House:  "3",
+			Flat:   1,
+		},
+		OrderItems:   []*dto.OrderItems{orderItems},
+		Price:        100,
+		DeliveryTime: 30,
 	}
 
-	mockS.EXPECT().GetIdByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
+	mockS.EXPECT().GetIDByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
 	mockO.EXPECT().GetOrder(&reqOrder).Return(resporder, nil)
 
 	req := httptest.NewRequest("GET", apiPath, nil)
@@ -412,23 +547,57 @@ func TestGetOrderSuccess(t *testing.T) {
 func TestGetOrderFail(t *testing.T) {
 	baseLogger, err := config.Cfg.Build()
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	defer baseLogger.Sync()
 
 	errorLogger, err := config.ErrorCfg.Build()
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	defer errorLogger.Sync()
-	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar())
+	var OKHitCounter = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "ok_request_count",
+			Help: "200 status counter",
+		},
+	)
+
+	var InternalServerErrorCounter = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "internal_server_error_request_count",
+			Help: "500 status counter",
+		},
+	)
+
+	var NotFoundErrorCounter = prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "no_found_server_error_request_count",
+			Help: "400 status counter",
+		},
+	)
+
+	var hits = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "hits",
+	}, []string{"status", "path"})
+
+	var timerhits = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: "timerhits",
+	}, []string{"status", "path"})
+
+	hitstats := &entity.HitStats{
+		Ok:                  OKHitCounter,
+		InternalServerError: InternalServerErrorCounter,
+		NotFoundError:       NotFoundErrorCounter,
+		URLMetric:           *hits,
+		Timing:              *timerhits,
+	}
+	logger := mw.NewACLog(baseLogger.Sugar(), errorLogger.Sugar(), *hitstats)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/orders/1"
-	mockO := mockO.NewMockUsecaseI(ctrl)
-	mockS := mockS.NewMockUsecaseI(ctrl)
+	mockO := mockO.NewMockOrderUsecaseI(ctrl)
+	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	handler := NewOrderHandler(mockO, mockS, logger)
 
 	cookie := &entity.Cookie{
@@ -437,11 +606,11 @@ func TestGetOrderFail(t *testing.T) {
 	}
 
 	reqOrder := dto.ReqGetOneOrder{
-		UserId:  1,
-		OrderId: 1,
+		UserID:  1,
+		OrderID: 1,
 	}
 
-	mockS.EXPECT().GetIdByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
+	mockS.EXPECT().GetIDByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
 	mockO.EXPECT().GetOrder(&reqOrder).Return(nil, entity.ErrInternalServerError)
 
 	req := httptest.NewRequest("GET", apiPath, nil)
@@ -461,7 +630,7 @@ func TestGetOrderFail(t *testing.T) {
 
 	require.Equal(t, 500, resp.StatusCode)
 
-	mockS.EXPECT().GetIdByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
+	mockS.EXPECT().GetIDByCookie(cookie.SessionToken).Return(cookie.UserID, nil)
 	mockO.EXPECT().GetOrder(&reqOrder).Return(nil, entity.ErrNotFound)
 
 	req = httptest.NewRequest("GET", apiPath, nil)

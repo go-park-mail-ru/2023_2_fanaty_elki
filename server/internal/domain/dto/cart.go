@@ -1,12 +1,30 @@
 package dto
 
-import "server/internal/domain/entity"
+import (
+	"server/internal/domain/entity"
+)
 
+//CartProduct dto
 type CartProduct struct {
-	Product   *entity.Product
-	ItemCount int
+	Product   *entity.Product `json:"Product"`
+	ItemCount int             `json:"ItemCount"`
 }
 
-type ReqProductID struct {
-	Id uint
+//CartWithRestaurant dto
+type CartWithRestaurant struct {
+	Restaurant *entity.Restaurant `json:"Restaurant"`
+	Products   []*CartProduct     `json:"Products"`
+	Promo      *RespPromo         `json:"Promo"`
 }
+
+//ReqProductID dto
+type ReqProductID struct {
+	ID uint
+}
+
+type Result struct {
+	Body interface{} `json:"Body"`
+}
+
+//easyjson:json
+type ProductSlice []*entity.Product

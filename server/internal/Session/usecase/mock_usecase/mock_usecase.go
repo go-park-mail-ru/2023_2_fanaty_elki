@@ -12,31 +12,31 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// MockUsecaseI is a mock of UsecaseI interface.
-type MockUsecaseI struct {
+// MockSessionUsecaseI is a mock of SessionUsecaseI interface.
+type MockSessionUsecaseI struct {
 	ctrl     *gomock.Controller
-	recorder *MockUsecaseIMockRecorder
+	recorder *MockSessionUsecaseIMockRecorder
 }
 
-// MockUsecaseIMockRecorder is the mock recorder for MockUsecaseI.
-type MockUsecaseIMockRecorder struct {
-	mock *MockUsecaseI
+// MockSessionUsecaseIMockRecorder is the mock recorder for MockSessionUsecaseI.
+type MockSessionUsecaseIMockRecorder struct {
+	mock *MockSessionUsecaseI
 }
 
-// NewMockUsecaseI creates a new mock instance.
-func NewMockUsecaseI(ctrl *gomock.Controller) *MockUsecaseI {
-	mock := &MockUsecaseI{ctrl: ctrl}
-	mock.recorder = &MockUsecaseIMockRecorder{mock}
+// NewMockSessionUsecaseI creates a new mock instance.
+func NewMockSessionUsecaseI(ctrl *gomock.Controller) *MockSessionUsecaseI {
+	mock := &MockSessionUsecaseI{ctrl: ctrl}
+	mock.recorder = &MockSessionUsecaseIMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockUsecaseI) EXPECT() *MockUsecaseIMockRecorder {
+func (m *MockSessionUsecaseI) EXPECT() *MockSessionUsecaseIMockRecorder {
 	return m.recorder
 }
 
 // Check mocks base method.
-func (m *MockUsecaseI) Check(SessionToken string) (uint, error) {
+func (m *MockSessionUsecaseI) Check(SessionToken string) (uint, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Check", SessionToken)
 	ret0, _ := ret[0].(uint)
@@ -45,13 +45,13 @@ func (m *MockUsecaseI) Check(SessionToken string) (uint, error) {
 }
 
 // Check indicates an expected call of Check.
-func (mr *MockUsecaseIMockRecorder) Check(SessionToken interface{}) *gomock.Call {
+func (mr *MockSessionUsecaseIMockRecorder) Check(SessionToken interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Check", reflect.TypeOf((*MockUsecaseI)(nil).Check), SessionToken)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Check", reflect.TypeOf((*MockSessionUsecaseI)(nil).Check), SessionToken)
 }
 
 // CheckCsrf mocks base method.
-func (m *MockUsecaseI) CheckCsrf(sessionToken, csrfToken string) error {
+func (m *MockSessionUsecaseI) CheckCsrf(sessionToken, csrfToken string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CheckCsrf", sessionToken, csrfToken)
 	ret0, _ := ret[0].(error)
@@ -59,13 +59,13 @@ func (m *MockUsecaseI) CheckCsrf(sessionToken, csrfToken string) error {
 }
 
 // CheckCsrf indicates an expected call of CheckCsrf.
-func (mr *MockUsecaseIMockRecorder) CheckCsrf(sessionToken, csrfToken interface{}) *gomock.Call {
+func (mr *MockSessionUsecaseIMockRecorder) CheckCsrf(sessionToken, csrfToken interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckCsrf", reflect.TypeOf((*MockUsecaseI)(nil).CheckCsrf), sessionToken, csrfToken)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckCsrf", reflect.TypeOf((*MockSessionUsecaseI)(nil).CheckCsrf), sessionToken, csrfToken)
 }
 
 // CreateCookieAuth mocks base method.
-func (m *MockUsecaseI) CreateCookieAuth(cookie *entity.Cookie) (*dto.ReqGetUserProfile, error) {
+func (m *MockSessionUsecaseI) CreateCookieAuth(cookie *entity.Cookie) (*dto.ReqGetUserProfile, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateCookieAuth", cookie)
 	ret0, _ := ret[0].(*dto.ReqGetUserProfile)
@@ -74,13 +74,13 @@ func (m *MockUsecaseI) CreateCookieAuth(cookie *entity.Cookie) (*dto.ReqGetUserP
 }
 
 // CreateCookieAuth indicates an expected call of CreateCookieAuth.
-func (mr *MockUsecaseIMockRecorder) CreateCookieAuth(cookie interface{}) *gomock.Call {
+func (mr *MockSessionUsecaseIMockRecorder) CreateCookieAuth(cookie interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCookieAuth", reflect.TypeOf((*MockUsecaseI)(nil).CreateCookieAuth), cookie)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCookieAuth", reflect.TypeOf((*MockSessionUsecaseI)(nil).CreateCookieAuth), cookie)
 }
 
 // CreateCsrf mocks base method.
-func (m *MockUsecaseI) CreateCsrf(sessionToken string) (string, error) {
+func (m *MockSessionUsecaseI) CreateCsrf(sessionToken string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateCsrf", sessionToken)
 	ret0, _ := ret[0].(string)
@@ -89,28 +89,28 @@ func (m *MockUsecaseI) CreateCsrf(sessionToken string) (string, error) {
 }
 
 // CreateCsrf indicates an expected call of CreateCsrf.
-func (mr *MockUsecaseIMockRecorder) CreateCsrf(sessionToken interface{}) *gomock.Call {
+func (mr *MockSessionUsecaseIMockRecorder) CreateCsrf(sessionToken interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCsrf", reflect.TypeOf((*MockUsecaseI)(nil).CreateCsrf), sessionToken)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCsrf", reflect.TypeOf((*MockSessionUsecaseI)(nil).CreateCsrf), sessionToken)
 }
 
-// GetIdByCookie mocks base method.
-func (m *MockUsecaseI) GetIdByCookie(SessionToken string) (uint, error) {
+// GetIDByCookie mocks base method.
+func (m *MockSessionUsecaseI) GetIDByCookie(SessionToken string) (uint, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetIdByCookie", SessionToken)
+	ret := m.ctrl.Call(m, "GetIDByCookie", SessionToken)
 	ret0, _ := ret[0].(uint)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetIdByCookie indicates an expected call of GetIdByCookie.
-func (mr *MockUsecaseIMockRecorder) GetIdByCookie(SessionToken interface{}) *gomock.Call {
+// GetIDByCookie indicates an expected call of GetIDByCookie.
+func (mr *MockSessionUsecaseIMockRecorder) GetIDByCookie(SessionToken interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetIdByCookie", reflect.TypeOf((*MockUsecaseI)(nil).GetIdByCookie), SessionToken)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetIDByCookie", reflect.TypeOf((*MockSessionUsecaseI)(nil).GetIDByCookie), SessionToken)
 }
 
 // GetUserProfile mocks base method.
-func (m *MockUsecaseI) GetUserProfile(sessionToken string) (*dto.ReqGetUserProfile, error) {
+func (m *MockSessionUsecaseI) GetUserProfile(sessionToken string) (*dto.ReqGetUserProfile, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUserProfile", sessionToken)
 	ret0, _ := ret[0].(*dto.ReqGetUserProfile)
@@ -119,13 +119,13 @@ func (m *MockUsecaseI) GetUserProfile(sessionToken string) (*dto.ReqGetUserProfi
 }
 
 // GetUserProfile indicates an expected call of GetUserProfile.
-func (mr *MockUsecaseIMockRecorder) GetUserProfile(sessionToken interface{}) *gomock.Call {
+func (mr *MockSessionUsecaseIMockRecorder) GetUserProfile(sessionToken interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserProfile", reflect.TypeOf((*MockUsecaseI)(nil).GetUserProfile), sessionToken)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserProfile", reflect.TypeOf((*MockSessionUsecaseI)(nil).GetUserProfile), sessionToken)
 }
 
 // Login mocks base method.
-func (m *MockUsecaseI) Login(user *entity.User) (*entity.Cookie, error) {
+func (m *MockSessionUsecaseI) Login(user *entity.User) (*entity.Cookie, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Login", user)
 	ret0, _ := ret[0].(*entity.Cookie)
@@ -134,13 +134,13 @@ func (m *MockUsecaseI) Login(user *entity.User) (*entity.Cookie, error) {
 }
 
 // Login indicates an expected call of Login.
-func (mr *MockUsecaseIMockRecorder) Login(user interface{}) *gomock.Call {
+func (mr *MockSessionUsecaseIMockRecorder) Login(user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Login", reflect.TypeOf((*MockUsecaseI)(nil).Login), user)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Login", reflect.TypeOf((*MockSessionUsecaseI)(nil).Login), user)
 }
 
 // Logout mocks base method.
-func (m *MockUsecaseI) Logout(cookie *entity.Cookie) error {
+func (m *MockSessionUsecaseI) Logout(cookie *entity.Cookie) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Logout", cookie)
 	ret0, _ := ret[0].(error)
@@ -148,7 +148,7 @@ func (m *MockUsecaseI) Logout(cookie *entity.Cookie) error {
 }
 
 // Logout indicates an expected call of Logout.
-func (mr *MockUsecaseIMockRecorder) Logout(cookie interface{}) *gomock.Call {
+func (mr *MockSessionUsecaseIMockRecorder) Logout(cookie interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Logout", reflect.TypeOf((*MockUsecaseI)(nil).Logout), cookie)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Logout", reflect.TypeOf((*MockSessionUsecaseI)(nil).Logout), cookie)
 }

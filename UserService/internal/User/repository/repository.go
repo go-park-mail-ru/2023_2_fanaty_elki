@@ -4,8 +4,9 @@ import (
 	"UserService/internal/dto"
 )
 
+//UserRepositoryI interface
 type UserRepositoryI interface {
-	FindUserById(id uint) (*dto.DBGetUser, error)
+	FindUserByID(id uint) (*dto.DBGetUser, error)
 	CreateUser(user *dto.DBCreateUser) (uint, error)
 	UpdateUser(user *dto.DBUpdateUser) error
 	FindUserByUsername(value string) (*dto.DBGetUser, error)

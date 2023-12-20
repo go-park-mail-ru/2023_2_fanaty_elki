@@ -7,8 +7,9 @@ import (
 	"fmt"
 )
 
+//UserUsecaseI interface
 type UserUsecaseI interface {
-	FindUserById(grpcid *user.ID) (*user.DBGetUser, error)
+	FindUserByID(grpcid *user.ID) (*user.DBGetUser, error)
 	CreateUser(grpcUser *user.DBCreateUser) (*user.ID, error)
 	UpdateUser(grpcuser *user.DBUpdateUser) (*user.Nothing, error)
 	FindUserByUsername(value *user.Value) (*user.DBGetUser, error)
@@ -16,20 +17,23 @@ type UserUsecaseI interface {
 	FindUserByPhone(value *user.Value) (*user.DBGetUser, error)
 }
 
-type userUsecase struct {
+//UserUsecase struct
+type UserUsecase struct {
 	userRepo userRep.UserRepositoryI
 }
 
-func NewUserUsecase(userRepI userRep.UserRepositoryI) *userUsecase {
-	return &userUsecase{
+//NewUserUsecase creates user usecase
+func NewUserUsecase(userRepI userRep.UserRepositoryI) *UserUsecase {
+	return &UserUsecase{
 		userRepo: userRepI,
 	}
 }
 
-func (u userUsecase) FindUserById(grpcid *user.ID) (*user.DBGetUser, error) {
+//FindUserByID finds user by id
+func (u UserUsecase) FindUserByID(grpcid *user.ID) (*user.DBGetUser, error) {
 	id := uint(grpcid.ID)
 
-	user, err := u.userRepo.FindUserById(id)
+	user, err := u.userRepo.FindUserByID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +41,8 @@ func (u userUsecase) FindUserById(grpcid *user.ID) (*user.DBGetUser, error) {
 	return dto.ToRespGetUser(user), nil	
 }
 
-func (u userUsecase) CreateUser(grpcUser *user.DBCreateUser) (*user.ID, error) {
+//CreateUser creates user
+func (u UserUsecase) CreateUser(grpcUser *user.DBCreateUser) (*user.ID, error) {
 	newUser := dto.ToDBCreateUser(grpcUser)
 
 	id, err := u.userRepo.CreateUser(newUser)
@@ -51,14 +56,16 @@ func (u userUsecase) CreateUser(grpcUser *user.DBCreateUser) (*user.ID, error) {
 	return grpcid, nil	
 }
 
-func (u userUsecase) UpdateUser(grpcuser *user.DBUpdateUser) (*user.Nothing, error) {
+//UpdateUser updates user 
+func (u UserUsecase) UpdateUser(grpcuser *user.DBUpdateUser) (*user.Nothing, error) {
 	upUser := dto.ToDBUpdateUser(grpcuser)
 
 	err := u.userRepo.UpdateUser(upUser)
 	return &user.Nothing{Dummy: true}, err
 }
 
-func (u userUsecase) FindUserByUsername(value *user.Value) (*user.DBGetUser, error) {
+//FindUserByUsername finds user by username
+func (u UserUsecase) FindUserByUsername(value *user.Value) (*user.DBGetUser, error) {
 	username := value.Value
 
 	fuser, err := u.userRepo.FindUserByUsername(username)
@@ -70,8 +77,8 @@ func (u userUsecase) FindUserByUsername(value *user.Value) (*user.DBGetUser, err
 	return dto.ToRespGetUser(fuser), nil
 }
 
-
-func (u userUsecase) FindUserByEmail(value *user.Value) (*user.DBGetUser, error) {
+//FindUserByEmail finds user by email
+func (u UserUsecase) FindUserByEmail(value *user.Value) (*user.DBGetUser, error) {
 	username := value.Value
 
 	fuser, err := u.userRepo.FindUserByEmail(username)
@@ -83,8 +90,8 @@ func (u userUsecase) FindUserByEmail(value *user.Value) (*user.DBGetUser, error)
 	return dto.ToRespGetUser(fuser), nil
 }
 
-
-func (u userUsecase) FindUserByPhone(value *user.Value) (*user.DBGetUser, error) {
+//FindUserByPhone finds user by phone
+func (u UserUsecase) FindUserByPhone(value *user.Value) (*user.DBGetUser, error) {
 	username := value.Value
 
 	fuser, err := u.userRepo.FindUserByPhone(username)

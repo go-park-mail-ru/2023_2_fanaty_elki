@@ -8,6 +8,9 @@ import (
 	"net/http"
 	"server/config"
 	"server/db"
+	addressDev "server/internal/Address/delivery"
+	addressRep "server/internal/Address/repository/postgres"
+	addressUsecase "server/internal/Address/usecase"
 	cartDev "server/internal/Cart/delivery"
 	cartRep "server/internal/Cart/repository/postgres"
 	cartUsecase "server/internal/Cart/usecase"
@@ -20,6 +23,9 @@ import (
 	productDev "server/internal/Product/delivery"
 	productRep "server/internal/Product/repository/microservice"
 	productUsecase "server/internal/Product/usecase"
+	promoDev "server/internal/Promo/delivery"
+	promoRep "server/internal/Promo/repository/postgres"
+	promoUsecase "server/internal/Promo/usecase"
 	restaurantDev "server/internal/Restaurant/delivery"
 	restaurantRep "server/internal/Restaurant/repository/postgres"
 	restaurantUsecase "server/internal/Restaurant/usecase"
@@ -48,6 +54,7 @@ import (
 // @license.name Apache 2.0
 // @host http://84.23.53.216:8001/
 
+//PORT of main app
 const PORT = ":8080"
 
 // var (
@@ -68,8 +75,8 @@ var (
 
 	host     = "test_postgres"
 	port     = 5432
-	user     = db.User.Username
-	password = db.User.Password
+	user     = "uliana"
+	password = "uliana"
 	dbname   = "prinesy-poday"
 
 	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
@@ -170,7 +177,7 @@ func main() {
 		Ok:                  OKHitCounter,
 		InternalServerError: InternalServerErrorCounter,
 		NotFoundError:       NotFoundErrorCounter,
-		UrlMetric:           *hits,
+		URLMetric:           *hits,
 		Timing:              *timerhits,
 	}
 
@@ -189,14 +196,18 @@ func main() {
 	sessionRepo := sessionRep.NewMicroService(authManager)
 	orderRepo := orderRep.NewOrderRepo(db)
 	commentRepo := commentRep.NewCommentRepo(db)
+	promoRepo := promoRep.NewPromoRepo(db)
+	addressRepo := addressRep.NewAddressRepo(db)
 
 	userUC := userUsecase.NewUserUsecase(userRepo, cartRepo)
-	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo, productRepo)
-	cartUC := cartUsecase.NewCartUsecase(cartRepo, productRepo, sessionRepo)
-	sessionUC := sessionUsecase.NewSessionUsecase(sessionRepo, userRepo)
+	sessionUC := sessionUsecase.NewSessionUsecase(sessionRepo, userRepo, addressRepo)
+	restaurantUC := restaurantUsecase.NewRestaurantUsecase(restaurantRepo, productRepo, sessionRepo, orderRepo)
+	cartUC := cartUsecase.NewCartUsecase(cartRepo, productRepo, sessionRepo, restaurantRepo, promoRepo)
 	orderUC := orderUsecase.NewOrderUsecase(orderRepo, cartRepo, productRepo)
 	productUC := productUsecase.NewProductUsecase(productRepo)
 	commentUC := commentUsecase.NewCommentUsecase(commentRepo, userRepo, restaurantRepo)
+	promoUC := promoUsecase.NewPromoUsecase(cartRepo, promoRepo, sessionRepo, restaurantRepo)
+	addressUC := addressUsecase.NewAddressUsecase(addressRepo, sessionRepo)
 
 	restaurantsHandler := restaurantDev.NewRestaurantHandler(restaurantUC, logger)
 	cartsHandler := cartDev.NewCartHandler(cartUC, logger)
@@ -204,6 +215,8 @@ func main() {
 	orderHandler := orderDev.NewOrderHandler(orderUC, sessionUC, logger)
 	productHandler := productDev.NewProductHandler(productUC, logger)
 	commentHandler := commentDev.NewCommentHandler(commentUC, sessionUC, logger)
+	promoHandler := promoDev.NewPromoHandler(promoUC, logger)
+	addressHandler := addressDev.NewAddressHandler(addressUC, sessionUC, logger)
 
 	authMW := middleware.NewSessionMiddleware(sessionUC, logger)
 
@@ -216,22 +229,26 @@ func main() {
 	router.PathPrefix("/api/csrf").Handler(authRouter)
 	router.PathPrefix("/api/users").Handler(corsRouter)
 	router.PathPrefix("/api/comments").Handler(authRouter).Methods(http.MethodPost, http.MethodOptions)
+	router.PathPrefix("/api/promo").Handler(authRouter)
+	router.PathPrefix("/api/restaurants").Handler(corsRouter)
 
-	router.Use(logger.ACLogMiddleware)
 	router.Use(middleware.PanicMiddleware)
+	router.Use(logger.ACLogMiddleware)
 	router.Use(middleware.CorsMiddleware)
 	corsRouter.Use(middleware.CorsCredentionalsMiddleware)
 	authRouter.Use(authMW.AuthMiddleware)
 
-	restaurantsHandler.RegisterHandler(router)
+	restaurantsHandler.RegisterHandler(corsRouter)
+	restaurantsHandler.RegisterCategoryHandler(router)
 	productHandler.RegisterHandler(router)
 	cartsHandler.RegisterHandler(authRouter)
 	sessionsHandler.RegisterCorsHandler(corsRouter)
 	sessionsHandler.RegisterAuthHandler(authRouter)
 	orderHandler.RegisterHandler(authRouter)
-	productHandler.RegisterHandler(router)
 	commentHandler.RegisterPostHandler(authRouter)
 	commentHandler.RegisterGetHandler(router)
+	promoHandler.RegisterHandler(authRouter)
+	addressHandler.RegisterHandler(authRouter)
 
 	router.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
 		promhttp.Handler().ServeHTTP(w, r)

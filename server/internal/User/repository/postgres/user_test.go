@@ -234,7 +234,7 @@ func TestFindUserById(t *testing.T) {
 		DB: db,
 	}
 
-	user, err := repo.FindUserById(id)
+	user, err := repo.FindUserByID(id)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err)
 		return

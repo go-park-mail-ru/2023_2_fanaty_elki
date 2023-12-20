@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	mockA "server/internal/Address/repository/mock_repository"
 	mockS "server/internal/Session/repository/mock_repository"
 	mockU "server/internal/User/repository/mock_repository"
 	"server/internal/domain/dto"
@@ -19,7 +20,8 @@ func TestLoginSuccess(t *testing.T) {
 
 	mockSes := mockS.NewMockSessionRepositoryI(ctrl)
 	mockUs := mockU.NewMockUserRepositoryI(ctrl)
-	usecase := NewSessionUsecase(mockSes, mockUs)
+	mockAdd := mockA.NewMockAddressRepositoryI(ctrl)
+	usecase := NewSessionUsecase(mockSes, mockUs, mockAdd)
 
 	user := &entity.User{
 		Username: "ania",
@@ -44,12 +46,13 @@ func TestCheckSuccess(t *testing.T) {
 
 	mockSes := mockS.NewMockSessionRepositoryI(ctrl)
 	mockUs := mockU.NewMockUserRepositoryI(ctrl)
-	usecase := NewSessionUsecase(mockSes, mockUs)
+	mockAdd := mockA.NewMockAddressRepositoryI(ctrl)
+	usecase := NewSessionUsecase(mockSes, mockUs, mockAdd)
 
 	sestok := "Uuehdbye"
 
-	var userID uint
-	userID = 1
+	var UserID uint
+	UserID = 1
 
 	cookie := entity.Cookie{
 		UserID:       1,
@@ -64,7 +67,7 @@ func TestCheckSuccess(t *testing.T) {
 	}
 
 	mockSes.EXPECT().Check(sestok).Return(&cookie, nil)
-	mockUs.EXPECT().FindUserById(userID).Return(dbuser, nil)
+	mockUs.EXPECT().FindUserByID(UserID).Return(dbuser, nil)
 	actual, err := usecase.Check(sestok)
 	assert.Equal(t, cookie.UserID, actual)
 	assert.Nil(t, err)
@@ -76,7 +79,8 @@ func TestLogoutSuccess(t *testing.T) {
 
 	mockSes := mockS.NewMockSessionRepositoryI(ctrl)
 	mockUs := mockU.NewMockUserRepositoryI(ctrl)
-	usecase := NewSessionUsecase(mockSes, mockUs)
+	mockAdd := mockA.NewMockAddressRepositoryI(ctrl)
+	usecase := NewSessionUsecase(mockSes, mockUs, mockAdd)
 
 	cookie := entity.Cookie{
 		UserID:       1,
@@ -99,7 +103,8 @@ func TestGetUserProfileSuccess(t *testing.T) {
 
 	mockSes := mockS.NewMockSessionRepositoryI(ctrl)
 	mockUs := mockU.NewMockUserRepositoryI(ctrl)
-	usecase := NewSessionUsecase(mockSes, mockUs)
+	mockAdd := mockA.NewMockAddressRepositoryI(ctrl)
+	usecase := NewSessionUsecase(mockSes, mockUs, mockAdd)
 
 	cookie := entity.Cookie{
 		UserID:       1,
@@ -113,12 +118,20 @@ func TestGetUserProfileSuccess(t *testing.T) {
 		Password: "anis1234",
 	}
 
+	addresses := &dto.RespGetAddresses{
+		Addresses:          []*dto.RespGetAddress{},
+		CurrentAddressesID: 0,
+	}
+
 	profile := &dto.ReqGetUserProfile{
-		Username: "ania",
+		Username:  "ania",
+		Addresses: addresses.Addresses,
+		Current:   0,
 	}
 
 	mockSes.EXPECT().Check(cookie.SessionToken).Return(&cookie, nil)
-	mockUs.EXPECT().FindUserById(cookie.UserID).Return(dbuser, nil)
+	mockUs.EXPECT().FindUserByID(cookie.UserID).Return(dbuser, nil)
+	mockAdd.EXPECT().GetAddresses(cookie.UserID).Return(addresses, nil)
 	actual, err := usecase.GetUserProfile(cookie.SessionToken)
 	assert.Equal(t, profile, actual)
 	assert.Nil(t, err)
@@ -130,7 +143,8 @@ func TestGetIdByCookieSuccess(t *testing.T) {
 
 	mockSes := mockS.NewMockSessionRepositoryI(ctrl)
 	mockUs := mockU.NewMockUserRepositoryI(ctrl)
-	usecase := NewSessionUsecase(mockSes, mockUs)
+	mockAdd := mockA.NewMockAddressRepositoryI(ctrl)
+	usecase := NewSessionUsecase(mockSes, mockUs, mockAdd)
 
 	cookie := entity.Cookie{
 		UserID:       1,
@@ -139,7 +153,7 @@ func TestGetIdByCookieSuccess(t *testing.T) {
 	}
 
 	mockSes.EXPECT().Check(cookie.SessionToken).Return(&cookie, nil)
-	actual, err := usecase.GetIdByCookie(cookie.SessionToken)
+	actual, err := usecase.GetIDByCookie(cookie.SessionToken)
 	assert.Equal(t, cookie.UserID, actual)
 	assert.Nil(t, err)
 }
@@ -150,16 +164,13 @@ func TestCreateCookieAuthSuccess(t *testing.T) {
 
 	mockSes := mockS.NewMockSessionRepositoryI(ctrl)
 	mockUs := mockU.NewMockUserRepositoryI(ctrl)
-	usecase := NewSessionUsecase(mockSes, mockUs)
+	mockAdd := mockA.NewMockAddressRepositoryI(ctrl)
+	usecase := NewSessionUsecase(mockSes, mockUs, mockAdd)
 
 	cookie := entity.Cookie{
 		UserID:       1,
 		SessionToken: "TYebbYudb",
 		MaxAge:       50 * time.Hour,
-	}
-
-	profile := &dto.ReqGetUserProfile{
-		Username: "ania",
 	}
 
 	dbuser := &dto.DBGetUser{
@@ -168,9 +179,21 @@ func TestCreateCookieAuthSuccess(t *testing.T) {
 		Password: "anis1234",
 	}
 
+	addresses := &dto.RespGetAddresses{
+		Addresses:          []*dto.RespGetAddress{},
+		CurrentAddressesID: 0,
+	}
+
+	profile := &dto.ReqGetUserProfile{
+		Username:  "ania",
+		Addresses: addresses.Addresses,
+		Current:   0,
+	}
+
 	mockSes.EXPECT().Expire(&cookie).Return(nil)
 	mockSes.EXPECT().Check(cookie.SessionToken).Return(&cookie, nil)
-	mockUs.EXPECT().FindUserById(cookie.UserID).Return(dbuser, nil)
+	mockUs.EXPECT().FindUserByID(cookie.UserID).Return(dbuser, nil)
+	mockAdd.EXPECT().GetAddresses(cookie.UserID).Return(addresses, nil)
 	actual, err := usecase.CreateCookieAuth(&cookie)
 	assert.Equal(t, profile, actual)
 	assert.Nil(t, err)
@@ -182,7 +205,8 @@ func TestCreateCsrfSuccess(t *testing.T) {
 
 	mockSes := mockS.NewMockSessionRepositoryI(ctrl)
 	mockUs := mockU.NewMockUserRepositoryI(ctrl)
-	usecase := NewSessionUsecase(mockSes, mockUs)
+	mockAdd := mockA.NewMockAddressRepositoryI(ctrl)
+	usecase := NewSessionUsecase(mockSes, mockUs, mockAdd)
 
 	cookie := entity.Cookie{
 		UserID:       1,
@@ -201,7 +225,8 @@ func TestCheckCsrfSuccess(t *testing.T) {
 
 	mockSes := mockS.NewMockSessionRepositoryI(ctrl)
 	mockUs := mockU.NewMockUserRepositoryI(ctrl)
-	usecase := NewSessionUsecase(mockSes, mockUs)
+	mockAdd := mockA.NewMockAddressRepositoryI(ctrl)
+	usecase := NewSessionUsecase(mockSes, mockUs, mockAdd)
 
 	cookie := entity.Cookie{
 		UserID:       1,
