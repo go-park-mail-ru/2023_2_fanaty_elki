@@ -35,10 +35,10 @@ func (m *MockRestaurantUsecaseI) EXPECT() *MockRestaurantUsecaseIMockRecorder {
 }
 
 // GetCategories mocks base method.
-func (m *MockRestaurantUsecaseI) GetCategories() (*[]string, error) {
+func (m *MockRestaurantUsecaseI) GetCategories() (*dto.StringSlice, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCategories")
-	ret0, _ := ret[0].(*[]string)
+	ret0, _ := ret[0].(*dto.StringSlice)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -50,10 +50,10 @@ func (mr *MockRestaurantUsecaseIMockRecorder) GetCategories() *gomock.Call {
 }
 
 // GetRandomRestaurantTips mocks base method.
-func (m *MockRestaurantUsecaseI) GetRandomRestaurantTips() ([]*dto.RestaurantWithCategories, error) {
+func (m *MockRestaurantUsecaseI) GetRandomRestaurantTips() (*dto.RestaurantWithCategoriesSlice, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRandomRestaurantTips")
-	ret0, _ := ret[0].([]*dto.RestaurantWithCategories)
+	ret0, _ := ret[0].(*dto.RestaurantWithCategoriesSlice)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -80,10 +80,10 @@ func (mr *MockRestaurantUsecaseIMockRecorder) GetRestaurantByID(id interface{}) 
 }
 
 // GetRestaurantProducts mocks base method.
-func (m *MockRestaurantUsecaseI) GetRestaurantProducts(id uint) ([]*dto.MenuTypeWithProducts, error) {
+func (m *MockRestaurantUsecaseI) GetRestaurantProducts(id uint) (*dto.MenuTypeWithProductsSlice, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRestaurantProducts", id)
-	ret0, _ := ret[0].([]*dto.MenuTypeWithProducts)
+	ret0, _ := ret[0].(*dto.MenuTypeWithProductsSlice)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -95,10 +95,10 @@ func (mr *MockRestaurantUsecaseIMockRecorder) GetRestaurantProducts(id interface
 }
 
 // GetRestaurantTips mocks base method.
-func (m *MockRestaurantUsecaseI) GetRestaurantTips(SessionToken string) ([]*dto.RestaurantWithCategories, error) {
+func (m *MockRestaurantUsecaseI) GetRestaurantTips(SessionToken string) (*dto.RestaurantWithCategoriesSlice, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRestaurantTips", SessionToken)
-	ret0, _ := ret[0].([]*dto.RestaurantWithCategories)
+	ret0, _ := ret[0].(*dto.RestaurantWithCategoriesSlice)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -110,10 +110,10 @@ func (mr *MockRestaurantUsecaseIMockRecorder) GetRestaurantTips(SessionToken int
 }
 
 // GetRestaurants mocks base method.
-func (m *MockRestaurantUsecaseI) GetRestaurants() ([]*dto.RestaurantWithCategories, error) {
+func (m *MockRestaurantUsecaseI) GetRestaurants() (*dto.RestaurantWithCategoriesSlice, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRestaurants")
-	ret0, _ := ret[0].([]*dto.RestaurantWithCategories)
+	ret0, _ := ret[0].(*dto.RestaurantWithCategoriesSlice)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -125,10 +125,10 @@ func (mr *MockRestaurantUsecaseIMockRecorder) GetRestaurants() *gomock.Call {
 }
 
 // GetRestaurantsByCategory mocks base method.
-func (m *MockRestaurantUsecaseI) GetRestaurantsByCategory(name string) ([]*dto.RestaurantWithCategories, error) {
+func (m *MockRestaurantUsecaseI) GetRestaurantsByCategory(name string) (*dto.RestaurantWithCategoriesSlice, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRestaurantsByCategory", name)
-	ret0, _ := ret[0].([]*dto.RestaurantWithCategories)
+	ret0, _ := ret[0].(*dto.RestaurantWithCategoriesSlice)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -140,10 +140,10 @@ func (mr *MockRestaurantUsecaseIMockRecorder) GetRestaurantsByCategory(name inte
 }
 
 // Search mocks base method.
-func (m *MockRestaurantUsecaseI) Search(word string) ([]*dto.RestaurantWithCategoriesAndProducts, error) {
+func (m *MockRestaurantUsecaseI) Search(word string) (*dto.RestaurantWithCategoriesAndProductsSlice, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Search", word)
-	ret0, _ := ret[0].([]*dto.RestaurantWithCategoriesAndProducts)
+	ret0, _ := ret[0].(*dto.RestaurantWithCategoriesAndProductsSlice)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

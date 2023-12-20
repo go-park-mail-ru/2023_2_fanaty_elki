@@ -25,7 +25,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/orders"
-	mockO := mockO.NewMockUsecaseI(ctrl)
+	mockO := mockO.NewMockOrderUsecaseI(ctrl)
 	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	var logger *mw.ACLog
 	handler := NewOrderHandler(mockO, mockS, logger)
@@ -136,7 +136,7 @@ func TestCreateOrderFail(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/orders"
-	mockO := mockO.NewMockUsecaseI(ctrl)
+	mockO := mockO.NewMockOrderUsecaseI(ctrl)
 	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	handler := NewOrderHandler(mockO, mockS, logger)
 
@@ -214,7 +214,7 @@ func TestUpdateOrderSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/orders"
-	mockO := mockO.NewMockUsecaseI(ctrl)
+	mockO := mockO.NewMockOrderUsecaseI(ctrl)
 	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	var logger *mw.ACLog
 	handler := NewOrderHandler(mockO, mockS, logger)
@@ -302,7 +302,7 @@ func TestUpdateOrderFail(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/orders"
-	mockO := mockO.NewMockUsecaseI(ctrl)
+	mockO := mockO.NewMockOrderUsecaseI(ctrl)
 	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	handler := NewOrderHandler(mockO, mockS, logger)
 
@@ -340,7 +340,7 @@ func TestGetOrdersSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/orders"
-	mockO := mockO.NewMockUsecaseI(ctrl)
+	mockO := mockO.NewMockOrderUsecaseI(ctrl)
 	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	var logger *mw.ACLog
 	handler := NewOrderHandler(mockO, mockS, logger)
@@ -355,7 +355,7 @@ func TestGetOrdersSuccess(t *testing.T) {
 	var flat uint
 	flat = 1
 
-	resporders := []*dto.RespGetOrder{
+	resporders := &dto.RespOrders{
 		{
 			ID:     1,
 			Status: 0,
@@ -449,7 +449,7 @@ func TestGetOrdersFail(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/orders"
-	mockO := mockO.NewMockUsecaseI(ctrl)
+	mockO := mockO.NewMockOrderUsecaseI(ctrl)
 	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	handler := NewOrderHandler(mockO, mockS, logger)
 
@@ -477,7 +477,7 @@ func TestGetOrderSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/orders/1"
-	mockO := mockO.NewMockUsecaseI(ctrl)
+	mockO := mockO.NewMockOrderUsecaseI(ctrl)
 	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	var logger *mw.ACLog
 	handler := NewOrderHandler(mockO, mockS, logger)
@@ -596,7 +596,7 @@ func TestGetOrderFail(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/orders/1"
-	mockO := mockO.NewMockUsecaseI(ctrl)
+	mockO := mockO.NewMockOrderUsecaseI(ctrl)
 	mockS := mockS.NewMockSessionUsecaseI(ctrl)
 	handler := NewOrderHandler(mockO, mockS, logger)
 

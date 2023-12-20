@@ -18,7 +18,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonE9abebc9DecodeServerEasy(in *jlexer.Lexer, out *RespGetComment) {
+func easyjsonE9abebc9DecodeServerInternalDomainDto(in *jlexer.Lexer, out *RespGetComment) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -59,7 +59,7 @@ func easyjsonE9abebc9DecodeServerEasy(in *jlexer.Lexer, out *RespGetComment) {
 		in.Consumed()
 	}
 }
-func easyjsonE9abebc9EncodeServerEasy(out *jwriter.Writer, in RespGetComment) {
+func easyjsonE9abebc9EncodeServerInternalDomainDto(out *jwriter.Writer, in RespGetComment) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -94,27 +94,27 @@ func easyjsonE9abebc9EncodeServerEasy(out *jwriter.Writer, in RespGetComment) {
 // MarshalJSON supports json.Marshaler interface
 func (v RespGetComment) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonE9abebc9EncodeServerEasy(&w, v)
+	easyjsonE9abebc9EncodeServerInternalDomainDto(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v RespGetComment) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonE9abebc9EncodeServerEasy(w, v)
+	easyjsonE9abebc9EncodeServerInternalDomainDto(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *RespGetComment) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonE9abebc9DecodeServerEasy(&r, v)
+	easyjsonE9abebc9DecodeServerInternalDomainDto(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *RespGetComment) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonE9abebc9DecodeServerEasy(l, v)
+	easyjsonE9abebc9DecodeServerInternalDomainDto(l, v)
 }
-func easyjsonE9abebc9DecodeServerEasy1(in *jlexer.Lexer, out *RespCreateComment) {
+func easyjsonE9abebc9DecodeServerInternalDomainDto1(in *jlexer.Lexer, out *RespCreateComment) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -155,7 +155,7 @@ func easyjsonE9abebc9DecodeServerEasy1(in *jlexer.Lexer, out *RespCreateComment)
 		in.Consumed()
 	}
 }
-func easyjsonE9abebc9EncodeServerEasy1(out *jwriter.Writer, in RespCreateComment) {
+func easyjsonE9abebc9EncodeServerInternalDomainDto1(out *jwriter.Writer, in RespCreateComment) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -190,27 +190,27 @@ func easyjsonE9abebc9EncodeServerEasy1(out *jwriter.Writer, in RespCreateComment
 // MarshalJSON supports json.Marshaler interface
 func (v RespCreateComment) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonE9abebc9EncodeServerEasy1(&w, v)
+	easyjsonE9abebc9EncodeServerInternalDomainDto1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v RespCreateComment) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonE9abebc9EncodeServerEasy1(w, v)
+	easyjsonE9abebc9EncodeServerInternalDomainDto1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *RespCreateComment) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonE9abebc9DecodeServerEasy1(&r, v)
+	easyjsonE9abebc9DecodeServerInternalDomainDto1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *RespCreateComment) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonE9abebc9DecodeServerEasy1(l, v)
+	easyjsonE9abebc9DecodeServerInternalDomainDto1(l, v)
 }
-func easyjsonE9abebc9DecodeServerEasy2(in *jlexer.Lexer, out *RespComments) {
+func easyjsonE9abebc9DecodeServerInternalDomainDto2(in *jlexer.Lexer, out *RespComments) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		in.Skip()
@@ -246,7 +246,7 @@ func easyjsonE9abebc9DecodeServerEasy2(in *jlexer.Lexer, out *RespComments) {
 		in.Consumed()
 	}
 }
-func easyjsonE9abebc9EncodeServerEasy2(out *jwriter.Writer, in RespComments) {
+func easyjsonE9abebc9EncodeServerInternalDomainDto2(out *jwriter.Writer, in RespComments) {
 	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 		out.RawString("null")
 	} else {
@@ -268,27 +268,27 @@ func easyjsonE9abebc9EncodeServerEasy2(out *jwriter.Writer, in RespComments) {
 // MarshalJSON supports json.Marshaler interface
 func (v RespComments) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonE9abebc9EncodeServerEasy2(&w, v)
+	easyjsonE9abebc9EncodeServerInternalDomainDto2(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v RespComments) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonE9abebc9EncodeServerEasy2(w, v)
+	easyjsonE9abebc9EncodeServerInternalDomainDto2(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *RespComments) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonE9abebc9DecodeServerEasy2(&r, v)
+	easyjsonE9abebc9DecodeServerInternalDomainDto2(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *RespComments) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonE9abebc9DecodeServerEasy2(l, v)
+	easyjsonE9abebc9DecodeServerInternalDomainDto2(l, v)
 }
-func easyjsonE9abebc9DecodeServerEasy3(in *jlexer.Lexer, out *ReqCreateComment) {
+func easyjsonE9abebc9DecodeServerInternalDomainDto3(in *jlexer.Lexer, out *ReqCreateComment) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -311,10 +311,10 @@ func easyjsonE9abebc9DecodeServerEasy3(in *jlexer.Lexer, out *ReqCreateComment) 
 			out.Text = string(in.String())
 		case "Rating":
 			out.Rating = uint8(in.Uint8())
-		case "RestaurantId":
-			out.RestaurantId = uint(in.Uint())
-		case "UserId":
-			out.UserId = uint(in.Uint())
+		case "RestaurantID":
+			out.RestaurantID = uint(in.Uint())
+		case "UserID":
+			out.UserID = uint(in.Uint())
 		default:
 			in.SkipRecursive()
 		}
@@ -325,7 +325,7 @@ func easyjsonE9abebc9DecodeServerEasy3(in *jlexer.Lexer, out *ReqCreateComment) 
 		in.Consumed()
 	}
 }
-func easyjsonE9abebc9EncodeServerEasy3(out *jwriter.Writer, in ReqCreateComment) {
+func easyjsonE9abebc9EncodeServerInternalDomainDto3(out *jwriter.Writer, in ReqCreateComment) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -340,14 +340,14 @@ func easyjsonE9abebc9EncodeServerEasy3(out *jwriter.Writer, in ReqCreateComment)
 		out.Uint8(uint8(in.Rating))
 	}
 	{
-		const prefix string = ",\"RestaurantId\":"
+		const prefix string = ",\"RestaurantID\":"
 		out.RawString(prefix)
-		out.Uint(uint(in.RestaurantId))
+		out.Uint(uint(in.RestaurantID))
 	}
 	{
-		const prefix string = ",\"UserId\":"
+		const prefix string = ",\"UserID\":"
 		out.RawString(prefix)
-		out.Uint(uint(in.UserId))
+		out.Uint(uint(in.UserID))
 	}
 	out.RawByte('}')
 }
@@ -355,27 +355,27 @@ func easyjsonE9abebc9EncodeServerEasy3(out *jwriter.Writer, in ReqCreateComment)
 // MarshalJSON supports json.Marshaler interface
 func (v ReqCreateComment) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonE9abebc9EncodeServerEasy3(&w, v)
+	easyjsonE9abebc9EncodeServerInternalDomainDto3(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v ReqCreateComment) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonE9abebc9EncodeServerEasy3(w, v)
+	easyjsonE9abebc9EncodeServerInternalDomainDto3(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *ReqCreateComment) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonE9abebc9DecodeServerEasy3(&r, v)
+	easyjsonE9abebc9DecodeServerInternalDomainDto3(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *ReqCreateComment) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonE9abebc9DecodeServerEasy3(l, v)
+	easyjsonE9abebc9DecodeServerInternalDomainDto3(l, v)
 }
-func easyjsonE9abebc9DecodeServerEasy4(in *jlexer.Lexer, out *DBRespGetComment) {
+func easyjsonE9abebc9DecodeServerInternalDomainDto4(in *jlexer.Lexer, out *DBRespGetComment) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -416,7 +416,7 @@ func easyjsonE9abebc9DecodeServerEasy4(in *jlexer.Lexer, out *DBRespGetComment) 
 		in.Consumed()
 	}
 }
-func easyjsonE9abebc9EncodeServerEasy4(out *jwriter.Writer, in DBRespGetComment) {
+func easyjsonE9abebc9EncodeServerInternalDomainDto4(out *jwriter.Writer, in DBRespGetComment) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -451,25 +451,25 @@ func easyjsonE9abebc9EncodeServerEasy4(out *jwriter.Writer, in DBRespGetComment)
 // MarshalJSON supports json.Marshaler interface
 func (v DBRespGetComment) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonE9abebc9EncodeServerEasy4(&w, v)
+	easyjsonE9abebc9EncodeServerInternalDomainDto4(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v DBRespGetComment) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonE9abebc9EncodeServerEasy4(w, v)
+	easyjsonE9abebc9EncodeServerInternalDomainDto4(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *DBRespGetComment) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonE9abebc9DecodeServerEasy4(&r, v)
+	easyjsonE9abebc9DecodeServerInternalDomainDto4(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *DBRespGetComment) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonE9abebc9DecodeServerEasy4(l, v)
+	easyjsonE9abebc9DecodeServerInternalDomainDto4(l, v)
 }
 func easyjsonE9abebc9DecodeDatabaseSql(in *jlexer.Lexer, out *sql.NullString) {
 	isTopLevel := in.IsStart()
@@ -520,7 +520,7 @@ func easyjsonE9abebc9EncodeDatabaseSql(out *jwriter.Writer, in sql.NullString) {
 	}
 	out.RawByte('}')
 }
-func easyjsonE9abebc9DecodeServerEasy5(in *jlexer.Lexer, out *DBRespCreateComment) {
+func easyjsonE9abebc9DecodeServerInternalDomainDto5(in *jlexer.Lexer, out *DBRespCreateComment) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -541,12 +541,12 @@ func easyjsonE9abebc9DecodeServerEasy5(in *jlexer.Lexer, out *DBRespCreateCommen
 		switch key {
 		case "Text":
 			easyjsonE9abebc9DecodeDatabaseSql(in, &out.Text)
-		case "UserId":
-			out.UserId = uint(in.Uint())
+		case "UserID":
+			out.UserID = uint(in.Uint())
 		case "Rating":
 			out.Rating = uint8(in.Uint8())
-		case "RestaurantId":
-			out.RestaurantId = uint(in.Uint())
+		case "RestaurantID":
+			out.RestaurantID = uint(in.Uint())
 		case "Date":
 			if data := in.Raw(); in.Ok() {
 				in.AddError((out.Date).UnmarshalJSON(data))
@@ -561,7 +561,7 @@ func easyjsonE9abebc9DecodeServerEasy5(in *jlexer.Lexer, out *DBRespCreateCommen
 		in.Consumed()
 	}
 }
-func easyjsonE9abebc9EncodeServerEasy5(out *jwriter.Writer, in DBRespCreateComment) {
+func easyjsonE9abebc9EncodeServerInternalDomainDto5(out *jwriter.Writer, in DBRespCreateComment) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -571,9 +571,9 @@ func easyjsonE9abebc9EncodeServerEasy5(out *jwriter.Writer, in DBRespCreateComme
 		easyjsonE9abebc9EncodeDatabaseSql(out, in.Text)
 	}
 	{
-		const prefix string = ",\"UserId\":"
+		const prefix string = ",\"UserID\":"
 		out.RawString(prefix)
-		out.Uint(uint(in.UserId))
+		out.Uint(uint(in.UserID))
 	}
 	{
 		const prefix string = ",\"Rating\":"
@@ -581,9 +581,9 @@ func easyjsonE9abebc9EncodeServerEasy5(out *jwriter.Writer, in DBRespCreateComme
 		out.Uint8(uint8(in.Rating))
 	}
 	{
-		const prefix string = ",\"RestaurantId\":"
+		const prefix string = ",\"RestaurantID\":"
 		out.RawString(prefix)
-		out.Uint(uint(in.RestaurantId))
+		out.Uint(uint(in.RestaurantID))
 	}
 	{
 		const prefix string = ",\"Date\":"
@@ -596,27 +596,27 @@ func easyjsonE9abebc9EncodeServerEasy5(out *jwriter.Writer, in DBRespCreateComme
 // MarshalJSON supports json.Marshaler interface
 func (v DBRespCreateComment) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonE9abebc9EncodeServerEasy5(&w, v)
+	easyjsonE9abebc9EncodeServerInternalDomainDto5(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v DBRespCreateComment) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonE9abebc9EncodeServerEasy5(w, v)
+	easyjsonE9abebc9EncodeServerInternalDomainDto5(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *DBRespCreateComment) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonE9abebc9DecodeServerEasy5(&r, v)
+	easyjsonE9abebc9DecodeServerInternalDomainDto5(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *DBRespCreateComment) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonE9abebc9DecodeServerEasy5(l, v)
+	easyjsonE9abebc9DecodeServerInternalDomainDto5(l, v)
 }
-func easyjsonE9abebc9DecodeServerEasy6(in *jlexer.Lexer, out *DBReqCreateComment) {
+func easyjsonE9abebc9DecodeServerInternalDomainDto6(in *jlexer.Lexer, out *DBReqCreateComment) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -637,10 +637,10 @@ func easyjsonE9abebc9DecodeServerEasy6(in *jlexer.Lexer, out *DBReqCreateComment
 		switch key {
 		case "Text":
 			easyjsonE9abebc9DecodeDatabaseSql(in, &out.Text)
-		case "RestaurantId":
-			out.RestaurantId = uint(in.Uint())
-		case "UserId":
-			out.UserId = uint(in.Uint())
+		case "RestaurantID":
+			out.RestaurantID = uint(in.Uint())
+		case "UserID":
+			out.UserID = uint(in.Uint())
 		case "Rating":
 			out.Rating = uint8(in.Uint8())
 		default:
@@ -653,7 +653,7 @@ func easyjsonE9abebc9DecodeServerEasy6(in *jlexer.Lexer, out *DBReqCreateComment
 		in.Consumed()
 	}
 }
-func easyjsonE9abebc9EncodeServerEasy6(out *jwriter.Writer, in DBReqCreateComment) {
+func easyjsonE9abebc9EncodeServerInternalDomainDto6(out *jwriter.Writer, in DBReqCreateComment) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -663,14 +663,14 @@ func easyjsonE9abebc9EncodeServerEasy6(out *jwriter.Writer, in DBReqCreateCommen
 		easyjsonE9abebc9EncodeDatabaseSql(out, in.Text)
 	}
 	{
-		const prefix string = ",\"RestaurantId\":"
+		const prefix string = ",\"RestaurantID\":"
 		out.RawString(prefix)
-		out.Uint(uint(in.RestaurantId))
+		out.Uint(uint(in.RestaurantID))
 	}
 	{
-		const prefix string = ",\"UserId\":"
+		const prefix string = ",\"UserID\":"
 		out.RawString(prefix)
-		out.Uint(uint(in.UserId))
+		out.Uint(uint(in.UserID))
 	}
 	{
 		const prefix string = ",\"Rating\":"
@@ -683,23 +683,23 @@ func easyjsonE9abebc9EncodeServerEasy6(out *jwriter.Writer, in DBReqCreateCommen
 // MarshalJSON supports json.Marshaler interface
 func (v DBReqCreateComment) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonE9abebc9EncodeServerEasy6(&w, v)
+	easyjsonE9abebc9EncodeServerInternalDomainDto6(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v DBReqCreateComment) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonE9abebc9EncodeServerEasy6(w, v)
+	easyjsonE9abebc9EncodeServerInternalDomainDto6(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *DBReqCreateComment) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonE9abebc9DecodeServerEasy6(&r, v)
+	easyjsonE9abebc9DecodeServerInternalDomainDto6(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *DBReqCreateComment) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonE9abebc9DecodeServerEasy6(l, v)
+	easyjsonE9abebc9DecodeServerInternalDomainDto6(l, v)
 }

@@ -18,7 +18,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson120d1ca2DecodeServerEasy(in *jlexer.Lexer, out *RespOrders) {
+func easyjson120d1ca2DecodeServerInternalDomainDto(in *jlexer.Lexer, out *RespOrders) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		in.Skip()
@@ -54,7 +54,7 @@ func easyjson120d1ca2DecodeServerEasy(in *jlexer.Lexer, out *RespOrders) {
 		in.Consumed()
 	}
 }
-func easyjson120d1ca2EncodeServerEasy(out *jwriter.Writer, in RespOrders) {
+func easyjson120d1ca2EncodeServerInternalDomainDto(out *jwriter.Writer, in RespOrders) {
 	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 		out.RawString("null")
 	} else {
@@ -76,27 +76,27 @@ func easyjson120d1ca2EncodeServerEasy(out *jwriter.Writer, in RespOrders) {
 // MarshalJSON supports json.Marshaler interface
 func (v RespOrders) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson120d1ca2EncodeServerEasy(&w, v)
+	easyjson120d1ca2EncodeServerInternalDomainDto(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v RespOrders) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson120d1ca2EncodeServerEasy(w, v)
+	easyjson120d1ca2EncodeServerInternalDomainDto(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *RespOrders) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson120d1ca2DecodeServerEasy(&r, v)
+	easyjson120d1ca2DecodeServerInternalDomainDto(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *RespOrders) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson120d1ca2DecodeServerEasy(l, v)
+	easyjson120d1ca2DecodeServerInternalDomainDto(l, v)
 }
-func easyjson120d1ca2DecodeServerEasy1(in *jlexer.Lexer, out *RespGetOrder) {
+func easyjson120d1ca2DecodeServerInternalDomainDto1(in *jlexer.Lexer, out *RespGetOrder) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -116,7 +116,7 @@ func easyjson120d1ca2DecodeServerEasy1(in *jlexer.Lexer, out *RespGetOrder) {
 		}
 		switch key {
 		case "Id":
-			out.Id = uint(in.Uint())
+			out.ID = uint(in.Uint())
 		case "Status":
 			out.Status = uint8(in.Uint8())
 		case "Date":
@@ -147,14 +147,14 @@ func easyjson120d1ca2DecodeServerEasy1(in *jlexer.Lexer, out *RespGetOrder) {
 		in.Consumed()
 	}
 }
-func easyjson120d1ca2EncodeServerEasy1(out *jwriter.Writer, in RespGetOrder) {
+func easyjson120d1ca2EncodeServerInternalDomainDto1(out *jwriter.Writer, in RespGetOrder) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"Id\":"
 		out.RawString(prefix[1:])
-		out.Uint(uint(in.Id))
+		out.Uint(uint(in.ID))
 	}
 	{
 		const prefix string = ",\"Status\":"
@@ -191,27 +191,27 @@ func easyjson120d1ca2EncodeServerEasy1(out *jwriter.Writer, in RespGetOrder) {
 // MarshalJSON supports json.Marshaler interface
 func (v RespGetOrder) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson120d1ca2EncodeServerEasy1(&w, v)
+	easyjson120d1ca2EncodeServerInternalDomainDto1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v RespGetOrder) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson120d1ca2EncodeServerEasy1(w, v)
+	easyjson120d1ca2EncodeServerInternalDomainDto1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *RespGetOrder) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson120d1ca2DecodeServerEasy1(&r, v)
+	easyjson120d1ca2DecodeServerInternalDomainDto1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *RespGetOrder) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson120d1ca2DecodeServerEasy1(l, v)
+	easyjson120d1ca2DecodeServerInternalDomainDto1(l, v)
 }
-func easyjson120d1ca2DecodeServerEasy2(in *jlexer.Lexer, out *RespGetOneOrder) {
+func easyjson120d1ca2DecodeServerInternalDomainDto2(in *jlexer.Lexer, out *RespGetOneOrder) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -231,7 +231,7 @@ func easyjson120d1ca2DecodeServerEasy2(in *jlexer.Lexer, out *RespGetOneOrder) {
 		}
 		switch key {
 		case "Id":
-			out.Id = uint(in.Uint())
+			out.ID = uint(in.Uint())
 		case "Status":
 			out.Status = uint8(in.Uint8())
 		case "Date":
@@ -293,14 +293,14 @@ func easyjson120d1ca2DecodeServerEasy2(in *jlexer.Lexer, out *RespGetOneOrder) {
 		in.Consumed()
 	}
 }
-func easyjson120d1ca2EncodeServerEasy2(out *jwriter.Writer, in RespGetOneOrder) {
+func easyjson120d1ca2EncodeServerInternalDomainDto2(out *jwriter.Writer, in RespGetOneOrder) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"Id\":"
 		out.RawString(prefix[1:])
-		out.Uint(uint(in.Id))
+		out.Uint(uint(in.ID))
 	}
 	{
 		const prefix string = ",\"Status\":"
@@ -357,27 +357,27 @@ func easyjson120d1ca2EncodeServerEasy2(out *jwriter.Writer, in RespGetOneOrder) 
 // MarshalJSON supports json.Marshaler interface
 func (v RespGetOneOrder) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson120d1ca2EncodeServerEasy2(&w, v)
+	easyjson120d1ca2EncodeServerInternalDomainDto2(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v RespGetOneOrder) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson120d1ca2EncodeServerEasy2(w, v)
+	easyjson120d1ca2EncodeServerInternalDomainDto2(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *RespGetOneOrder) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson120d1ca2DecodeServerEasy2(&r, v)
+	easyjson120d1ca2DecodeServerInternalDomainDto2(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *RespGetOneOrder) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson120d1ca2DecodeServerEasy2(l, v)
+	easyjson120d1ca2DecodeServerInternalDomainDto2(l, v)
 }
-func easyjson120d1ca2DecodeServerEasy3(in *jlexer.Lexer, out *RespCreateOrder) {
+func easyjson120d1ca2DecodeServerInternalDomainDto3(in *jlexer.Lexer, out *RespCreateOrder) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -397,7 +397,7 @@ func easyjson120d1ca2DecodeServerEasy3(in *jlexer.Lexer, out *RespCreateOrder) {
 		}
 		switch key {
 		case "Id":
-			out.Id = uint(in.Uint())
+			out.ID = uint(in.Uint())
 		case "Status":
 			out.Status = uint8(in.Uint8())
 		case "Date":
@@ -428,14 +428,14 @@ func easyjson120d1ca2DecodeServerEasy3(in *jlexer.Lexer, out *RespCreateOrder) {
 		in.Consumed()
 	}
 }
-func easyjson120d1ca2EncodeServerEasy3(out *jwriter.Writer, in RespCreateOrder) {
+func easyjson120d1ca2EncodeServerInternalDomainDto3(out *jwriter.Writer, in RespCreateOrder) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"Id\":"
 		out.RawString(prefix[1:])
-		out.Uint(uint(in.Id))
+		out.Uint(uint(in.ID))
 	}
 	{
 		const prefix string = ",\"Status\":"
@@ -472,25 +472,25 @@ func easyjson120d1ca2EncodeServerEasy3(out *jwriter.Writer, in RespCreateOrder) 
 // MarshalJSON supports json.Marshaler interface
 func (v RespCreateOrder) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson120d1ca2EncodeServerEasy3(&w, v)
+	easyjson120d1ca2EncodeServerInternalDomainDto3(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v RespCreateOrder) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson120d1ca2EncodeServerEasy3(w, v)
+	easyjson120d1ca2EncodeServerInternalDomainDto3(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *RespCreateOrder) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson120d1ca2DecodeServerEasy3(&r, v)
+	easyjson120d1ca2DecodeServerInternalDomainDto3(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *RespCreateOrder) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson120d1ca2DecodeServerEasy3(l, v)
+	easyjson120d1ca2DecodeServerInternalDomainDto3(l, v)
 }
 func easyjson120d1ca2DecodeServerInternalDomainEntity(in *jlexer.Lexer, out *entity.Address) {
 	isTopLevel := in.IsStart()
@@ -555,7 +555,7 @@ func easyjson120d1ca2EncodeServerInternalDomainEntity(out *jwriter.Writer, in en
 	}
 	out.RawByte('}')
 }
-func easyjson120d1ca2DecodeServerEasy4(in *jlexer.Lexer, out *ReqUpdateOrder) {
+func easyjson120d1ca2DecodeServerInternalDomainDto4(in *jlexer.Lexer, out *ReqUpdateOrder) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -575,7 +575,7 @@ func easyjson120d1ca2DecodeServerEasy4(in *jlexer.Lexer, out *ReqUpdateOrder) {
 		}
 		switch key {
 		case "Id":
-			out.Id = uint(in.Uint())
+			out.ID = uint(in.Uint())
 		case "Status":
 			out.Status = uint8(in.Uint8())
 		default:
@@ -588,14 +588,14 @@ func easyjson120d1ca2DecodeServerEasy4(in *jlexer.Lexer, out *ReqUpdateOrder) {
 		in.Consumed()
 	}
 }
-func easyjson120d1ca2EncodeServerEasy4(out *jwriter.Writer, in ReqUpdateOrder) {
+func easyjson120d1ca2EncodeServerInternalDomainDto4(out *jwriter.Writer, in ReqUpdateOrder) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"Id\":"
 		out.RawString(prefix[1:])
-		out.Uint(uint(in.Id))
+		out.Uint(uint(in.ID))
 	}
 	{
 		const prefix string = ",\"Status\":"
@@ -608,27 +608,27 @@ func easyjson120d1ca2EncodeServerEasy4(out *jwriter.Writer, in ReqUpdateOrder) {
 // MarshalJSON supports json.Marshaler interface
 func (v ReqUpdateOrder) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson120d1ca2EncodeServerEasy4(&w, v)
+	easyjson120d1ca2EncodeServerInternalDomainDto4(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v ReqUpdateOrder) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson120d1ca2EncodeServerEasy4(w, v)
+	easyjson120d1ca2EncodeServerInternalDomainDto4(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *ReqUpdateOrder) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson120d1ca2DecodeServerEasy4(&r, v)
+	easyjson120d1ca2DecodeServerInternalDomainDto4(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *ReqUpdateOrder) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson120d1ca2DecodeServerEasy4(l, v)
+	easyjson120d1ca2DecodeServerInternalDomainDto4(l, v)
 }
-func easyjson120d1ca2DecodeServerEasy5(in *jlexer.Lexer, out *ReqGetOneOrder) {
+func easyjson120d1ca2DecodeServerInternalDomainDto5(in *jlexer.Lexer, out *ReqGetOneOrder) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -648,9 +648,9 @@ func easyjson120d1ca2DecodeServerEasy5(in *jlexer.Lexer, out *ReqGetOneOrder) {
 		}
 		switch key {
 		case "OrderId":
-			out.OrderId = uint(in.Uint())
-		case "UserId":
-			out.UserId = uint(in.Uint())
+			out.OrderID = uint(in.Uint())
+		case "UserID":
+			out.UserID = uint(in.Uint())
 		default:
 			in.SkipRecursive()
 		}
@@ -661,19 +661,19 @@ func easyjson120d1ca2DecodeServerEasy5(in *jlexer.Lexer, out *ReqGetOneOrder) {
 		in.Consumed()
 	}
 }
-func easyjson120d1ca2EncodeServerEasy5(out *jwriter.Writer, in ReqGetOneOrder) {
+func easyjson120d1ca2EncodeServerInternalDomainDto5(out *jwriter.Writer, in ReqGetOneOrder) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"OrderId\":"
 		out.RawString(prefix[1:])
-		out.Uint(uint(in.OrderId))
+		out.Uint(uint(in.OrderID))
 	}
 	{
-		const prefix string = ",\"UserId\":"
+		const prefix string = ",\"UserID\":"
 		out.RawString(prefix)
-		out.Uint(uint(in.UserId))
+		out.Uint(uint(in.UserID))
 	}
 	out.RawByte('}')
 }
@@ -681,27 +681,27 @@ func easyjson120d1ca2EncodeServerEasy5(out *jwriter.Writer, in ReqGetOneOrder) {
 // MarshalJSON supports json.Marshaler interface
 func (v ReqGetOneOrder) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson120d1ca2EncodeServerEasy5(&w, v)
+	easyjson120d1ca2EncodeServerInternalDomainDto5(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v ReqGetOneOrder) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson120d1ca2EncodeServerEasy5(w, v)
+	easyjson120d1ca2EncodeServerInternalDomainDto5(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *ReqGetOneOrder) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson120d1ca2DecodeServerEasy5(&r, v)
+	easyjson120d1ca2DecodeServerInternalDomainDto5(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *ReqGetOneOrder) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson120d1ca2DecodeServerEasy5(l, v)
+	easyjson120d1ca2DecodeServerInternalDomainDto5(l, v)
 }
-func easyjson120d1ca2DecodeServerEasy6(in *jlexer.Lexer, out *ReqCreateOrder) {
+func easyjson120d1ca2DecodeServerInternalDomainDto6(in *jlexer.Lexer, out *ReqCreateOrder) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -721,7 +721,7 @@ func easyjson120d1ca2DecodeServerEasy6(in *jlexer.Lexer, out *ReqCreateOrder) {
 		}
 		switch key {
 		case "UserID":
-			out.UserId = uint(in.Uint())
+			out.UserID = uint(in.Uint())
 		case "Address":
 			if in.IsNull() {
 				in.Skip()
@@ -742,14 +742,14 @@ func easyjson120d1ca2DecodeServerEasy6(in *jlexer.Lexer, out *ReqCreateOrder) {
 		in.Consumed()
 	}
 }
-func easyjson120d1ca2EncodeServerEasy6(out *jwriter.Writer, in ReqCreateOrder) {
+func easyjson120d1ca2EncodeServerInternalDomainDto6(out *jwriter.Writer, in ReqCreateOrder) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"UserID\":"
 		out.RawString(prefix[1:])
-		out.Uint(uint(in.UserId))
+		out.Uint(uint(in.UserID))
 	}
 	{
 		const prefix string = ",\"Address\":"
@@ -766,27 +766,27 @@ func easyjson120d1ca2EncodeServerEasy6(out *jwriter.Writer, in ReqCreateOrder) {
 // MarshalJSON supports json.Marshaler interface
 func (v ReqCreateOrder) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson120d1ca2EncodeServerEasy6(&w, v)
+	easyjson120d1ca2EncodeServerInternalDomainDto6(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v ReqCreateOrder) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson120d1ca2EncodeServerEasy6(w, v)
+	easyjson120d1ca2EncodeServerInternalDomainDto6(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *ReqCreateOrder) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson120d1ca2DecodeServerEasy6(&r, v)
+	easyjson120d1ca2DecodeServerInternalDomainDto6(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *ReqCreateOrder) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson120d1ca2DecodeServerEasy6(l, v)
+	easyjson120d1ca2DecodeServerInternalDomainDto6(l, v)
 }
-func easyjson120d1ca2DecodeServerEasy7(in *jlexer.Lexer, out *OrderItems) {
+func easyjson120d1ca2DecodeServerInternalDomainDto7(in *jlexer.Lexer, out *OrderItems) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -831,7 +831,7 @@ func easyjson120d1ca2DecodeServerEasy7(in *jlexer.Lexer, out *OrderItems) {
 						if v7 == nil {
 							v7 = new(RespGetOrderProduct)
 						}
-						easyjson120d1ca2DecodeServerEasy8(in, v7)
+						easyjson120d1ca2DecodeServerInternalDomainDto8(in, v7)
 					}
 					out.Products = append(out.Products, v7)
 					in.WantComma()
@@ -848,7 +848,7 @@ func easyjson120d1ca2DecodeServerEasy7(in *jlexer.Lexer, out *OrderItems) {
 		in.Consumed()
 	}
 }
-func easyjson120d1ca2EncodeServerEasy7(out *jwriter.Writer, in OrderItems) {
+func easyjson120d1ca2EncodeServerInternalDomainDto7(out *jwriter.Writer, in OrderItems) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -871,7 +871,7 @@ func easyjson120d1ca2EncodeServerEasy7(out *jwriter.Writer, in OrderItems) {
 				if v9 == nil {
 					out.RawString("null")
 				} else {
-					easyjson120d1ca2EncodeServerEasy8(out, *v9)
+					easyjson120d1ca2EncodeServerInternalDomainDto8(out, *v9)
 				}
 			}
 			out.RawByte(']')
@@ -883,27 +883,27 @@ func easyjson120d1ca2EncodeServerEasy7(out *jwriter.Writer, in OrderItems) {
 // MarshalJSON supports json.Marshaler interface
 func (v OrderItems) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson120d1ca2EncodeServerEasy7(&w, v)
+	easyjson120d1ca2EncodeServerInternalDomainDto7(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v OrderItems) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson120d1ca2EncodeServerEasy7(w, v)
+	easyjson120d1ca2EncodeServerInternalDomainDto7(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *OrderItems) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson120d1ca2DecodeServerEasy7(&r, v)
+	easyjson120d1ca2DecodeServerInternalDomainDto7(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *OrderItems) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson120d1ca2DecodeServerEasy7(l, v)
+	easyjson120d1ca2DecodeServerInternalDomainDto7(l, v)
 }
-func easyjson120d1ca2DecodeServerEasy8(in *jlexer.Lexer, out *RespGetOrderProduct) {
+func easyjson120d1ca2DecodeServerInternalDomainDto8(in *jlexer.Lexer, out *RespGetOrderProduct) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -923,7 +923,7 @@ func easyjson120d1ca2DecodeServerEasy8(in *jlexer.Lexer, out *RespGetOrderProduc
 		}
 		switch key {
 		case "Id":
-			out.Id = uint(in.Uint())
+			out.ID = uint(in.Uint())
 		case "Name":
 			out.Name = string(in.String())
 		case "Price":
@@ -942,14 +942,14 @@ func easyjson120d1ca2DecodeServerEasy8(in *jlexer.Lexer, out *RespGetOrderProduc
 		in.Consumed()
 	}
 }
-func easyjson120d1ca2EncodeServerEasy8(out *jwriter.Writer, in RespGetOrderProduct) {
+func easyjson120d1ca2EncodeServerInternalDomainDto8(out *jwriter.Writer, in RespGetOrderProduct) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"Id\":"
 		out.RawString(prefix[1:])
-		out.Uint(uint(in.Id))
+		out.Uint(uint(in.ID))
 	}
 	{
 		const prefix string = ",\"Name\":"
@@ -973,7 +973,7 @@ func easyjson120d1ca2EncodeServerEasy8(out *jwriter.Writer, in RespGetOrderProdu
 	}
 	out.RawByte('}')
 }
-func easyjson120d1ca2DecodeServerEasy9(in *jlexer.Lexer, out *DBReqCreateOrder) {
+func easyjson120d1ca2DecodeServerInternalDomainDto9(in *jlexer.Lexer, out *DBReqCreateOrder) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1023,8 +1023,8 @@ func easyjson120d1ca2DecodeServerEasy9(in *jlexer.Lexer, out *DBReqCreateOrder) 
 				}
 				in.Delim(']')
 			}
-		case "UserId":
-			out.UserId = uint(in.Uint())
+		case "UserID":
+			out.UserID = uint(in.Uint())
 		case "Status":
 			out.Status = uint8(in.Uint8())
 		case "Price":
@@ -1055,7 +1055,7 @@ func easyjson120d1ca2DecodeServerEasy9(in *jlexer.Lexer, out *DBReqCreateOrder) 
 		in.Consumed()
 	}
 }
-func easyjson120d1ca2EncodeServerEasy9(out *jwriter.Writer, in DBReqCreateOrder) {
+func easyjson120d1ca2EncodeServerInternalDomainDto9(out *jwriter.Writer, in DBReqCreateOrder) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -1080,9 +1080,9 @@ func easyjson120d1ca2EncodeServerEasy9(out *jwriter.Writer, in DBReqCreateOrder)
 		}
 	}
 	{
-		const prefix string = ",\"UserId\":"
+		const prefix string = ",\"UserID\":"
 		out.RawString(prefix)
-		out.Uint(uint(in.UserId))
+		out.Uint(uint(in.UserID))
 	}
 	{
 		const prefix string = ",\"Status\":"
@@ -1119,25 +1119,25 @@ func easyjson120d1ca2EncodeServerEasy9(out *jwriter.Writer, in DBReqCreateOrder)
 // MarshalJSON supports json.Marshaler interface
 func (v DBReqCreateOrder) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson120d1ca2EncodeServerEasy9(&w, v)
+	easyjson120d1ca2EncodeServerInternalDomainDto9(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v DBReqCreateOrder) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson120d1ca2EncodeServerEasy9(w, v)
+	easyjson120d1ca2EncodeServerInternalDomainDto9(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *DBReqCreateOrder) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson120d1ca2DecodeServerEasy9(&r, v)
+	easyjson120d1ca2DecodeServerInternalDomainDto9(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *DBReqCreateOrder) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson120d1ca2DecodeServerEasy9(l, v)
+	easyjson120d1ca2DecodeServerInternalDomainDto9(l, v)
 }
 func easyjson120d1ca2DecodeServerInternalDomainEntity1(in *jlexer.Lexer, out *entity.CartProduct) {
 	isTopLevel := in.IsStart()

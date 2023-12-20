@@ -18,7 +18,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson47107b8bDecodeServerEasy(in *jlexer.Lexer, out *RespPromo) {
+func easyjson47107b8bDecodeServerInternalDomainDto(in *jlexer.Lexer, out *RespPromo) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -41,6 +41,8 @@ func easyjson47107b8bDecodeServerEasy(in *jlexer.Lexer, out *RespPromo) {
 			out.Type = int(in.Int())
 		case "Discount":
 			out.Discount = uint(in.Uint())
+		case "Promo":
+			out.Promo = string(in.String())
 		default:
 			in.SkipRecursive()
 		}
@@ -51,7 +53,7 @@ func easyjson47107b8bDecodeServerEasy(in *jlexer.Lexer, out *RespPromo) {
 		in.Consumed()
 	}
 }
-func easyjson47107b8bEncodeServerEasy(out *jwriter.Writer, in RespPromo) {
+func easyjson47107b8bEncodeServerInternalDomainDto(out *jwriter.Writer, in RespPromo) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -65,33 +67,38 @@ func easyjson47107b8bEncodeServerEasy(out *jwriter.Writer, in RespPromo) {
 		out.RawString(prefix)
 		out.Uint(uint(in.Discount))
 	}
+	{
+		const prefix string = ",\"Promo\":"
+		out.RawString(prefix)
+		out.String(string(in.Promo))
+	}
 	out.RawByte('}')
 }
 
 // MarshalJSON supports json.Marshaler interface
 func (v RespPromo) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson47107b8bEncodeServerEasy(&w, v)
+	easyjson47107b8bEncodeServerInternalDomainDto(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v RespPromo) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson47107b8bEncodeServerEasy(w, v)
+	easyjson47107b8bEncodeServerInternalDomainDto(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *RespPromo) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson47107b8bDecodeServerEasy(&r, v)
+	easyjson47107b8bDecodeServerInternalDomainDto(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *RespPromo) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson47107b8bDecodeServerEasy(l, v)
+	easyjson47107b8bDecodeServerInternalDomainDto(l, v)
 }
-func easyjson47107b8bDecodeServerEasy1(in *jlexer.Lexer, out *DBGetPromo) {
+func easyjson47107b8bDecodeServerInternalDomainDto1(in *jlexer.Lexer, out *DBGetPromo) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -118,8 +125,8 @@ func easyjson47107b8bDecodeServerEasy1(in *jlexer.Lexer, out *DBGetPromo) {
 			out.PromoType = int(in.Int())
 		case "Sale":
 			easyjson47107b8bDecodeDatabaseSql(in, &out.Sale)
-		case "RestaurantId":
-			easyjson47107b8bDecodeDatabaseSql(in, &out.RestaurantId)
+		case "RestaurantID":
+			easyjson47107b8bDecodeDatabaseSql(in, &out.RestaurantID)
 		case "ActiveFrom":
 			if data := in.Raw(); in.Ok() {
 				in.AddError((out.ActiveFrom).UnmarshalJSON(data))
@@ -138,7 +145,7 @@ func easyjson47107b8bDecodeServerEasy1(in *jlexer.Lexer, out *DBGetPromo) {
 		in.Consumed()
 	}
 }
-func easyjson47107b8bEncodeServerEasy1(out *jwriter.Writer, in DBGetPromo) {
+func easyjson47107b8bEncodeServerInternalDomainDto1(out *jwriter.Writer, in DBGetPromo) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -163,9 +170,9 @@ func easyjson47107b8bEncodeServerEasy1(out *jwriter.Writer, in DBGetPromo) {
 		easyjson47107b8bEncodeDatabaseSql(out, in.Sale)
 	}
 	{
-		const prefix string = ",\"RestaurantId\":"
+		const prefix string = ",\"RestaurantID\":"
 		out.RawString(prefix)
-		easyjson47107b8bEncodeDatabaseSql(out, in.RestaurantId)
+		easyjson47107b8bEncodeDatabaseSql(out, in.RestaurantID)
 	}
 	{
 		const prefix string = ",\"ActiveFrom\":"
@@ -183,25 +190,25 @@ func easyjson47107b8bEncodeServerEasy1(out *jwriter.Writer, in DBGetPromo) {
 // MarshalJSON supports json.Marshaler interface
 func (v DBGetPromo) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson47107b8bEncodeServerEasy1(&w, v)
+	easyjson47107b8bEncodeServerInternalDomainDto1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v DBGetPromo) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson47107b8bEncodeServerEasy1(w, v)
+	easyjson47107b8bEncodeServerInternalDomainDto1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *DBGetPromo) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson47107b8bDecodeServerEasy1(&r, v)
+	easyjson47107b8bDecodeServerInternalDomainDto1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *DBGetPromo) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson47107b8bDecodeServerEasy1(l, v)
+	easyjson47107b8bDecodeServerInternalDomainDto1(l, v)
 }
 func easyjson47107b8bDecodeDatabaseSql(in *jlexer.Lexer, out *sql.NullString) {
 	isTopLevel := in.IsStart()

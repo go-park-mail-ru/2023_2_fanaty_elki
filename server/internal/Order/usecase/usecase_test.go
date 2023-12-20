@@ -209,9 +209,36 @@ func TestGetOrdersSuccess(t *testing.T) {
 		},
 	}
 
+	exp := &dto.RespOrders{
+		{
+			ID:     1,
+			Status: 0,
+			Date:   timenow,
+			Address: &dto.RespOrderAddress{
+				City:   "Moscow",
+				Street: "Tverskaya",
+				House:  "2",
+				Flat:   flat,
+			},
+			Price: 100,
+		},
+		{
+			ID:     2,
+			Status: 0,
+			Date:   timenow,
+			Address: &dto.RespOrderAddress{
+				City:   "Moscow",
+				Street: "Tverskaya",
+				House:  "3",
+				Flat:   flat,
+			},
+			Price: 200,
+		},
+	}
+
 	mockOrder.EXPECT().GetOrders(UserID).Return(resporders, nil)
 	actual, err := usecase.GetOrders(UserID)
-	assert.Equal(t, resporders, actual)
+	assert.Equal(t, exp, actual)
 	assert.Nil(t, err)
 
 }

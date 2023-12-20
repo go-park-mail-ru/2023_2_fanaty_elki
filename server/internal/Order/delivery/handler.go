@@ -60,7 +60,7 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 
 	UserID, _ := handler.sessionUC.GetIDByCookie(cookie.Value)
 
-	reqOrder := dto.ReqCreateOrder{UserId: userId}
+	reqOrder := dto.ReqCreateOrder{UserID: UserID}
 
 	err := easyjson.UnmarshalFromReader(r.Body, &reqOrder)
 	if err != nil {

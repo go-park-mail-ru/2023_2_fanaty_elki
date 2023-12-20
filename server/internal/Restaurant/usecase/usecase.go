@@ -187,7 +187,7 @@ func (res RestaurantUsecase) GetCategories() (*dto.StringSlice, error) {
 		respRestWithCategories = append(respRestWithCategories, rest)
 		fmt.Println("usecase ", &respRestWithCategories)
 	}
-	fmt.Println(&respRestWithCategories[0], &respRestWithCategories[1], &respRestWithCategories[2])
+	//fmt.Println(&respRestWithCategories[0], &respRestWithCategories[1], &respRestWithCategories[2])
 	return &respRestWithCategories, nil
 }
 
@@ -311,7 +311,7 @@ func (res RestaurantUsecase) GetRestaurantTips(SessionToken string) (*dto.Restau
 		}
 
 		for _, ord := range orders {
-			order, err := res.orderRepo.GetOrder(&dto.ReqGetOneOrder{OrderId: ord.Id, UserId: userID})
+			order, err := res.orderRepo.GetOrder(&dto.ReqGetOneOrder{OrderID: ord.ID, UserID: userID})
 
 			if err != nil {
 				return nil, err

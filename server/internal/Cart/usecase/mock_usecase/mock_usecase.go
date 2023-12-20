@@ -7,7 +7,6 @@ package mock_usecase
 import (
 	reflect "reflect"
 	dto "server/internal/domain/dto"
-	entity "server/internal/domain/entity"
 
 	gomock "github.com/golang/mock/gomock"
 )
@@ -78,10 +77,10 @@ func (mr *MockCartUsecaseIMockRecorder) DeleteProductFromCart(SessionToken, prod
 }
 
 // GetCartTips mocks base method.
-func (m *MockCartUsecaseI) GetCartTips(SessionToken string) ([]*entity.Product, error) {
+func (m *MockCartUsecaseI) GetCartTips(SessionToken string) (*dto.ProductSlice, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCartTips", SessionToken)
-	ret0, _ := ret[0].([]*entity.Product)
+	ret0, _ := ret[0].(*dto.ProductSlice)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
