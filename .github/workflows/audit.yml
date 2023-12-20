@@ -109,5 +109,5 @@ jobs:
           host: prinesy-poday.ru
           username: ubuntu
           key: ${{ secrets.VM_RSA_KEY }}
-          script: cd /home/ubuntu/2023_2_fanaty_elki && sudo make up
+          script: cd /home/ubuntu/2023_2_fanaty_elki && sudo make copy && sudo make up
   
