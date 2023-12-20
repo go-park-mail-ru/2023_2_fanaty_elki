@@ -85,6 +85,7 @@ var (
 )
 
 func main() {
+	
 	flag.Parse()
 	router := mux.NewRouter()
 	authRouter := mux.NewRouter()
