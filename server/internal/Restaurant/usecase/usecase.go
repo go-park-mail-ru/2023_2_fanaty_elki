@@ -13,9 +13,10 @@ import (
 	"sort"
 )
 
-type UsecaseI interface {
+//RestaurantUsecaseI interface
+type RestaurantUsecaseI interface {
 	GetRestaurants() (*dto.RestaurantWithCategoriesSlice, error)
-	GetRestaurantById(id uint) (*dto.RestaurantWithCategories, error)
+	GetRestaurantByID(id uint) (*dto.RestaurantWithCategories, error)
 	GetRestaurantProducts(id uint) (*dto.MenuTypeWithProductsSlice, error)
 	GetRestaurantsByCategory(name string) (*dto.RestaurantWithCategoriesSlice, error)
 	GetCategories() (*dto.StringSlice, error)
@@ -24,15 +25,17 @@ type UsecaseI interface {
 	GetRandomRestaurantTips() (*dto.RestaurantWithCategoriesSlice, error)
 }
 
-type restaurantUsecase struct {
+//RestaurantUsecase struct
+type RestaurantUsecase struct {
 	restaurantRepo restRep.RestaurantRepositoryI
 	productRepo    productRep.ProductRepositoryI
 	sessionRepo    sessionRep.SessionRepositoryI
 	orderRepo      orderRep.OrderRepositoryI
 }
 
-func NewRestaurantUsecase(resRep restRep.RestaurantRepositoryI, productRep productRep.ProductRepositoryI, sessionRep sessionRep.SessionRepositoryI, orderRep orderRep.OrderRepositoryI) *restaurantUsecase {
-	return &restaurantUsecase{
+//NewRestaurantUsecase creates new restaurant usecase
+func NewRestaurantUsecase(resRep restRep.RestaurantRepositoryI, productRep productRep.ProductRepositoryI, sessionRep sessionRep.SessionRepositoryI, orderRep orderRep.OrderRepositoryI) *RestaurantUsecase {
+	return &RestaurantUsecase{
 		restaurantRepo: resRep,
 		productRepo:    productRep,
 		sessionRepo:    sessionRep,
@@ -41,7 +44,8 @@ func NewRestaurantUsecase(resRep restRep.RestaurantRepositoryI, productRep produ
 
 }
 
-func (res restaurantUsecase) GetRestaurants() (*dto.RestaurantWithCategoriesSlice, error) {
+//GetRestaurants gets restaurants
+func (res RestaurantUsecase) GetRestaurants() (*dto.RestaurantWithCategoriesSlice, error) {
 	rests, err := res.restaurantRepo.GetRestaurants()
 	if err != nil {
 		return nil, entity.ErrInternalServerError
@@ -57,7 +61,7 @@ func (res restaurantUsecase) GetRestaurants() (*dto.RestaurantWithCategoriesSlic
 		rest.MinDeliveryTime = mindeltime
 		rest.MaxDeliveryTime = maxdeltime
 		rest.DeliveryPrice = delprice
-		cats, err := res.restaurantRepo.GetCategoriesByRestaurantId(rest.ID)
+		cats, err := res.restaurantRepo.GetCategoriesByRestaurantID(rest.ID)
 		if err != nil {
 			if err != entity.ErrNotFound {
 				return nil, entity.ErrInternalServerError
@@ -75,8 +79,9 @@ func (res restaurantUsecase) GetRestaurants() (*dto.RestaurantWithCategoriesSlic
 	return &respRestWithCategories, nil
 }
 
-func (res restaurantUsecase) GetRestaurantById(id uint) (*dto.RestaurantWithCategories, error) {
-	rest, err := res.restaurantRepo.GetRestaurantById(id)
+//GetRestaurantByID gets restaurant by id
+func (res RestaurantUsecase) GetRestaurantByID(id uint) (*dto.RestaurantWithCategories, error) {
+	rest, err := res.restaurantRepo.GetRestaurantByID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +94,7 @@ func (res restaurantUsecase) GetRestaurantById(id uint) (*dto.RestaurantWithCate
 	rest.MinDeliveryTime = mindeltime
 	rest.MaxDeliveryTime = maxdeltime
 	rest.DeliveryPrice = delprice
-	cats, err := res.restaurantRepo.GetCategoriesByRestaurantId(rest.ID)
+	cats, err := res.restaurantRepo.GetCategoriesByRestaurantID(rest.ID)
 	if err != nil {
 		if err != entity.ErrNotFound {
 			return nil, entity.ErrInternalServerError
@@ -99,14 +104,15 @@ func (res restaurantUsecase) GetRestaurantById(id uint) (*dto.RestaurantWithCate
 	return restwithcat, nil
 }
 
-func (res restaurantUsecase) GetRestaurantProducts(id uint) (*dto.MenuTypeWithProductsSlice, error) {
-	menuTypes, err := res.restaurantRepo.GetMenuTypesByRestaurantId(id)
+//GetRestaurantProducts gets products from restaurant
+func (res RestaurantUsecase) GetRestaurantProducts(id uint) (*dto.MenuTypeWithProductsSlice, error) {
+	menuTypes, err := res.restaurantRepo.GetMenuTypesByRestaurantID(id)
 	if err != nil {
 		return nil, err
 	}
 	var menuTypesWithProducts []*dto.MenuTypeWithProducts
 	for _, menu := range menuTypes {
-		products, err := res.productRepo.GetProductsByMenuTypeId(menu.ID)
+		products, err := res.productRepo.GetProductsByMenuTypeID(menu.ID)
 		if err != nil {
 			return nil, entity.ErrInternalServerError
 		}
@@ -126,7 +132,8 @@ func (res restaurantUsecase) GetRestaurantProducts(id uint) (*dto.MenuTypeWithPr
 	return &respMenu, nil
 }
 
-func (res restaurantUsecase) GetRestaurantsByCategory(name string) (*dto.RestaurantWithCategoriesSlice, error) {
+//GetRestaurantsByCategory gets restaurants by category
+func (res RestaurantUsecase) GetRestaurantsByCategory(name string) (*dto.RestaurantWithCategoriesSlice, error) {
 	rests, err := res.restaurantRepo.GetRestaurantsByCategory(name)
 	if err != nil {
 		if err == entity.ErrNotFound {
@@ -145,7 +152,7 @@ func (res restaurantUsecase) GetRestaurantsByCategory(name string) (*dto.Restaur
 		rest.MinDeliveryTime = mindeltime
 		rest.MaxDeliveryTime = maxdeltime
 		rest.DeliveryPrice = delprice
-		cats, err := res.restaurantRepo.GetCategoriesByRestaurantId(rest.ID)
+		cats, err := res.restaurantRepo.GetCategoriesByRestaurantID(rest.ID)
 		if err != nil {
 			if err != entity.ErrNotFound {
 				return nil, entity.ErrInternalServerError
@@ -163,7 +170,8 @@ func (res restaurantUsecase) GetRestaurantsByCategory(name string) (*dto.Restaur
 	return &respRestWithCategories, nil
 }
 
-func (res restaurantUsecase) GetCategories() (*dto.StringSlice, error) {
+//GetCategories gets categories
+func (res RestaurantUsecase) GetCategories() (*dto.StringSlice, error) {
 	cats, err := res.restaurantRepo.GetCategories()
 	categories := dto.TransformCategoriesToStringSlice(cats)
 	if err != nil {
@@ -183,7 +191,8 @@ func (res restaurantUsecase) GetCategories() (*dto.StringSlice, error) {
 	return &respRestWithCategories, nil
 }
 
-func (res restaurantUsecase) Search(word string) (*dto.RestaurantWithCategoriesAndProductsSlice, error) {
+//Search searches restaurant
+func (res RestaurantUsecase) Search(word string) (*dto.RestaurantWithCategoriesAndProductsSlice, error) {
 	rests, err := res.restaurantRepo.SearchRestaurants(word)
 	if err != nil {
 		return nil, entity.ErrInternalServerError
@@ -206,17 +215,17 @@ func (res restaurantUsecase) Search(word string) (*dto.RestaurantWithCategoriesA
 	rests = append(rests, restsbycategory...)
 	products, err := res.productRepo.SearchProducts(word)
 	for _, prod := range products {
-		restId, err := res.productRepo.GetRestaurantIdByProduct(prod.ID)
+		restID, err := res.productRepo.GetRestaurantIDByProduct(prod.ID)
 		if err != nil {
 			return nil, entity.ErrInternalServerError
 		}
-		if !restset[restId] {
-			restById, err := res.restaurantRepo.GetRestaurantById(restId)
+		if !restset[restID] {
+			restByID, err := res.restaurantRepo.GetRestaurantByID(restID)
 			if err != nil {
 				return nil, entity.ErrInternalServerError
 			}
-			restset[restId] = true
-			rests = append(rests, restById)
+			restset[restID] = true
+			rests = append(rests, restByID)
 		}
 	}
 	if err != nil {
@@ -233,7 +242,7 @@ func (res restaurantUsecase) Search(word string) (*dto.RestaurantWithCategoriesA
 		rest.MinDeliveryTime = mindeltime
 		rest.MaxDeliveryTime = maxdeltime
 		rest.DeliveryPrice = delprice
-		cats, err := res.restaurantRepo.GetCategoriesByRestaurantId(rest.ID)
+		cats, err := res.restaurantRepo.GetCategoriesByRestaurantID(rest.ID)
 		if err != nil {
 			if err != entity.ErrNotFound {
 				return nil, entity.ErrInternalServerError
@@ -244,12 +253,12 @@ func (res restaurantUsecase) Search(word string) (*dto.RestaurantWithCategoriesA
 		restsWithCategoriesAndProducts = append(restsWithCategoriesAndProducts, restWithCatsAndProducts)
 	}
 	for _, prod := range products {
-		restId, err := res.productRepo.GetRestaurantIdByProduct(prod.ID)
+		restID, err := res.productRepo.GetRestaurantIDByProduct(prod.ID)
 		if err != nil {
 			return nil, entity.ErrInternalServerError
 		}
 		for _, rest := range restsWithCategoriesAndProducts {
-			if rest.ID == restId {
+			if rest.ID == restID {
 				rest.Products = append(rest.Products, prod)
 			}
 		}
@@ -263,7 +272,8 @@ func (res restaurantUsecase) Search(word string) (*dto.RestaurantWithCategoriesA
 	return &respRestWithCategories, nil
 }
 
-func (res restaurantUsecase) GetRestaurantTips(SessionToken string) (*dto.RestaurantWithCategoriesSlice, error) {
+//GetRestaurantTips gets restaurant by tips
+func (res RestaurantUsecase) GetRestaurantTips(SessionToken string) (*dto.RestaurantWithCategoriesSlice, error) {
 	restaurants, err := res.restaurantRepo.GetRestaurants()
 
 	if err != nil {
@@ -345,7 +355,7 @@ func (res restaurantUsecase) GetRestaurantTips(SessionToken string) (*dto.Restau
 			rest.MinDeliveryTime = mindeltime
 			rest.MaxDeliveryTime = maxdeltime
 			rest.DeliveryPrice = delprice
-			cats, err := res.restaurantRepo.GetCategoriesByRestaurantId(rest.ID)
+			cats, err := res.restaurantRepo.GetCategoriesByRestaurantID(rest.ID)
 			if err != nil {
 				if err != entity.ErrNotFound {
 					return nil, entity.ErrInternalServerError
@@ -365,7 +375,8 @@ func (res restaurantUsecase) GetRestaurantTips(SessionToken string) (*dto.Restau
 	return &respRestWithCategories, nil
 }
 
-func (res restaurantUsecase) GetRandomRestaurantTips() (*dto.RestaurantWithCategoriesSlice, error) {
+//GetRandomRestaurantTips gets random restaurants as a tip
+func (res RestaurantUsecase) GetRandomRestaurantTips() (*dto.RestaurantWithCategoriesSlice, error) {
 	restaurants, err := res.restaurantRepo.GetRestaurants()
 
 	if err != nil {
@@ -407,7 +418,7 @@ func (res restaurantUsecase) GetRandomRestaurantTips() (*dto.RestaurantWithCateg
 			rest.MinDeliveryTime = mindeltime
 			rest.MaxDeliveryTime = maxdeltime
 			rest.DeliveryPrice = delprice
-			cats, err := res.restaurantRepo.GetCategoriesByRestaurantId(rest.ID)
+			cats, err := res.restaurantRepo.GetCategoriesByRestaurantID(rest.ID)
 			if err != nil {
 				if err != entity.ErrNotFound {
 					return nil, entity.ErrInternalServerError

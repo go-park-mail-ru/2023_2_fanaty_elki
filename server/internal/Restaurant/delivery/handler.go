@@ -14,30 +14,35 @@ import (
 	"github.com/mailru/easyjson"
 )
 
+//Result struct
 type Result struct {
 	Body interface{}
 }
 
+//RespError struct
 type RespError struct {
 	Err string
 }
 
+//RestaurantHandler handles requests connectded to restaurants
 type RestaurantHandler struct {
-	restaurants restaurantUsecase.UsecaseI
+	restaurants restaurantUsecase.RestaurantUsecaseI
 	logger      *mw.ACLog
 }
 
-func NewRestaurantHandler(restaurants restaurantUsecase.UsecaseI, logger *mw.ACLog) *RestaurantHandler {
+//NewRestaurantHandler creates new restaurant handler
+func NewRestaurantHandler(restaurants restaurantUsecase.RestaurantUsecaseI, logger *mw.ACLog) *RestaurantHandler {
 	return &RestaurantHandler{
 		restaurants: restaurants,
 		logger:      logger,
 	}
 }
 
+//RegisterHandler registers api of restaurants
 func (handler *RestaurantHandler) RegisterHandler(router *mux.Router) {
 	router.HandleFunc("/api/restaurants", handler.GetRestaurantList).Methods(http.MethodGet)
 	router.HandleFunc("/api/restaurants/tips", handler.GetRestaurantTipList).Methods(http.MethodGet)
-	router.HandleFunc("/api/restaurants/{id:[0-9]+}", handler.GetRestaurantById).Methods(http.MethodGet)
+	router.HandleFunc("/api/restaurants/{id:[0-9]+}", handler.GetRestaurantByID).Methods(http.MethodGet)
 	router.HandleFunc("/api/restaurants/{id}/products", handler.GetRestaurantProducts).Methods(http.MethodGet)
 	router.HandleFunc("/api/restaurants/{category}", handler.GetRestaurantListByCategory).Methods(http.MethodGet)
 	router.HandleFunc("/api/restaurants/", handler.Search).Methods(http.MethodGet)
@@ -47,15 +52,15 @@ func (handler *RestaurantHandler) RegisterCategoryHandler(router *mux.Router) {
 	router.HandleFunc("/api/categories", handler.GetCategoryList).Methods(http.MethodGet)
 }
 
-// GetRestaurantsList godoc
-// @Summary      giving restaurats
-// @Description  giving array of restaurants
-// @Tags        Restaurants
-// @Accept     */*
-// @Produce  application/json
-// @Success  200 {object}  []entity.Restaurant "success returning array of restaurants"
-// @Failure 500 {object} error "internal server error"
-// @Router   /restaurants [get]
+//GetRestaurantList godoc
+//@Summary      giving restaurats
+//@Description  giving array of restaurants
+//@Tags        Restaurants
+//@Accept     */*
+//@Produce  application/json
+//@Success  200 {object}  []entity.Restaurant "success returning array of restaurants"
+//@Failure 500 {object} error "internal server error"
+//@Router   /restaurants [get]
 func (handler *RestaurantHandler) GetRestaurantList(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
@@ -79,16 +84,16 @@ func (handler *RestaurantHandler) GetRestaurantList(w http.ResponseWriter, r *ht
 	}
 }
 
-// GetRestaurantById godoc
-// @Summary      giving information about restaurant and its products
-// @Description  giving restaurant object and array of menu types with array of products in each menu type
-// @Tags        Restaurants
-// @Accept     */{id}
-// @Produce  application/json
-// @Success  200 {object}  dto.RestaurantWithProducts "success returning information about restaurant"
-// @Failure 500 {object} error "internal server error"
-// @Router   /restaurants/{id} [get]
-func (handler *RestaurantHandler) GetRestaurantById(w http.ResponseWriter, r *http.Request) {
+//GetRestaurantByID godoc
+//@Summary      giving information about restaurant and its products
+//@Description  giving restaurant object and array of menu types with array of products in each menu type
+//@Tags        Restaurants
+//@Accept     */{id}
+//@Produce  application/json
+//@Success  200 {object}  dto.RestaurantWithProducts "success returning information about restaurant"
+//@Failure 500 {object} error "internal server error"
+//@Router   /restaurants/{id} [get]
+func (handler *RestaurantHandler) GetRestaurantByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
@@ -108,7 +113,7 @@ func (handler *RestaurantHandler) GetRestaurantById(w http.ResponseWriter, r *ht
 
 	id := uint(id64)
 
-	rest, err := handler.restaurants.GetRestaurantById(id)
+	rest, err := handler.restaurants.GetRestaurantByID(id)
 
 	if err != nil {
 		if err == entity.ErrNotFound {
@@ -132,6 +137,7 @@ func (handler *RestaurantHandler) GetRestaurantById(w http.ResponseWriter, r *ht
 	}
 }
 
+//GetRestaurantProducts get products of restaurant
 func (handler *RestaurantHandler) GetRestaurantProducts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -176,6 +182,7 @@ func (handler *RestaurantHandler) GetRestaurantProducts(w http.ResponseWriter, r
 	}
 }
 
+//GetRestaurantListByCategory gets restaurants by category
 func (handler *RestaurantHandler) GetRestaurantListByCategory(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
@@ -212,6 +219,7 @@ func (handler *RestaurantHandler) GetRestaurantListByCategory(w http.ResponseWri
 	}
 }
 
+//GetCategoryList gets categories
 func (handler *RestaurantHandler) GetCategoryList(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
@@ -237,6 +245,7 @@ func (handler *RestaurantHandler) GetCategoryList(w http.ResponseWriter, r *http
 	}
 }
 
+//Search searches restaurants
 func (handler *RestaurantHandler) Search(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
@@ -271,6 +280,7 @@ func (handler *RestaurantHandler) Search(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+//GetRestaurantTipList gets restaurant tips
 func (handler *RestaurantHandler) GetRestaurantTipList(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

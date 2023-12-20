@@ -8,32 +8,36 @@ import (
 	"server/internal/domain/entity"
 	mw "server/internal/middleware"
 	"strconv"
-
 	"github.com/gorilla/mux"
 	easyjson "github.com/mailru/easyjson"
 	easyjsonopt "github.com/mailru/easyjson/opt"
 )
 
+//Result struct
 type Result struct {
 	Body interface{}
 }
 
+//RespError struct
 type RespError struct {
 	Err string
 }
 
+//CartHandler struct
 type CartHandler struct {
-	cartUsecase cartUsecase.UsecaseI
+	cartUsecase cartUsecase.CartUsecaseI
 	logger      *mw.ACLog
 }
 
-func NewCartHandler(cartUsecase cartUsecase.UsecaseI, logger *mw.ACLog) *CartHandler {
+//NewCartHandler creates cart handler 
+func NewCartHandler(cartUsecase cartUsecase.CartUsecaseI, logger *mw.ACLog) *CartHandler {
 	return &CartHandler{
 		cartUsecase: cartUsecase,
 		logger:      logger,
 	}
 }
 
+//RegisterHandler registers cart handler api
 func (handler *CartHandler) RegisterHandler(router *mux.Router) {
 	router.HandleFunc("/api/cart", handler.GetCart).Methods(http.MethodGet)
 	router.HandleFunc("/api/cart", handler.AddProductToCart).Methods(http.MethodPost)
@@ -42,6 +46,7 @@ func (handler *CartHandler) RegisterHandler(router *mux.Router) {
 	router.HandleFunc("/api/cart/tips", handler.GetCartTips).Methods(http.MethodGet)
 }
 
+//GetCart handles get cart request 
 func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -64,6 +69,7 @@ func (handler *CartHandler) GetCart(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//AddProductToCart handles add product to cart request
 func (handler *CartHandler) AddProductToCart(w http.ResponseWriter, r *http.Request) {
 	jsonbody, err := ioutil.ReadAll(r.Body)
 
@@ -93,6 +99,7 @@ func (handler *CartHandler) AddProductToCart(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusCreated)
 }
 
+//DeleteProductFromCart handles delete product from cart request
 func (handler *CartHandler) DeleteProductFromCart(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	strid, ok := vars["id"]
@@ -126,6 +133,7 @@ func (handler *CartHandler) DeleteProductFromCart(w http.ResponseWriter, r *http
 	}
 }
 
+//CleanCart handles clean cart request
 func (handler *CartHandler) CleanCart(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
@@ -140,6 +148,7 @@ func (handler *CartHandler) CleanCart(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//GetCartTips handles get cart tips request
 func (handler *CartHandler) GetCartTips(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

@@ -14,6 +14,7 @@ type microService struct {
 	client auth.SessionRPCClient
 }
 
+//NewMicroService creates new session repository
 func NewMicroService(client auth.SessionRPCClient) sessionRep.SessionRepositoryI {
 	return &microService{
 		client: client,

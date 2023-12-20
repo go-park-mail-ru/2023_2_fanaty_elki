@@ -12,21 +12,25 @@ import (
 	"strconv"
 )
 
+//Result struct
 type Result struct {
 	Body interface{}
 }
 
+//RespError struct
 type RespError struct {
 	Err string
 }
 
+//AddressHandler struct
 type AddressHandler struct {
-	addressUC addressUsecase.UsecaseI
-	sessionUC sessionUsecase.UsecaseI
+	addressUC addressUsecase.AddressUsecaseI
+	sessionUC sessionUsecase.SessionUsecaseI
 	logger    *mw.ACLog
 }
 
-func NewAddressHandler(addressUC addressUsecase.UsecaseI, sessionUC sessionUsecase.UsecaseI, logger *mw.ACLog) *AddressHandler {
+//NewAddressHandler creates address handler
+func NewAddressHandler(addressUC addressUsecase.AddressUsecaseI, sessionUC sessionUsecase.SessionUsecaseI, logger *mw.ACLog) *AddressHandler {
 	return &AddressHandler{
 		addressUC: addressUC,
 		sessionUC: sessionUC,
@@ -34,6 +38,7 @@ func NewAddressHandler(addressUC addressUsecase.UsecaseI, sessionUC sessionUseca
 	}
 }
 
+//RegisterHandler registers address handler api
 func (handler *AddressHandler) RegisterHandler(router *mux.Router) {
 	router.HandleFunc("/api/users/me/addresses", handler.CreateAddress).Methods(http.MethodPost)
 	router.HandleFunc("/api/users/me/addresses/{id}", handler.DeleteAddress).Methods(http.MethodDelete)
@@ -41,6 +46,7 @@ func (handler *AddressHandler) RegisterHandler(router *mux.Router) {
 	// router.HandleFunc("/api/addresss/{id}", handler.GetAddress).Methods(http.MethodGet)
 }
 
+//CreateAddress handles create address request
 func (handler *AddressHandler) CreateAddress(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -83,6 +89,7 @@ func (handler *AddressHandler) CreateAddress(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusCreated)
 }
 
+//DeleteAddress handles delete address request
 func (handler *AddressHandler) DeleteAddress(w http.ResponseWriter, r *http.Request) {
 	//w.Header().Set("Content-Type", "application/json")
 
@@ -95,13 +102,13 @@ func (handler *AddressHandler) DeleteAddress(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	addressId, err := strconv.ParseUint(strid, 10, 64)
+	addressID, err := strconv.ParseUint(strid, 10, 64)
 	if err != nil {
 		handler.logger.LogError("problems while parsing addresss json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = handler.addressUC.DeleteAddress(uint(addressId), cookie.Value)
+	err = handler.addressUC.DeleteAddress(uint(addressID), cookie.Value)
 	switch err {
 	case entity.ErrInternalServerError:
 		handler.logger.LogError("problems while deleting address", err, w.Header().Get("request-id"), r.URL.Path)
@@ -114,6 +121,7 @@ func (handler *AddressHandler) DeleteAddress(w http.ResponseWriter, r *http.Requ
 	}
 }
 
+//SetAddress handles set address request
 func (handler *AddressHandler) SetAddress(w http.ResponseWriter, r *http.Request) {
 	//w.Header().Set("Content-Type", "application/json")
 
@@ -126,13 +134,13 @@ func (handler *AddressHandler) SetAddress(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	addressId, err := strconv.ParseUint(strid, 10, 64)
+	addressID, err := strconv.ParseUint(strid, 10, 64)
 	if err != nil {
 		handler.logger.LogError("problems while parsing addresss json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = handler.addressUC.SetAddress(uint(addressId), cookie.Value)
+	err = handler.addressUC.SetAddress(uint(addressID), cookie.Value)
 	switch err {
 	case entity.ErrInternalServerError:
 		handler.logger.LogError("problems while deleting address", err, w.Header().Get("request-id"), r.URL.Path)

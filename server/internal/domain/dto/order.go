@@ -5,19 +5,22 @@ import (
 	"time"
 )
 
+//ReqCreateOrder dto
 type ReqCreateOrder struct {
-	UserId  uint                   `json:"UserID"`
+	UserID  uint                   `json:"UserID"`
 	Address *ReqCreateOrderAddress `json:"Address"`
 }
 
+//ReqUpdateOrder dto
 type ReqUpdateOrder struct {
-	Id     uint  `json:"Id"`
+	ID     uint  `json:"Id"`
 	Status uint8 `json:"Status"`
 }
 
+//DBReqCreateOrder dto
 type DBReqCreateOrder struct {
 	Products     []*entity.CartProduct
-	UserId       uint
+	UserID       uint
 	Status       uint8
 	Price        uint
 	Date         time.Time
@@ -25,8 +28,9 @@ type DBReqCreateOrder struct {
 	DeliveryTime uint8
 }
 
+//RespCreateOrder dto
 type RespCreateOrder struct {
-	Id           uint            `json:"Id"`
+	ID           uint            `json:"Id"`
 	Status       uint8           `json:"Status"`
 	Date         time.Time       `json:"Date"`
 	Address      *entity.Address `json:"Address"`
@@ -34,9 +38,9 @@ type RespCreateOrder struct {
 	DeliveryTime uint8           `json:"DeliveryTime"`
 }
 
-// Для слайса заказов
+//RespGetOrder dto Для слайса заказов
 type RespGetOrder struct {
-	Id           uint              `json:"Id"`
+	ID           uint              `json:"Id"`
 	Status       uint8             `json:"Status"`
 	Date         time.Time         `json:"Date"`
 	Address      *RespOrderAddress `json:"Address"`
@@ -45,9 +49,9 @@ type RespGetOrder struct {
 	//UpdatedDate time.Time `json:"UpdatedDate"`
 }
 
-// Для конкретного заказа
+//RespGetOneOrder dto Для конкретного заказа
 type RespGetOneOrder struct {
-	Id           uint              `json:"Id"`
+	ID           uint              `json:"Id"`
 	Status       uint8             `json:"Status"`
 	Date         time.Time         `json:"Date"`
 	Address      *RespOrderAddress `json:"Address"`
@@ -56,11 +60,13 @@ type RespGetOneOrder struct {
 	DeliveryTime uint8             `json:"DeliveryTime"`
 }
 
+//ReqGetOneOrder dto
 type ReqGetOneOrder struct {
-	OrderId uint `json:"OrderId"`
-	UserId  uint
+	OrderID uint `json:"OrderId"`
+	UserID  uint
 }
 
+//OrderItems dto
 type OrderItems struct {
 	RestaurantName string                 `json:"RestaurantName"`
 	Products       []*RespGetOrderProduct `json:"Products"`
@@ -69,10 +75,11 @@ type OrderItems struct {
 //easyjson:json
 type RespOrders []*RespGetOrder
 
+//ToEntityCreateOrder transforms ReqCreateOrder to Order
 func ToEntityCreateOrder(order *ReqCreateOrder) *entity.Order {
 	return &entity.Order{
 		Status:       0,
-		UserId:       order.UserId,
+		UserID:       order.UserID,
 		Date:         time.Now(),
 		Address:      ToEntityCreateOrderAddress(order.Address),
 		Price:        0,
@@ -80,9 +87,10 @@ func ToEntityCreateOrder(order *ReqCreateOrder) *entity.Order {
 	}
 }
 
+//ToDBReqCreateOrder transforms order and cart products to DBReqCreateOrder
 func ToDBReqCreateOrder(order *entity.Order, products []*entity.CartProduct) *DBReqCreateOrder {
 	return &DBReqCreateOrder{
-		UserId:       order.UserId,
+		UserID:       order.UserID,
 		Products:     products,
 		Status:       order.Status,
 		Price:        order.Price,
@@ -92,9 +100,10 @@ func ToDBReqCreateOrder(order *entity.Order, products []*entity.CartProduct) *DB
 	}
 }
 
+//ToEntityUpdateOrder transforms ReqUpdateOrder to Order
 func ToEntityUpdateOrder(order *ReqUpdateOrder) *entity.Order {
 	return &entity.Order{
-		ID:     order.Id,
+		ID:     order.ID,
 		Status: order.Status,
 	}
 }

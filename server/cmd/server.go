@@ -54,6 +54,7 @@ import (
 // @license.name Apache 2.0
 // @host http://84.23.53.216:8001/
 
+//PORT of main app
 const PORT = ":8080"
 
 // var (
@@ -176,7 +177,7 @@ func main() {
 		Ok:                  OKHitCounter,
 		InternalServerError: InternalServerErrorCounter,
 		NotFoundError:       NotFoundErrorCounter,
-		UrlMetric:           *hits,
+		URLMetric:           *hits,
 		Timing:              *timerhits,
 	}
 

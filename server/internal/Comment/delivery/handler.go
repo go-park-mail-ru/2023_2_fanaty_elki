@@ -13,21 +13,25 @@ import (
 	"github.com/mailru/easyjson"
 )
 
+//Result struct
 type Result struct {
 	Body interface{}
 }
 
+//RespError struct
 type RespError struct {
 	Err string
 }
 
+//CommentHandler struct
 type CommentHandler struct {
-	commentUC commentUsecase.UsecaseI
-	sessionUC sessionUsecase.UsecaseI
+	commentUC commentUsecase.CommentUsecaseI
+	sessionUC sessionUsecase.SessionUsecaseI
 	logger    *mw.ACLog
 }
 
-func NewCommentHandler(commentUC commentUsecase.UsecaseI, sessionUC sessionUsecase.UsecaseI, logger *mw.ACLog) *CommentHandler {
+//NewCommentHandler create comment handler
+func NewCommentHandler(commentUC commentUsecase.CommentUsecaseI, sessionUC sessionUsecase.SessionUsecaseI, logger *mw.ACLog) *CommentHandler {
 	return &CommentHandler{
 		commentUC: commentUC,
 		sessionUC: sessionUC,
@@ -35,14 +39,17 @@ func NewCommentHandler(commentUC commentUsecase.UsecaseI, sessionUC sessionUseca
 	}
 }
 
+//RegisterPostHandler registers comment handler api
 func (handler *CommentHandler) RegisterPostHandler(router *mux.Router) {
 	router.HandleFunc("/api/comments/{RestaurantId}", handler.CreateComment).Methods(http.MethodPost)
 }
 
+//RegisterGetHandler registers comment handler api
 func (handler *CommentHandler) RegisterGetHandler(router *mux.Router) {
 	router.HandleFunc("/api/comments/{RestaurantId}", handler.GetComments).Methods(http.MethodGet)
 }
 
+//CreateComment handles create comment request
 func (handler *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -52,7 +59,7 @@ func (handler *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	restaurantId, err := strconv.ParseUint(strid, 10, 64)
+	restaurantID, err := strconv.ParseUint(strid, 10, 64)
 	if err != nil {
 		handler.logger.LogError("problems while parsing comments get parameters", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
@@ -66,11 +73,11 @@ func (handler *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Requ
 	}
 
 	cookie, _ := r.Cookie("session_id")
-	userId, _ := handler.sessionUC.GetIdByCookie(cookie.Value)
+	UserID, _ := handler.sessionUC.GetIDByCookie(cookie.Value)
 
 	reqComment := &dto.ReqCreateComment{
-		UserId:       userId,
-		RestaurantId: uint(restaurantId),
+		UserID:       UserID,
+		RestaurantID: uint(restaurantID),
 	}
 
 	err = easyjson.UnmarshalFromReader(r.Body, reqComment)
@@ -103,6 +110,7 @@ func (handler *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Requ
 	}
 }
 
+//GetComments handles get comments request
 func (handler *CommentHandler) GetComments(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
@@ -112,14 +120,14 @@ func (handler *CommentHandler) GetComments(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	restaurantId, err := strconv.ParseUint(strid, 10, 64)
+	restaurantID, err := strconv.ParseUint(strid, 10, 64)
 	if err != nil {
 		handler.logger.LogError("problems while parsing comments get parameters", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	respComment, err := handler.commentUC.GetComments(uint(restaurantId))
+	respComment, err := handler.commentUC.GetComments(uint(restaurantID))
 	if err != nil {
 		handler.logger.LogError("problems with getting comments", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)

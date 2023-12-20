@@ -10,26 +10,31 @@ import (
 	"go.uber.org/zap"
 )
 
+//ACLog is an access logger
 type ACLog struct {
 	logger      *zap.SugaredLogger
 	errorLogger *zap.SugaredLogger
 	hitcounter  entity.HitStats
 }
 
-type responseRecorder struct {
+//ResponseRecorder is a wrapper allowing get accept to response status for AC logs
+type ResponseRecorder struct {
 	http.ResponseWriter
 	status int
 }
 
-func (r *responseRecorder) WriteHeader(status int) {
+//WriteHeader writes header of response status for AC logs
+func (r *ResponseRecorder) WriteHeader(status int) {
 	r.status = status
 	r.ResponseWriter.WriteHeader(status)
 }
 
-func NewLoggingResponseWriter(w http.ResponseWriter) *responseRecorder {
-	return &responseRecorder{w, http.StatusOK}
+//NewLoggingResponseWriter creates new ResponseRecorder
+func NewLoggingResponseWriter(w http.ResponseWriter) *ResponseRecorder {
+	return &ResponseRecorder{w, http.StatusOK}
 }
 
+//NewACLog createas new object of ACLog
 func NewACLog(logger *zap.SugaredLogger, errorLogger *zap.SugaredLogger, hc entity.HitStats) *ACLog {
 	return &ACLog{
 		logger:      logger,
@@ -38,6 +43,7 @@ func NewACLog(logger *zap.SugaredLogger, errorLogger *zap.SugaredLogger, hc enti
 	}
 }
 
+//ACLogMiddleware creates access logs
 func (ac *ACLog) ACLogMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rec := NewLoggingResponseWriter(w)
@@ -64,11 +70,12 @@ func (ac *ACLog) ACLogMiddleware(next http.Handler) http.Handler {
 			ac.hitcounter.InternalServerError.Inc()
 		}
 
-		ac.hitcounter.UrlMetric.WithLabelValues(strconv.Itoa(status), r.URL.Path).Inc()
+		ac.hitcounter.URLMetric.WithLabelValues(strconv.Itoa(status), r.URL.Path).Inc()
 		ac.hitcounter.Timing.WithLabelValues(strconv.Itoa(status), r.URL.Path).Add(float64(time.Duration(time.Since(start).Microseconds())))
 	})
 }
 
+//LogError creates error logs
 func (ac *ACLog) LogError(message string, err error, requestID string, url string) {
 	ac.errorLogger.Errorw(message,
 		zap.Error(err),

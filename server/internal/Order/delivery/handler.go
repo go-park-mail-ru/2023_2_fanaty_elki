@@ -1,6 +1,8 @@
 package delivery
 
 import (
+	"github.com/gorilla/mux"
+	easyjson "github.com/mailru/easyjson"
 	"net/http"
 	orderUsecase "server/internal/Order/usecase"
 	sessionUsecase "server/internal/Session/usecase"
@@ -8,26 +10,27 @@ import (
 	"server/internal/domain/entity"
 	mw "server/internal/middleware"
 	"strconv"
-
-	"github.com/gorilla/mux"
-	easyjson "github.com/mailru/easyjson"
 )
 
+//Result struct
 type Result struct {
 	Body interface{}
 }
 
+//RespError struct
 type RespError struct {
 	Err string
 }
 
+//OrderHandler struct
 type OrderHandler struct {
-	orderUC   orderUsecase.UsecaseI
-	sessionUC sessionUsecase.UsecaseI
+	orderUC   orderUsecase.OrderUsecaseI
+	sessionUC sessionUsecase.SessionUsecaseI
 	logger    *mw.ACLog
 }
 
-func NewOrderHandler(orderUC orderUsecase.UsecaseI, sessionUC sessionUsecase.UsecaseI, logger *mw.ACLog) *OrderHandler {
+//NewOrderHandler creates order handler
+func NewOrderHandler(orderUC orderUsecase.OrderUsecaseI, sessionUC sessionUsecase.SessionUsecaseI, logger *mw.ACLog) *OrderHandler {
 	return &OrderHandler{
 		orderUC:   orderUC,
 		sessionUC: sessionUC,
@@ -35,6 +38,7 @@ func NewOrderHandler(orderUC orderUsecase.UsecaseI, sessionUC sessionUsecase.Use
 	}
 }
 
+//RegisterHandler registers order handler api
 func (handler *OrderHandler) RegisterHandler(router *mux.Router) {
 	router.HandleFunc("/api/orders", handler.CreateOrder).Methods(http.MethodPost)
 	router.HandleFunc("/api/orders", handler.UpdateOrder).Methods(http.MethodPatch)
@@ -42,6 +46,7 @@ func (handler *OrderHandler) RegisterHandler(router *mux.Router) {
 	router.HandleFunc("/api/orders/{id}", handler.GetOrder).Methods(http.MethodGet)
 }
 
+//CreateOrder handles create order request
 func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -53,7 +58,7 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 
 	cookie, _ := r.Cookie("session_id")
 
-	userId, _ := handler.sessionUC.GetIdByCookie(cookie.Value)
+	UserID, _ := handler.sessionUC.GetIDByCookie(cookie.Value)
 
 	reqOrder := dto.ReqCreateOrder{UserId: userId}
 
@@ -90,6 +95,7 @@ func (handler *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+//UpdateOrder handles update order request
 func (handler *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 
 	reqOrder := dto.ReqUpdateOrder{}
@@ -109,12 +115,13 @@ func (handler *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+//GetOrders handles get order request
 func (handler *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
 
 	cookie, _ := r.Cookie("session_id")
-	userId, _ := handler.sessionUC.GetIdByCookie(cookie.Value)
+	UserID, _ := handler.sessionUC.GetIDByCookie(cookie.Value)
 
-	respOrders, err := handler.orderUC.GetOrders(userId)
+	respOrders, err := handler.orderUC.GetOrders(UserID)
 	if err != nil {
 		handler.logger.LogError("order: problems while getting orders", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -129,6 +136,7 @@ func (handler *OrderHandler) GetOrders(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//GetOrder handles get order request
 func (handler *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -139,7 +147,7 @@ func (handler *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	orderId, err := strconv.ParseUint(strid, 10, 64)
+	orderID, err := strconv.ParseUint(strid, 10, 64)
 	if err != nil {
 		handler.logger.LogError("problems while parsing orders json", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusBadRequest)
@@ -154,19 +162,19 @@ func (handler *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 	// 	w.WriteHeader(http.StatusInternalServerError)
 	// }
 
-	userId, err := handler.sessionUC.GetIdByCookie(cookie.Value)
+	UserID, err := handler.sessionUC.GetIDByCookie(cookie.Value)
 	// if err != nil {
 	// 	w.WriteHeader(http.StatusInternalServerError)
 	// 	return
 	// }
-	// if userId == 0 {
+	// if UserID == 0 {
 	// 	w.WriteHeader(http.StatusUnauthorized)
 	// 	return
 	// }
 
 	reqOrder := dto.ReqGetOneOrder{
-		UserId:  userId,
-		OrderId: uint(orderId),
+		UserID:  UserID,
+		OrderID: uint(orderID),
 	}
 
 	respOrder, err := handler.orderUC.GetOrder(&reqOrder)

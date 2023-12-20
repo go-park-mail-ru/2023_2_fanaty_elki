@@ -4,106 +4,113 @@ import (
 	"server/internal/domain/entity"
 )
 
+//ReqCreateOrderAddress dto
 type ReqCreateOrderAddress struct {
 	City   string `json:"City"`
 	Street string `json:"Street"`
 	House  string `json:"House"`
-	Flat   uint  `json:"Flat"`
+	Flat   uint   `json:"Flat"`
 }
 
+//RespOrderAddress dto
 type RespOrderAddress struct {
 	City   string `json:"City"`
 	Street string `json:"Street"`
 	House  string `json:"House"`
-	Flat   uint  `json:"Flat"`
+	Flat   uint   `json:"Flat"`
 }
 
-
+//DBCreateOrderAddress dto
 type DBCreateOrderAddress struct {
-	City   string 
-	Street string 
-	House  string   
-	Flat   uint  
+	City   string
+	Street string
+	House  string
+	Flat   uint
 }
 
+//DBReqCreateUserAddress dto
 type DBReqCreateUserAddress struct {
-	UserId uint	 
-	City   string 
-	Street string 
-	House  string   
-	Flat   uint  
+	UserID uint
+	City   string
+	Street string
+	House  string
+	Flat   uint
 }
 
+//ReqCreateAddress dto
 type ReqCreateAddress struct {
 	City   string `json:"City"`
 	Street string `json:"Street"`
 	House  string `json:"House"`
 	Flat   uint   `json:"Flat"`
-	Cookie string 
+	Cookie string
 }
 
-
-
+//DBReqDeleteUserAddress dto
 type DBReqDeleteUserAddress struct {
-	UserId 	  uint
-	AddressId uint 
+	UserID    uint
+	AddressID uint
 }
 
+//DBReqUpdateUserAddress dto
 type DBReqUpdateUserAddress struct {
-	UserId 	  uint
-	AddressId uint 
+	UserID    uint
+	AddressID uint
 }
 
+//RespGetAddress dto
 type RespGetAddress struct {
-	Id 	   uint   `json:"Id"`
+	ID     uint   `json:"Id"`
 	City   string `json:"City"`
 	Street string `json:"Street"`
 	House  string `json:"House"`
 	Flat   uint   `json:"Flat"`
 }
 
+//RespGetAddresses dto
 type RespGetAddresses struct {
-	Addresses 		   []*RespGetAddress `json:"Addresses"`
-	CurrentAddressesId uint 			 `json:"CurrentAddressesId"`
+	Addresses          []*RespGetAddress `json:"Addresses"`
+	CurrentAddressesID uint              `json:"CurrentAddressesId"`
 }
 
-func ToEntityCreateOrderAddress(address *ReqCreateOrderAddress) *entity.Address{
+//ToEntityCreateOrderAddress transforms ReqCreateOrderAddress to Address
+func ToEntityCreateOrderAddress(address *ReqCreateOrderAddress) *entity.Address {
 	return &entity.Address{
-		City: address.City,
+		City:   address.City,
 		Street: address.Street,
-		House: address.House,
-		Flat: address.Flat,
+		House:  address.House,
+		Flat:   address.Flat,
 	}
 }
 
-
-func ToDBCreateOrderAddress(address *entity.Address) *DBCreateOrderAddress{
+//ToDBCreateOrderAddress transforms Address to DBCreateOrderAddress
+func ToDBCreateOrderAddress(address *entity.Address) *DBCreateOrderAddress {
 	return &DBCreateOrderAddress{
-		Flat: address.Flat,
-		City: address.City,
+		Flat:   address.Flat,
+		City:   address.City,
 		Street: address.Street,
-		House: address.House,
+		House:  address.House,
 	}
-	
+
 }
 
-func ToEntityCreateAddress(address *ReqCreateAddress) *entity.Address{
+//ToEntityCreateAddress transforms ReqCreateAddress to Address
+func ToEntityCreateAddress(address *ReqCreateAddress) *entity.Address {
 	return &entity.Address{
-		City: address.City,
+		City:   address.City,
 		Street: address.Street,
-		House: address.House,
-		Flat: address.Flat,
+		House:  address.House,
+		Flat:   address.Flat,
 	}
 }
 
-
-func ToDBCreateAddress(address *entity.Address, userId uint) *DBReqCreateUserAddress{
+//ToDBCreateAddress transforms address and user id to ReqCreateUserAddress
+func ToDBCreateAddress(address *entity.Address, UserID uint) *DBReqCreateUserAddress {
 	return &DBReqCreateUserAddress{
-		UserId: userId,
-		Flat: address.Flat,
-		City: address.City,
+		UserID: UserID,
+		Flat:   address.Flat,
+		City:   address.City,
 		Street: address.Street,
-		House: address.House,
+		House:  address.House,
 	}
 }
-

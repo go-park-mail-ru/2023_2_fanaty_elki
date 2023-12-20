@@ -1,34 +1,36 @@
 package delivery
 
 import (
+	"github.com/gorilla/mux"
+	"github.com/mailru/easyjson"
 	"net/http"
-
 	sessionUsecase "server/internal/Session/usecase"
 	userUsecase "server/internal/User/usecase"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 	mw "server/internal/middleware"
 	"time"
-
-	"github.com/gorilla/mux"
-	"github.com/mailru/easyjson"
 )
 
+//Result struct
 type Result struct {
 	Body interface{}
 }
 
+//RespError struct
 type RespError struct {
 	Err string
 }
 
+//SessionHandler struct
 type SessionHandler struct {
-	sessions sessionUsecase.UsecaseI
-	users    userUsecase.UsecaseI
+	sessions sessionUsecase.SessionUsecaseI
+	users    userUsecase.Iusecase
 	logger   *mw.ACLog
 }
 
-func NewSessionHandler(sessions sessionUsecase.UsecaseI, users userUsecase.UsecaseI, logger *mw.ACLog) *SessionHandler {
+//NewSessionHandler creates session handler
+func NewSessionHandler(sessions sessionUsecase.SessionUsecaseI, users userUsecase.Iusecase, logger *mw.ACLog) *SessionHandler {
 	return &SessionHandler{
 		sessions: sessions,
 		users:    users,
@@ -36,6 +38,7 @@ func NewSessionHandler(sessions sessionUsecase.UsecaseI, users userUsecase.Useca
 	}
 }
 
+//RegisterAuthHandler registers cors handler api
 func (handler *SessionHandler) RegisterAuthHandler(router *mux.Router) {
 	router.HandleFunc("/api/logout", handler.Logout).Methods(http.MethodDelete)
 	router.HandleFunc("/api/auth", handler.Auth).Methods(http.MethodGet)
@@ -45,6 +48,7 @@ func (handler *SessionHandler) RegisterAuthHandler(router *mux.Router) {
 	router.HandleFunc("/api/csrf", handler.CreateCsrf).Methods(http.MethodPost)
 }
 
+//RegisterCorsHandler registers cors handler api
 func (handler *SessionHandler) RegisterCorsHandler(router *mux.Router) {
 	router.HandleFunc("/api/login", handler.Login).Methods(http.MethodPost)
 	router.HandleFunc("/api/users", handler.SignUp).Methods(http.MethodPost)
@@ -229,8 +233,8 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	oldCookie, _ := r.Cookie("session_id")
-	userId, err := handler.sessions.Check(oldCookie.Value)
-	if userId == 0 {
+	UserID, err := handler.sessions.Check(oldCookie.Value)
+	if UserID == 0 {
 		handler.logger.LogError("unauthorized", err, w.Header().Get("request-id"), r.URL.Path)
 		w.WriteHeader(http.StatusUnauthorized)
 		oldCookie.Expires = time.Now().AddDate(0, 0, -1)
@@ -248,7 +252,7 @@ func (handler *SessionHandler) Auth(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, cookie)
 	user, err := handler.sessions.CreateCookieAuth(&entity.Cookie{
-		UserID:       userId,
+		UserID:       UserID,
 		SessionToken: cookie.Value,
 	})
 	if err != nil {
@@ -292,6 +296,7 @@ func (handler *SessionHandler) Profile(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//UpdateProfile handles update profile request
 func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
@@ -302,7 +307,7 @@ func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Requ
 	}
 
 	cookie, _ := r.Cookie("session_id")
-	id, _ := handler.sessions.GetIdByCookie(cookie.Value)
+	id, _ := handler.sessions.GetIDByCookie(cookie.Value)
 
 	updatedUser := &dto.ReqUpdateUser{}
 
@@ -342,10 +347,11 @@ func (handler *SessionHandler) UpdateProfile(w http.ResponseWriter, r *http.Requ
 	}
 }
 
+//UpdateAvatar handles update avatar request
 func (handler *SessionHandler) UpdateAvatar(w http.ResponseWriter, r *http.Request) {
 
 	cookie, _ := r.Cookie("session_id")
-	id, _ := handler.sessions.GetIdByCookie(cookie.Value)
+	id, _ := handler.sessions.GetIDByCookie(cookie.Value)
 
 	r.ParseMultipartForm(10 << 20)
 	file, filehandler, err := r.FormFile("image")
@@ -365,6 +371,7 @@ func (handler *SessionHandler) UpdateAvatar(w http.ResponseWriter, r *http.Reque
 
 }
 
+//CreateCsrf handles create csrf request
 func (handler *SessionHandler) CreateCsrf(w http.ResponseWriter, r *http.Request) {
 	cookie, _ := r.Cookie("session_id")
 	token, err := handler.sessions.CreateCsrf(cookie.Value)

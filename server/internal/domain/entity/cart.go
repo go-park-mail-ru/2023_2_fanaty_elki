@@ -1,10 +1,12 @@
 package entity
 
+//Cart entity
 type Cart struct {
 	ID     uint
 	UserID uint
 }
 
+//CartProduct entity
 type CartProduct struct {
 	ID        uint
 	ProductID uint
@@ -12,8 +14,9 @@ type CartProduct struct {
 	ItemCount int
 }
 
+//CartWithRestaurant entity
 type CartWithRestaurant struct {
-	RestaurantId uint
+	RestaurantID uint
 	Products     []*CartProduct
-	PromoId      uint
+	PromoID      uint
 }

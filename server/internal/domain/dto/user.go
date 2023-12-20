@@ -6,6 +6,7 @@ import (
 	proto "server/proto/user"
 )
 
+//ReqCreateUser dto
 type ReqCreateUser struct {
 	ID          uint   `json:"ID"`
 	Username    string `json:"Username"`
@@ -16,6 +17,7 @@ type ReqCreateUser struct {
 	Icon        string `json:"Icon"`
 }
 
+//ReqGetUserProfile dto
 type ReqGetUserProfile struct {
 	Username    string            `json:"Username"`
 	Birthday    string            `json:"Birthday"`
@@ -26,6 +28,7 @@ type ReqGetUserProfile struct {
 	Current     uint              `json:"CurrentAddressId"`
 }
 
+//ReqLoginUser dto
 type ReqLoginUser struct {
 	Username string `json:"Username"`
 	Password string `json:"Password"`
@@ -35,6 +38,7 @@ type RespID struct {
 	ID uint `json:"ID"`
 }
 
+//ReqUpdateUser dto
 type ReqUpdateUser struct {
 	Username    string `json:"Username"`
 	Password    string `json:"Password"`
@@ -44,6 +48,7 @@ type ReqUpdateUser struct {
 	Icon        string `json:"Icon"`
 }
 
+//DBCreateUser dto
 type DBCreateUser struct {
 	ID          uint
 	Username    string
@@ -54,6 +59,7 @@ type DBCreateUser struct {
 	Icon        sql.NullString
 }
 
+//DBUpdateUser dto
 type DBUpdateUser struct {
 	ID          uint
 	Username    string
@@ -64,6 +70,7 @@ type DBUpdateUser struct {
 	Icon        sql.NullString
 }
 
+//DBGetUser dto
 type DBGetUser struct {
 	ID          uint
 	Username    string
@@ -74,78 +81,85 @@ type DBGetUser struct {
 	Icon        sql.NullString
 }
 
+//ToRespGetUser transforms DBGetUser to proto.DBGetUser
 func ToRespGetUser(user *DBGetUser) *proto.DBGetUser {
 	return &proto.DBGetUser{
 		ID:          uint64(user.ID),
 		Username:    user.Username,
 		Password:    user.Password,
-		Birthday:    transformSqlStringToString(user.Birthday),
+		Birthday:    transformSQLStringToString(user.Birthday),
 		PhoneNumber: user.PhoneNumber,
 		Email:       user.Email,
-		Icon:        transformSqlStringToString(user.Icon),
+		Icon:        transformSQLStringToString(user.Icon),
 	}
 }
 
+//ToDBGetUser transforms proto.DBGetUser to DBGetUser
 func ToDBGetUser(user *proto.DBGetUser) *DBGetUser {
 	return &DBGetUser{
 		ID:          uint(user.ID),
 		Password:    user.Password,
 		Username:    user.Username,
-		Birthday:    *transformStringToSqlString(user.Birthday),
+		Birthday:    *transformStringToSQLString(user.Birthday),
 		PhoneNumber: user.PhoneNumber,
 		Email:       user.Email,
-		Icon:        *transformStringToSqlString(user.Icon),
+		Icon:        *transformStringToSQLString(user.Icon),
 	}
 }
 
+//ToRespCreateUser transforms DBCreateUser to proto.DBCreateUser
 func ToRespCreateUser(user *DBCreateUser) *proto.DBCreateUser {
 	return &proto.DBCreateUser{
 		ID:          uint64(user.ID),
 		Username:    user.Username,
 		Password:    user.Password,
-		Birthday:    transformSqlStringToString(user.Birthday),
+		Birthday:    transformSQLStringToString(user.Birthday),
 		PhoneNumber: user.PhoneNumber,
 		Email:       user.Email,
-		Icon:        transformSqlStringToString(user.Icon),
+		Icon:        transformSQLStringToString(user.Icon),
 	}
 }
 
+//ToDBCreateUser transforms proto.DBCreateUser to DBCreateUser
 func ToDBCreateUser(user *proto.DBCreateUser) *DBCreateUser {
 	return &DBCreateUser{
 		ID:          uint(user.ID),
 		Username:    user.Username,
 		Password:    user.Password,
-		Birthday:    *transformStringToSqlString(user.Birthday),
+		Birthday:    *transformStringToSQLString(user.Birthday),
 		PhoneNumber: user.PhoneNumber,
 		Email:       user.Email,
-		Icon:        *transformStringToSqlString(user.Icon),
+		Icon:        *transformStringToSQLString(user.Icon),
 	}
 }
 
+//ToRespUpdateUser transforms DBUpdateUser to proto.DBUpdateUser
 func ToRespUpdateUser(user *DBUpdateUser) *proto.DBUpdateUser {
 	return &proto.DBUpdateUser{
 		ID:          uint64(user.ID),
 		Username:    user.Username,
 		Password:    user.Password,
-		Birthday:    transformSqlStringToString(user.Birthday),
+		Birthday:    transformSQLStringToString(user.Birthday),
 		PhoneNumber: user.PhoneNumber,
 		Email:       user.Email,
-		Icon:        transformSqlStringToString(user.Icon),
+		Icon:        transformSQLStringToString(user.Icon),
 	}
 }
 
+//ToDBUpdateUser transforms proto.DBUpdateUser to DBUpdateUser
 func ToDBUpdateUser(user *proto.DBUpdateUser) *DBUpdateUser {
 	return &DBUpdateUser{
 		ID:          uint(user.ID),
 		Username:    user.Username,
 		Password:    user.Password,
-		Birthday:    *transformStringToSqlString(user.Birthday),
+		Birthday:    *transformStringToSQLString(user.Birthday),
 		PhoneNumber: user.PhoneNumber,
 		Email:       user.Email,
-		Icon:        *transformStringToSqlString(user.Icon),
+		Icon:        *transformStringToSQLString(user.Icon),
 	}
 }
 
+//ToEntityGetUser transforms DBGetUser to User
 func ToEntityGetUser(reqUser *DBGetUser) *entity.User {
 	if reqUser == nil {
 		return nil
@@ -154,13 +168,14 @@ func ToEntityGetUser(reqUser *DBGetUser) *entity.User {
 		ID:          reqUser.ID,
 		Username:    reqUser.Username,
 		Password:    reqUser.Password,
-		Birthday:    transformSqlStringToString(reqUser.Birthday),
+		Birthday:    transformSQLStringToString(reqUser.Birthday),
 		PhoneNumber: reqUser.PhoneNumber,
 		Email:       reqUser.Email,
-		Icon:        transformSqlStringToString(reqUser.Icon),
+		Icon:        transformSQLStringToString(reqUser.Icon),
 	}
 }
 
+//ToEntityCreateUser transforms ReqCreateUser to User
 func ToEntityCreateUser(reqUser *ReqCreateUser) *entity.User {
 	if reqUser == nil {
 		return nil
@@ -176,6 +191,7 @@ func ToEntityCreateUser(reqUser *ReqCreateUser) *entity.User {
 	}
 }
 
+//ToEntityUpdateUser transforms ReqUpdateUser to User
 func ToEntityUpdateUser(reqUser *ReqUpdateUser, id uint) *entity.User {
 	if reqUser == nil {
 		return nil
@@ -191,6 +207,7 @@ func ToEntityUpdateUser(reqUser *ReqUpdateUser, id uint) *entity.User {
 	}
 }
 
+//ToEntityLoginUser transforms ReqLoginUser to User
 func ToEntityLoginUser(reqUser *ReqLoginUser) *entity.User {
 	if reqUser == nil {
 		return nil
@@ -201,48 +218,51 @@ func ToEntityLoginUser(reqUser *ReqLoginUser) *entity.User {
 	}
 }
 
+//ToRepoCreateUser transforms User to DBCreateUser
 func ToRepoCreateUser(user *entity.User) *DBCreateUser {
 	return &DBCreateUser{
 		ID:          user.ID,
 		Username:    user.Username,
 		Password:    user.Password,
-		Birthday:    *transformStringToSqlString(user.Birthday),
+		Birthday:    *transformStringToSQLString(user.Birthday),
 		PhoneNumber: user.PhoneNumber,
 		Email:       user.Email,
-		Icon:        *transformStringToSqlString(user.Icon),
+		Icon:        *transformStringToSQLString(user.Icon),
 	}
 }
 
+//ToRepoUpdateUser transforms User to DBUpdateUser
 func ToRepoUpdateUser(user *entity.User) *DBUpdateUser {
 	return &DBUpdateUser{
 		ID:          user.ID,
 		Username:    user.Username,
 		Password:    user.Password,
-		Birthday:    *transformStringToSqlString(user.Birthday),
+		Birthday:    *transformStringToSQLString(user.Birthday),
 		PhoneNumber: user.PhoneNumber,
 		Email:       user.Email,
-		Icon:        *transformStringToSqlString(user.Icon),
+		Icon:        *transformStringToSQLString(user.Icon),
 	}
 }
 
+//ToReqGetUserProfile transforms DBGetUset to ReqGetUserProfile
 func ToReqGetUserProfile(user *DBGetUser) *ReqGetUserProfile {
 	return &ReqGetUserProfile{
 		Username:    user.Username,
-		Birthday:    transformSqlStringToString(user.Birthday),
+		Birthday:    transformSQLStringToString(user.Birthday),
 		PhoneNumber: user.PhoneNumber,
 		Email:       user.Email,
-		Icon:        transformSqlStringToString(user.Icon),
+		Icon:        transformSQLStringToString(user.Icon),
 	}
 }
 
-func transformStringToSqlString(str string) *sql.NullString {
+func transformStringToSQLString(str string) *sql.NullString {
 	if str != "" {
 		return &sql.NullString{String: str, Valid: true}
 	}
 	return &sql.NullString{Valid: false}
 }
 
-func transformSqlStringToString(str sql.NullString) string {
+func transformSQLStringToString(str sql.NullString) string {
 	if str.Valid {
 		return str.String
 	}

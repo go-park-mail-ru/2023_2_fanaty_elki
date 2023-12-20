@@ -1,7 +1,8 @@
 package dto
 
+//RespGetOrderProduct dto
 type RespGetOrderProduct struct {
-	Id 			uint 	`json:"Id"`
+	ID 			uint 	`json:"Id"`
 	Name        string  `json:"Name"`
 	Price       float32 `json:"Price"`
 	Icon        string	`json:"Icon"`

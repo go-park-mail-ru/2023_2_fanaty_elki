@@ -11,31 +11,31 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// MockUsecaseI is a mock of UsecaseI interface.
-type MockUsecaseI struct {
+// MockRestaurantUsecaseI is a mock of RestaurantUsecaseI interface.
+type MockRestaurantUsecaseI struct {
 	ctrl     *gomock.Controller
-	recorder *MockUsecaseIMockRecorder
+	recorder *MockRestaurantUsecaseIMockRecorder
 }
 
-// MockUsecaseIMockRecorder is the mock recorder for MockUsecaseI.
-type MockUsecaseIMockRecorder struct {
-	mock *MockUsecaseI
+// MockRestaurantUsecaseIMockRecorder is the mock recorder for MockRestaurantUsecaseI.
+type MockRestaurantUsecaseIMockRecorder struct {
+	mock *MockRestaurantUsecaseI
 }
 
-// NewMockUsecaseI creates a new mock instance.
-func NewMockUsecaseI(ctrl *gomock.Controller) *MockUsecaseI {
-	mock := &MockUsecaseI{ctrl: ctrl}
-	mock.recorder = &MockUsecaseIMockRecorder{mock}
+// NewMockRestaurantUsecaseI creates a new mock instance.
+func NewMockRestaurantUsecaseI(ctrl *gomock.Controller) *MockRestaurantUsecaseI {
+	mock := &MockRestaurantUsecaseI{ctrl: ctrl}
+	mock.recorder = &MockRestaurantUsecaseIMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockUsecaseI) EXPECT() *MockUsecaseIMockRecorder {
+func (m *MockRestaurantUsecaseI) EXPECT() *MockRestaurantUsecaseIMockRecorder {
 	return m.recorder
 }
 
 // GetCategories mocks base method.
-func (m *MockUsecaseI) GetCategories() (*[]string, error) {
+func (m *MockRestaurantUsecaseI) GetCategories() (*[]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCategories")
 	ret0, _ := ret[0].(*[]string)
@@ -44,28 +44,43 @@ func (m *MockUsecaseI) GetCategories() (*[]string, error) {
 }
 
 // GetCategories indicates an expected call of GetCategories.
-func (mr *MockUsecaseIMockRecorder) GetCategories() *gomock.Call {
+func (mr *MockRestaurantUsecaseIMockRecorder) GetCategories() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCategories", reflect.TypeOf((*MockUsecaseI)(nil).GetCategories))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCategories", reflect.TypeOf((*MockRestaurantUsecaseI)(nil).GetCategories))
 }
 
-// GetRestaurantById mocks base method.
-func (m *MockUsecaseI) GetRestaurantById(id uint) (*dto.RestaurantWithCategories, error) {
+// GetRandomRestaurantTips mocks base method.
+func (m *MockRestaurantUsecaseI) GetRandomRestaurantTips() ([]*dto.RestaurantWithCategories, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetRestaurantById", id)
+	ret := m.ctrl.Call(m, "GetRandomRestaurantTips")
+	ret0, _ := ret[0].([]*dto.RestaurantWithCategories)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRandomRestaurantTips indicates an expected call of GetRandomRestaurantTips.
+func (mr *MockRestaurantUsecaseIMockRecorder) GetRandomRestaurantTips() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRandomRestaurantTips", reflect.TypeOf((*MockRestaurantUsecaseI)(nil).GetRandomRestaurantTips))
+}
+
+// GetRestaurantByID mocks base method.
+func (m *MockRestaurantUsecaseI) GetRestaurantByID(id uint) (*dto.RestaurantWithCategories, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRestaurantByID", id)
 	ret0, _ := ret[0].(*dto.RestaurantWithCategories)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetRestaurantById indicates an expected call of GetRestaurantById.
-func (mr *MockUsecaseIMockRecorder) GetRestaurantById(id interface{}) *gomock.Call {
+// GetRestaurantByID indicates an expected call of GetRestaurantByID.
+func (mr *MockRestaurantUsecaseIMockRecorder) GetRestaurantByID(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRestaurantById", reflect.TypeOf((*MockUsecaseI)(nil).GetRestaurantById), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRestaurantByID", reflect.TypeOf((*MockRestaurantUsecaseI)(nil).GetRestaurantByID), id)
 }
 
 // GetRestaurantProducts mocks base method.
-func (m *MockUsecaseI) GetRestaurantProducts(id uint) ([]*dto.MenuTypeWithProducts, error) {
+func (m *MockRestaurantUsecaseI) GetRestaurantProducts(id uint) ([]*dto.MenuTypeWithProducts, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRestaurantProducts", id)
 	ret0, _ := ret[0].([]*dto.MenuTypeWithProducts)
@@ -74,13 +89,28 @@ func (m *MockUsecaseI) GetRestaurantProducts(id uint) ([]*dto.MenuTypeWithProduc
 }
 
 // GetRestaurantProducts indicates an expected call of GetRestaurantProducts.
-func (mr *MockUsecaseIMockRecorder) GetRestaurantProducts(id interface{}) *gomock.Call {
+func (mr *MockRestaurantUsecaseIMockRecorder) GetRestaurantProducts(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRestaurantProducts", reflect.TypeOf((*MockUsecaseI)(nil).GetRestaurantProducts), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRestaurantProducts", reflect.TypeOf((*MockRestaurantUsecaseI)(nil).GetRestaurantProducts), id)
+}
+
+// GetRestaurantTips mocks base method.
+func (m *MockRestaurantUsecaseI) GetRestaurantTips(SessionToken string) ([]*dto.RestaurantWithCategories, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRestaurantTips", SessionToken)
+	ret0, _ := ret[0].([]*dto.RestaurantWithCategories)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRestaurantTips indicates an expected call of GetRestaurantTips.
+func (mr *MockRestaurantUsecaseIMockRecorder) GetRestaurantTips(SessionToken interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRestaurantTips", reflect.TypeOf((*MockRestaurantUsecaseI)(nil).GetRestaurantTips), SessionToken)
 }
 
 // GetRestaurants mocks base method.
-func (m *MockUsecaseI) GetRestaurants() ([]*dto.RestaurantWithCategories, error) {
+func (m *MockRestaurantUsecaseI) GetRestaurants() ([]*dto.RestaurantWithCategories, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRestaurants")
 	ret0, _ := ret[0].([]*dto.RestaurantWithCategories)
@@ -89,13 +119,13 @@ func (m *MockUsecaseI) GetRestaurants() ([]*dto.RestaurantWithCategories, error)
 }
 
 // GetRestaurants indicates an expected call of GetRestaurants.
-func (mr *MockUsecaseIMockRecorder) GetRestaurants() *gomock.Call {
+func (mr *MockRestaurantUsecaseIMockRecorder) GetRestaurants() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRestaurants", reflect.TypeOf((*MockUsecaseI)(nil).GetRestaurants))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRestaurants", reflect.TypeOf((*MockRestaurantUsecaseI)(nil).GetRestaurants))
 }
 
 // GetRestaurantsByCategory mocks base method.
-func (m *MockUsecaseI) GetRestaurantsByCategory(name string) ([]*dto.RestaurantWithCategories, error) {
+func (m *MockRestaurantUsecaseI) GetRestaurantsByCategory(name string) ([]*dto.RestaurantWithCategories, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRestaurantsByCategory", name)
 	ret0, _ := ret[0].([]*dto.RestaurantWithCategories)
@@ -104,13 +134,13 @@ func (m *MockUsecaseI) GetRestaurantsByCategory(name string) ([]*dto.RestaurantW
 }
 
 // GetRestaurantsByCategory indicates an expected call of GetRestaurantsByCategory.
-func (mr *MockUsecaseIMockRecorder) GetRestaurantsByCategory(name interface{}) *gomock.Call {
+func (mr *MockRestaurantUsecaseIMockRecorder) GetRestaurantsByCategory(name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRestaurantsByCategory", reflect.TypeOf((*MockUsecaseI)(nil).GetRestaurantsByCategory), name)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRestaurantsByCategory", reflect.TypeOf((*MockRestaurantUsecaseI)(nil).GetRestaurantsByCategory), name)
 }
 
 // Search mocks base method.
-func (m *MockUsecaseI) Search(word string) ([]*dto.RestaurantWithCategoriesAndProducts, error) {
+func (m *MockRestaurantUsecaseI) Search(word string) ([]*dto.RestaurantWithCategoriesAndProducts, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Search", word)
 	ret0, _ := ret[0].([]*dto.RestaurantWithCategoriesAndProducts)
@@ -119,7 +149,7 @@ func (m *MockUsecaseI) Search(word string) ([]*dto.RestaurantWithCategoriesAndPr
 }
 
 // Search indicates an expected call of Search.
-func (mr *MockUsecaseIMockRecorder) Search(word interface{}) *gomock.Call {
+func (mr *MockRestaurantUsecaseIMockRecorder) Search(word interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockUsecaseI)(nil).Search), word)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Search", reflect.TypeOf((*MockRestaurantUsecaseI)(nil).Search), word)
 }

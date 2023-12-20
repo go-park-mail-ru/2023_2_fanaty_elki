@@ -25,7 +25,7 @@ func TestGetCartSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/cart"
-	mock := mockC.NewMockUsecaseI(ctrl)
+	mock := mockC.NewMockCartUsecaseI(ctrl)
 	var logger *mw.ACLog
 	handler := NewCartHandler(mock, logger)
 
@@ -111,7 +111,7 @@ func TestGetCartFail(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/cart"
-	mock := mockC.NewMockUsecaseI(ctrl)
+	mock := mockC.NewMockCartUsecaseI(ctrl)
 	handler := NewCartHandler(mock, logger)
 
 	testErr := errors.New("test")
@@ -140,7 +140,7 @@ func TestAddProductToCartSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/cart"
-	mock := mockC.NewMockUsecaseI(ctrl)
+	mock := mockC.NewMockCartUsecaseI(ctrl)
 	var logger *mw.ACLog
 	handler := NewCartHandler(mock, logger)
 
@@ -193,7 +193,7 @@ func TestAddProductToCartFail(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/cart"
-	mock := mockC.NewMockUsecaseI(ctrl)
+	mock := mockC.NewMockCartUsecaseI(ctrl)
 	handler := NewCartHandler(mock, logger)
 
 	var id uint
@@ -253,7 +253,7 @@ func TestDeleteProductFromCartSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/cart"
-	mock := mockC.NewMockUsecaseI(ctrl)
+	mock := mockC.NewMockCartUsecaseI(ctrl)
 	var logger *mw.ACLog
 	handler := NewCartHandler(mock, logger)
 
@@ -303,7 +303,7 @@ func TestDeleteProductFromCartFail(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/cart/1"
-	mock := mockC.NewMockUsecaseI(ctrl)
+	mock := mockC.NewMockCartUsecaseI(ctrl)
 	handler := NewCartHandler(mock, logger)
 
 	testErr := errors.New("test")
@@ -348,7 +348,7 @@ func TestCleanCartSuccess(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/cart/clear"
-	mock := mockC.NewMockUsecaseI(ctrl)
+	mock := mockC.NewMockCartUsecaseI(ctrl)
 	var logger *mw.ACLog
 	handler := NewCartHandler(mock, logger)
 
@@ -395,7 +395,7 @@ func TestCleanCartFail(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	apiPath := "/api/cart/clear"
-	mock := mockC.NewMockUsecaseI(ctrl)
+	mock := mockC.NewMockCartUsecaseI(ctrl)
 	handler := NewCartHandler(mock, logger)
 
 	testErr := errors.New("test")

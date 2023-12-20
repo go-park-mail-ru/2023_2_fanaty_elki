@@ -5,8 +5,9 @@ import (
 	"AuthService/entity"
 	"encoding/json"
 	"fmt"
-	"github.com/gomodule/redigo/redis"
 	"sync"
+
+	"github.com/gomodule/redigo/redis"
 )
 
 type sessionManager struct {

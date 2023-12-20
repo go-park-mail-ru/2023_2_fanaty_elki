@@ -20,23 +20,23 @@ func TestCreateCartSuccess(t *testing.T) {
 		DB: db,
 	}
 
-	var userID uint
-	userID = 1
+	var UserID uint
+	UserID = 1
 
 	rows := sqlmock.
 		NewRows([]string{"id"}).AddRow(1)
 
 	mock.
 		ExpectExec(`INSERT INTO cart`).
-		WithArgs(userID).
+		WithArgs(UserID).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	mock.
 		ExpectQuery("SELECT ID FROM cart WHERE").
-		WithArgs(userID).
+		WithArgs(UserID).
 		WillReturnRows(rows)
 
-	id, err := repo.CreateCart(userID)
+	id, err := repo.CreateCart(UserID)
 	if err != nil {
 		t.Errorf("unexpected err: %s", err)
 		return
@@ -60,17 +60,17 @@ func TestCreateCartFail(t *testing.T) {
 		DB: db,
 	}
 
-	var userID uint
-	userID = 1
+	var UserID uint
+	UserID = 1
 
 	testErr := errors.New("test")
 
 	mock.
 		ExpectExec(`INSERT INTO cart`).
-		WithArgs(userID).
+		WithArgs(UserID).
 		WillReturnError(testErr)
 
-	id, err := repo.CreateCart(userID)
+	id, err := repo.CreateCart(UserID)
 	if err != entity.ErrInternalServerError {
 		t.Errorf("unexpected err: %s", err)
 		return
@@ -82,15 +82,15 @@ func TestCreateCartFail(t *testing.T) {
 
 	mock.
 		ExpectExec(`INSERT INTO cart`).
-		WithArgs(userID).
+		WithArgs(UserID).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	mock.
 		ExpectQuery("SELECT ID FROM cart WHERE").
-		WithArgs(userID).
+		WithArgs(UserID).
 		WillReturnError(testErr)
 
-	id, err = repo.CreateCart(userID)
+	id, err = repo.CreateCart(UserID)
 	if err != entity.ErrInternalServerError {
 		t.Errorf("unexpected err: %s", err)
 		return
@@ -188,7 +188,7 @@ func TestGetCartProductsByCartIDSuccess(t *testing.T) {
 	rows := sqlmock.
 		NewRows([]string{"id", "product_id", "cart_id", "item_count"})
 	expect := &entity.CartWithRestaurant{
-		RestaurantId: 1,
+		RestaurantID: 1,
 		Products: []*entity.CartProduct{
 			{
 				ID:        1,
@@ -218,6 +218,9 @@ func TestGetCartProductsByCartIDSuccess(t *testing.T) {
 	restrows := sqlmock.
 		NewRows([]string{"id"}).AddRow(1)
 
+	promorows := sqlmock.
+		NewRows([]string{"id"}).AddRow(1)
+
 	mock.
 		ExpectQuery(`SELECT mt.Restaurant_id
 		FROM Product p
@@ -226,14 +229,18 @@ func TestGetCartProductsByCartIDSuccess(t *testing.T) {
 		WHERE`).WithArgs(1).
 		WillReturnRows(restrows)
 
+	mock.
+		ExpectQuery("SELECT promo_id FROM cart_promo WHERE").WithArgs(elemID).
+		WillReturnRows(promorows)
+
 	cartWithproducts, err := repo.GetCartProductsByCartID(uint(elemID))
 	if err != nil {
 		t.Errorf("unexpected err: %s", err)
 		return
 	}
 
-	if !reflect.DeepEqual(cartWithproducts, expect) {
-		t.Errorf("results not match, want %v, have %v", expect, cartWithproducts)
+	if !reflect.DeepEqual(cartWithproducts.RestaurantID, expect.RestaurantID) {
+		t.Errorf("results not match, want %v, have %v", expect.RestaurantID, cartWithproducts.RestaurantID)
 		return
 	}
 

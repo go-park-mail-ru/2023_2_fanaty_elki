@@ -6,20 +6,23 @@ import (
 	"time"
 )
 
+//ReqCreateComment dto
 type ReqCreateComment struct {
 	Text         string `json:"Text"`
 	Rating       uint8  `json:"Rating"`
-	RestaurantId uint
-	UserId       uint
+	RestaurantID uint
+	UserID       uint
 }
 
+//DBReqCreateComment dto
 type DBReqCreateComment struct {
 	Text         sql.NullString
-	RestaurantId uint
-	UserId       uint
+	RestaurantID uint
+	UserID       uint
 	Rating       uint8
 }
 
+//RespCreateComment dto
 type RespCreateComment struct {
 	Username string
 	Icon     string
@@ -28,14 +31,16 @@ type RespCreateComment struct {
 	Date     time.Time
 }
 
+//DBRespCreateComment dto
 type DBRespCreateComment struct {
 	Text         sql.NullString
-	UserId       uint
+	UserID       uint
 	Rating       uint8
-	RestaurantId uint
+	RestaurantID uint
 	Date         time.Time
 }
 
+//RespGetComment dto
 type RespGetComment struct {
 	Username string    `json:"Username"`
 	Icon     string    `json:"Icon"`
@@ -44,6 +49,7 @@ type RespGetComment struct {
 	Date     time.Time `json:"Date"`
 }
 
+//DBRespGetComment dto
 type DBRespGetComment struct {
 	Username string
 	Icon     string
@@ -55,33 +61,37 @@ type DBRespGetComment struct {
 //easyjson:json
 type RespComments []*RespGetComment
 
+//FromReqToEntCreateComment transforms ReqCreateComment to Comment
 func (c ReqCreateComment) FromReqToEntCreateComment() *entity.Comment {
 	return &entity.Comment{
 		Text:         c.Text,
 		Rating:       c.Rating,
-		RestaurantId: c.RestaurantId,
-		UserId:       c.UserId,
+		RestaurantID: c.RestaurantID,
+		UserID:       c.UserID,
 	}
 }
 
+//FromDBRespToEntCreateComment transforms DBRespCreateComment to Comment
 func (c DBRespCreateComment) FromDBRespToEntCreateComment() *entity.Comment {
 	return &entity.Comment{
-		Text:   transformSqlStringToString(c.Text),
+		Text:   transformSQLStringToString(c.Text),
 		Rating: c.Rating,
 		Date:   c.Date,
-		UserId: c.UserId,
+		UserID: c.UserID,
 	}
 }
 
+//FromEntToDBReqCreateComment transforms Comment to DBReqCreateComment
 func FromEntToDBReqCreateComment(comment *entity.Comment) *DBReqCreateComment {
 	return &DBReqCreateComment{
-		Text:         *transformStringToSqlString(comment.Text),
+		Text:         *transformStringToSQLString(comment.Text),
 		Rating:       comment.Rating,
-		RestaurantId: comment.RestaurantId,
-		UserId:       comment.UserId,
+		RestaurantID: comment.RestaurantID,
+		UserID:       comment.UserID,
 	}
 }
 
+//FromEntToRespCreateComment transforms Comment to RespCreateComment
 func FromEntToRespCreateComment(comment *entity.Comment) *RespCreateComment {
 	return &RespCreateComment{
 		Text:   comment.Text,
@@ -90,9 +100,10 @@ func FromEntToRespCreateComment(comment *entity.Comment) *RespCreateComment {
 	}
 }
 
+//FromDBtoDel transforms DBRespGetComment to RespGetComment
 func (c DBRespGetComment) FromDBtoDel() *RespGetComment {
 	return &RespGetComment{
-		Text:     transformSqlStringToString(c.Text),
+		Text:     transformSQLStringToString(c.Text),
 		Username: c.Username,
 		Icon:     c.Icon,
 		Rating:   c.Rating,
