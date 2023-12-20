@@ -673,10 +673,10 @@ func TestGetRandomRestaurantTipsSuccess(t *testing.T) {
 	mockRest.EXPECT().GetRestaurants().Return(rests, nil)
 	mockRest.EXPECT().GetRestaurantByName(rests[0].Name).Return(rests[0], nil)
 	mockRest.EXPECT().GetRestaurantByName(rests[1].Name).Return(rests[1], nil)
-	mockRest.EXPECT().GetRestaurantByName(rests[2].Name).Return(rests[2], nil)
+	//mockRest.EXPECT().GetRestaurantByName(rests[2].Name).Return(rests[2], nil)
 	mockRest.EXPECT().GetCategoriesByRestaurantID(rests[0].ID).Return(categories, nil)
 	mockRest.EXPECT().GetCategoriesByRestaurantID(rests[1].ID).Return(categories, nil)
-	mockRest.EXPECT().GetCategoriesByRestaurantID(rests[2].ID).Return(categories, nil)
+	//mockRest.EXPECT().GetCategoriesByRestaurantID(rests[2].ID).Return(categories, nil)
 
 	_, err := usecase.GetRandomRestaurantTips()
 	//fmt.Println(actual)
