@@ -1,8 +1,8 @@
-FROM golang:1.19
+FROM ubuntu:latest
 
 WORKDIR /
 
-COPY build/product ./
+COPY ["build/product", "./"]
 
 # WORKDIR /app
 

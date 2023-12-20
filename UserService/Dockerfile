@@ -1,8 +1,8 @@
-FROM golang:1.19
+FROM ubuntu:latest
 
 WORKDIR /
 
-COPY build/user ./
+COPY ["build/user", "./"]
 
 # WORKDIR /app
 
@@ -14,4 +14,4 @@ COPY build/user ./
 
 EXPOSE 8083
 
-CMD [ "./app/user" ]
+CMD [ "./user" ]

@@ -1,8 +1,8 @@
-FROM golang:1.19
+FROM ubuntu:latest
 
 WORKDIR /
 
-COPY build/auth ./
+COPY ["build/auth", "./"]
 
 # WORKDIR /app
 
@@ -10,7 +10,7 @@ COPY build/auth ./
 # RUN go mod tidy
 # RUN go build cmd/main.go
 
-# WORKDIR /
+WORKDIR /
 
 EXPOSE 8081
 
