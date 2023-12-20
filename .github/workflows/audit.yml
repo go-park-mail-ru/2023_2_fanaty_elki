@@ -15,8 +15,8 @@ jobs:
       with:
         go-version: 1.21
 
-  #   - name: Verify dependencies
-  #     run: find -name go.mod -execdir go mod verify \;
+    - name: Verify dependencies
+      run: find -name go.mod -execdir go mod verify \;
 
   linter:
     runs-on: ubuntu-latest
@@ -43,7 +43,7 @@ jobs:
         run: make test
 
   build:
-    needs: [linter]
+    needs: [linter, test]
   
     runs-on: ubuntu-latest
     container: golang
@@ -58,15 +58,6 @@ jobs:
           CGO_ENABLED: 0
         run: make build
 
-  # deploy:
-  #   needs: [build]
-  #   runs-on: ubuntu-latest
-
-  #   steps:
-      # - uses: actions/checkout@v3
-      - name: check
-        run: ls
-
       - name: Push build data
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -76,33 +67,6 @@ jobs:
           key: ${{ secrets.VM_RSA_KEY }}
           source: "build, docker-compose.yml, Dockerfile, Makefile, AuthService/Dockerfile, ProductService/Dockerfile, UserService/Dockerfile"
           target: /home/ubuntu/2023_2_fanaty_elki
-      # - name: Push auth
-      #   uses: appleboy/scp-action@v0.1.4
-      #   with:
-      #     host: prinesy-poday.ru
-      #     username: ubuntu
-      #     overwrite: true
-      #     key: ${{ secrets.SECRET_KEY }}
-      #     source: "AuthService/Dockerfile"
-      #     target: /home/ubuntu/testCI/AuthService
-      # - name: Push user
-      #   uses: appleboy/scp-action@v0.1.4
-      #   with:
-      #     host: prinesy-poday.ru
-      #     username: ubuntu
-      #     overwrite: true
-      #     key: ${{ secrets.SECRET_KEY }}
-      #     source: "UserService/Dockerfile"
-      #     target: /home/ubuntu/testCI/UserService
-      # - name: Push product
-      #   uses: appleboy/scp-action@v0.1.4
-      #   with:
-      #     host: prinesy-poday.ru
-      #     username: ubuntu
-      #     overwrite: true
-      #     key: ${{ secrets.SECRET_KEY }}
-      #     source: "ProductService/Dockerfile"
-      #     target: /home/ubuntu/testCI/ProductService
       - name: Deploy
         uses: appleboy/ssh-action@v0.1.10
         with:
