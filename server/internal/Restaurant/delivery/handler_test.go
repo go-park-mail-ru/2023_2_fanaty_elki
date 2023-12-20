@@ -358,3 +358,54 @@ func TestGetRestaurantProductsFail(t *testing.T) {
 	require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
 
 }
+
+func TestGetRestaurantListByCategorySuccess(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	apiPath := "/api/restaurants/Бургеры"
+	mock := mockR.NewMockRestaurantUsecaseI(ctrl)
+	var logger *mw.ACLog
+	handler := NewRestaurantHandler(mock, logger)
+
+	rests := []*dto.RestaurantWithCategories{
+		{ID: 1,
+			Name:          "Burger King",
+			Rating:        3.7,
+			CommentsCount: 60,
+			Categories:    []string{"Burger", "Breakfast"},
+			Icon:          "img/burger_king.jpg",
+		},
+		{ID: 2,
+			Name:          "MacBurger",
+			Rating:        3.8,
+			CommentsCount: 69,
+			Categories:    []string{"Burger", "Breakfast"},
+			Icon:          "img/mac_burger.jpg",
+		},
+	}
+
+	mock.EXPECT().GetRestaurantsByCategory("Бургеры").Return(rests, nil)
+
+	vars := map[string]string{
+		"category": "Бургеры",
+	}
+
+	req := httptest.NewRequest("GET", apiPath, nil)
+
+	req = mux.SetURLVars(req, vars)
+
+	w := httptest.NewRecorder()
+
+	handler.GetRestaurantListByCategory(w, req)
+
+	resp := w.Result()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+
+	require.Equal(t, 200, resp.StatusCode)
+	require.Equal(t, "application/json", resp.Header.Get("Content-Type"))
+	require.Contains(t, string(body), "Body")
+
+}
