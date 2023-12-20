@@ -75,8 +75,8 @@ var (
 
 	host     = "test_postgres"
 	port     = 5432
-	user     = db.User.Username
-	password = db.User.Password
+	user     = "uliana"
+	password = "uliana"
 	dbname   = "prinesy-poday"
 
 	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
