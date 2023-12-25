@@ -3,6 +3,7 @@ package delivery
 import (
 	"errors"
 	"fmt"
+
 	//"io/ioutil"
 	"net/http/httptest"
 	"server/config"
@@ -32,14 +33,14 @@ func TestGetRestaurantsListSuccess(t *testing.T) {
 			Rating:        3.7,
 			CommentsCount: 60,
 			Categories:    []string{"Burger", "Breakfast"},
-			Icon:          "img/burger_king.jpg",
+			Icon:          "img/burger_king.webp",
 		},
 		{ID: 2,
 			Name:          "MacBurger",
 			Rating:        3.8,
 			CommentsCount: 69,
 			Categories:    []string{"Burger", "Breakfast"},
-			Icon:          "img/mac_burger.jpg",
+			Icon:          "img/mac_burger.webp",
 		},
 	}
 
@@ -112,7 +113,7 @@ func TestGetRestaurantByIdSuccess(t *testing.T) {
 		Rating:        3.7,
 		CommentsCount: 60,
 		Categories:    []string{"Burger", "Breakfast"},
-		Icon:          "img/burger_king.jpg",
+		Icon:          "img/burger_king.webp",
 	}
 
 	var elemID = 1
@@ -372,14 +373,14 @@ func TestGetRestaurantListByCategorySuccess(t *testing.T) {
 			Rating:        3.7,
 			CommentsCount: 60,
 			Categories:    []string{"Burger", "Breakfast"},
-			Icon:          "img/burger_king.jpg",
+			Icon:          "img/burger_king.webp",
 		},
 		{ID: 2,
 			Name:          "MacBurger",
 			Rating:        3.8,
 			CommentsCount: 69,
 			Categories:    []string{"Burger", "Breakfast"},
-			Icon:          "img/mac_burger.jpg",
+			Icon:          "img/mac_burger.webp",
 		},
 	}
 
