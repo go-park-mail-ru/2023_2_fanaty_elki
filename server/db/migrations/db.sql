@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS public.RESTAURANT
 	RATING numeric(2,1) default 0.0 NOT NULL,
 	COMMENTS_COUNT integer default 0 NOT NULL,
 	CATEGORY varchar,
-	ICON varchar default 'img/defaultIcon.png' NOT NULL,
+	ICON varchar default 'img/defaultIcon.webp' NOT NULL,
 	CREATED_AT TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
 	UPDATED_AT TIMESTAMP WITH TIME ZONE default NOW(),
     PRIMARY KEY (ID),
@@ -60,21 +60,21 @@ EXECUTE PROCEDURE trigger_set_timestamp();
 
 
 insert into restaurant(name,rating,comments_count,icon,category)
-values('Burger King',3.7,60,'img/burger_king.jpg','Fastfood');
+values('Burger King',3.7,60,'img/burger_king.webp','Fastfood');
 insert into restaurant(name,rating,comments_count,icon,category)
-values('MacBurger',3.8,69,'img/mac_burger.jpg','Fastfood');
+values('MacBurger',3.8,69,'img/mac_burger.webp','Fastfood');
 insert into restaurant(name,rating,comments_count,icon,category)
-values('Вкусно и точка',3.2,90,'img/tasty_and..jpg','Fastfood');
+values('Вкусно и точка',3.2,90,'img/tasty_and..webp','Fastfood');
 insert into restaurant(name,rating,comments_count,icon,category)
-values('KFC',4.0,90,'img/kfc.jpg','Fastfood');
+values('KFC',4.0,90,'img/kfc.webp','Fastfood');
 insert into restaurant(name,rating,comments_count,icon,category)
 values('Шоколадница',4.5,90,'img/chocolate.jpeg','Fastfood');
 insert into restaurant(name,rating,comments_count,icon,category)
-values('Корчма Тарас Бульба',5.0,90,'img/bulba.jpg','Fastfood');
+values('Корчма Тарас Бульба',5.0,90,'img/bulba.webp','Fastfood');
 insert into restaurant(name,rating,comments_count,icon,category)
 values('Subway',3.0,90,'img/subway.jpeg','Fastfood');
 insert into restaurant(name,rating,comments_count,icon,category)
-values('Sushiwok',4.5,90,'img/sushi_wok.png','Fastfood');
+values('Sushiwok',4.5,90,'img/sushi_wok.webp','Fastfood');
 
 
 

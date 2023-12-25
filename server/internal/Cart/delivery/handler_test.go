@@ -39,7 +39,7 @@ func TestGetCartSuccess(t *testing.T) {
 		Name:          "Burger King",
 		Rating:        3.7,
 		CommentsCount: 60,
-		Icon:          "img/burger_king.jpg",
+		Icon:          "img/burger_king.webp",
 	}
 
 	res := &dto.CartWithRestaurant{

@@ -13,20 +13,20 @@ import (
 	"github.com/minio/minio-go/v6"
 )
 
-//Iusecase is interface of user usecase
+// Iusecase is interface of user usecase
 type Iusecase interface {
 	CreateUser(newUser *entity.User) (uint, error)
 	UpdateUser(newUser *entity.User) error
 	UpdateAvatar(file multipart.File, filehandler *multipart.FileHeader, id uint) error
 }
 
-//UserUsecase provides usecase layer of User entity
+// UserUsecase provides usecase layer of User entity
 type UserUsecase struct {
 	userRepo userRep.UserRepositoryI
 	cartRepo cartRep.CartRepositoryI
 }
 
-//NewUserUsecase creates UserUsecase object
+// NewUserUsecase creates UserUsecase object
 func NewUserUsecase(userRepI userRep.UserRepositoryI, cartRepI cartRep.CartRepositoryI) *UserUsecase {
 	return &UserUsecase{
 		userRepo: userRepI,
@@ -34,7 +34,7 @@ func NewUserUsecase(userRepI userRep.UserRepositoryI, cartRepI cartRep.CartRepos
 	}
 }
 
-//GetUserByID gets user by id
+// GetUserByID gets user by id
 func (us UserUsecase) GetUserByID(id uint) (*entity.User, error) {
 	user, err := us.userRepo.FindUserByID(id)
 	if err != nil {
@@ -43,7 +43,7 @@ func (us UserUsecase) GetUserByID(id uint) (*entity.User, error) {
 	return dto.ToEntityGetUser(user), nil
 }
 
-//CreateUser creates user
+// CreateUser creates user
 func (us UserUsecase) CreateUser(newUser *entity.User) (uint, error) {
 
 	err := us.checkUserFieldsCreate(newUser)
@@ -58,7 +58,7 @@ func (us UserUsecase) CreateUser(newUser *entity.User) (uint, error) {
 	}
 
 	if newUser.Icon == "" {
-		newUser.Icon = "img/defaultIcon.png"
+		newUser.Icon = "img/defaultIcon.webp"
 	}
 	user, err := us.userRepo.CreateUser(dto.ToRepoCreateUser(newUser))
 	if err != nil {
@@ -73,7 +73,7 @@ func (us UserUsecase) CreateUser(newUser *entity.User) (uint, error) {
 	return user, nil
 }
 
-//UpdateUser updates user's data
+// UpdateUser updates user's data
 func (us UserUsecase) UpdateUser(newUser *entity.User) error {
 	err := us.checkUserFieldsUpdate(newUser)
 	if err != nil {
@@ -205,7 +205,7 @@ func (us UserUsecase) checkUserFieldsUpdate(user *entity.User) error {
 	return nil
 }
 
-//UpdateAvatar updates user's avatar
+// UpdateAvatar updates user's avatar
 func (us UserUsecase) UpdateAvatar(file multipart.File, filehandler *multipart.FileHeader, id uint) error {
 	endpoint := "bring-give.hb.ru-msk.vkcs.cloud"
 	location := "bring-give"
@@ -259,4 +259,3 @@ func (us UserUsecase) uploadFile(minioClient *minio.Client, bucketName string, l
 
 	return nil
 }
-

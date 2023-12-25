@@ -8,20 +8,20 @@ import (
 	"server/internal/domain/entity"
 )
 
-//CommentUsecaseI interface
+// CommentUsecaseI interface
 type CommentUsecaseI interface {
 	CreateComment(comment *dto.ReqCreateComment) (*dto.RespCreateComment, error)
 	GetComments(id uint) (*dto.RespComments, error)
 }
 
-//CommentUsecase struct
+// CommentUsecase struct
 type CommentUsecase struct {
 	commentRepo commentRep.CommentRepositoryI
 	userRepo    userRep.UserRepositoryI
 	restRepo    restRep.RestaurantRepositoryI
 }
 
-//NewCommentUsecase crate comment usecase
+// NewCommentUsecase crate comment usecase
 func NewCommentUsecase(commentRepI commentRep.CommentRepositoryI, userRepI userRep.UserRepositoryI,
 	restRepI restRep.RestaurantRepositoryI) *CommentUsecase {
 	return &CommentUsecase{
@@ -31,7 +31,7 @@ func NewCommentUsecase(commentRepI commentRep.CommentRepositoryI, userRepI userR
 	}
 }
 
-//CreateComment creates comment
+// CreateComment creates comment
 func (c *CommentUsecase) CreateComment(comment *dto.ReqCreateComment) (*dto.RespCreateComment, error) {
 	if comment.Rating < 1 || comment.Rating > 5 {
 		return nil, entity.ErrInvalidRating
@@ -54,7 +54,7 @@ func (c *CommentUsecase) CreateComment(comment *dto.ReqCreateComment) (*dto.Resp
 	if user.Icon.Valid {
 		respComment.Icon = user.Icon.String
 	} else {
-		respComment.Icon = "img/defaultIcon.png"
+		respComment.Icon = "img/defaultIcon.webp"
 	}
 
 	err = c.restRepo.UpdateComments(comment)
@@ -65,7 +65,7 @@ func (c *CommentUsecase) CreateComment(comment *dto.ReqCreateComment) (*dto.Resp
 	return respComment, nil
 }
 
-//GetComments gets comments
+// GetComments gets comments
 func (c *CommentUsecase) GetComments(id uint) (*dto.RespComments, error) {
 	resp, err := c.commentRepo.Get(id)
 
