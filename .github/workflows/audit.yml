@@ -53,7 +53,7 @@ jobs:
         run: make test
 
   build:
-    needs: [linter, test]
+    needs: [golangci-lint, test]
   
     runs-on: ubuntu-latest
     container: golang
