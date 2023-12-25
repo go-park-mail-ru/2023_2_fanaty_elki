@@ -79,11 +79,11 @@ values('Вкусно и точка', 'img/tasty_and..webp');
 insert into restaurant(name, icon)
 values('KFC', 'img/kfc.webp');
 insert into restaurant(name, icon)
-values('Шоколадница', 'img/chocolate.jpeg');
+values('Шоколадница', 'img/chocolate.webp');
 insert into restaurant(name, icon)
 values('Корчма Тарас Бульба', 'img/bulba.webp');
 insert into restaurant(name, icon)
-values('Subway', 'img/subway.jpeg');
+values('Subway', 'img/subway.webp');
 insert into restaurant(name, icon)
 values('Sushiwok', 'img/sushi_wok.webp');
 
