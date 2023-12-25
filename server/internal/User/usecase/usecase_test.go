@@ -23,7 +23,7 @@ func TestGetUserByIdSucces(t *testing.T) {
 
 	dbuser := &dto.DBGetUser{
 		ID:          1,
-		Username:    "john_doe",
+		Username:    "Иван Иванович",
 		Password:    "secure_password",
 		Birthday:    sql.NullString{Valid: true, String: "1995-04-04"},
 		PhoneNumber: "+7 916 534-23-99",
@@ -33,7 +33,7 @@ func TestGetUserByIdSucces(t *testing.T) {
 
 	user := &entity.User{
 		ID:          1,
-		Username:    "john_doe",
+		Username:    "Иван Иванович",
 		Password:    "secure_password",
 		PhoneNumber: "+7 916 534-23-99",
 		Birthday:    "1995-04-04",
@@ -58,7 +58,7 @@ func TestCreateUserSucces(t *testing.T) {
 
 	dbuser := &dto.DBCreateUser{
 		ID:          1,
-		Username:    "john_doe",
+		Username:    "Иван Иванович",
 		Password:    "secure_password",
 		Birthday:    sql.NullString{Valid: true, String: "1995-04-04"},
 		PhoneNumber: "+7 916 534-23-99",
@@ -68,7 +68,7 @@ func TestCreateUserSucces(t *testing.T) {
 
 	user := &entity.User{
 		ID:          1,
-		Username:    "john_doe",
+		Username:    "Иван Иванович",
 		Password:    "secure_password",
 		PhoneNumber: "+7 916 534-23-99",
 		Birthday:    "1995-04-04",
@@ -96,7 +96,7 @@ func TestUpdateUserSucces(t *testing.T) {
 
 	dbuser := &dto.DBUpdateUser{
 		ID:          1,
-		Username:    "john_doe",
+		Username:    "Иван Иванович",
 		Password:    "secure_password",
 		Birthday:    sql.NullString{Valid: true, String: "1995-04-04"},
 		PhoneNumber: "+7 916 534-23-99",
@@ -106,7 +106,7 @@ func TestUpdateUserSucces(t *testing.T) {
 
 	dbgetuser := &dto.DBGetUser{
 		ID:          1,
-		Username:    "john_doe",
+		Username:    "Иван Иванович",
 		Password:    "secure_password",
 		Birthday:    sql.NullString{Valid: true, String: "1995-04-04"},
 		PhoneNumber: "+7 916 534-23-99",
@@ -116,7 +116,7 @@ func TestUpdateUserSucces(t *testing.T) {
 
 	user := &entity.User{
 		ID:          1,
-		Username:    "john_doe",
+		Username:    "Иван Иванович",
 		Password:    "secure_password",
 		PhoneNumber: "+7 916 534-23-99",
 		Birthday:    "1995-04-04",
