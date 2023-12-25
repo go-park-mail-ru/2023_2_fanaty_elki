@@ -34,6 +34,7 @@ type ReqLoginUser struct {
 	Password string `json:"Password"`
 }
 
+//RespID struct
 type RespID struct {
 	ID uint `json:"ID"`
 }
