@@ -176,7 +176,7 @@ func (us UserUsecase) checkUserFieldsCreate(user *entity.User) error {
 		return entity.ErrInvalidEmail
 	}
 
-	re = regexp.MustCompile(`^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{6,10}$`)
+	re = regexp.MustCompile(`^\+7\s9[0-9]{2}\s[0-9]{3}-[0-9]{2}-[0-9]{2}$`)
 	if user.PhoneNumber == "" || !re.MatchString(user.PhoneNumber) {
 		return entity.ErrInvalidPhoneNumber
 	}
@@ -198,7 +198,7 @@ func (us UserUsecase) checkUserFieldsUpdate(user *entity.User) error {
 		return entity.ErrInvalidEmail
 	}
 
-	re = regexp.MustCompile(`^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{6,10}$`)
+	re = regexp.MustCompile(`^\+7\s9[0-9]{2}\s[0-9]{3}-[0-9]{2}-[0-9]{2}$`)
 	if !re.MatchString(user.PhoneNumber) && len(user.PhoneNumber) != 0 {
 		return entity.ErrInvalidPhoneNumber
 	}
