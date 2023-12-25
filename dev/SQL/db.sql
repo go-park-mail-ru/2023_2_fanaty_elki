@@ -572,19 +572,19 @@ FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
 
 insert into promo(code, promo_type, sale, restaurant_id, active_from, active_to)
-values('KORCHMA15', 0, 15, 6, '2023-12-5', '2023-12-25');
+values('KORCHMA15', 0, 15, 6, '2023-12-5', '2023-12-28');
 insert into promo(code,  promo_type, sale, restaurant_id, active_from, active_to)
-values('SUBWAY35',0, 35, 7, '2023-12-5', '2023-12-25');
+values('SUBWAY35',0, 35, 7, '2023-12-5', '2023-12-28');
 insert into promo(code,  promo_type, sale, restaurant_id, active_from, active_to)
-values('YAKITORIA50',0, 50, 2, '2023-12-5', '2023-12-25');
+values('YAKITORIA50',0, 50, 2, '2023-12-5', '2023-12-28');
 insert into promo(code,  promo_type,  restaurant_id, active_from, active_to)
-values('BURGERKINGFREE', 1 , 1, '2023-12-5', '2023-12-25');
+values('BURGERKINGFREE', 1 , 1, '2023-12-5', '2023-12-28');
 insert into promo(code,  promo_type, sale, restaurant_id, active_from, active_to)
-values('VKUSNO20', 0 , 20, 3 , '2023-12-5', '2023-12-10');
+values('VKUSNO20', 0 , 20, 3 , '2023-12-5', '2023-12-28');
 insert into promo(code,  promo_type, active_from, active_to)
-values('PRINESYFREE', 1 , '2023-12-5', '2023-12-25');
+values('PRINESYFREE', 1 , '2023-12-5', '2023-12-28');
 insert into promo(code,  promo_type, sale, active_from, active_to)
-values('SHYSH30', 0, 30, '2023-12-5', '2023-12-25');
+values('SHYSH30', 0, 30, '2023-12-5', '2023-12-28');
 
 
 CREATE TABLE IF NOT EXISTS public.user_promo
