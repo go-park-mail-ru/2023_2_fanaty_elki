@@ -1,11 +1,13 @@
 package usecase
 
 import (
+	"fmt"
 	cartRep "server/internal/Cart/repository"
 	orderRep "server/internal/Order/repository"
 	productRep "server/internal/Product/repository"
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
+	"time"
 )
 
 //OrderUsecaseI interface
@@ -71,6 +73,27 @@ func (or *OrderUsecase) CreateOrder(reqOrder *dto.ReqCreateOrder) (*dto.RespCrea
 	if err != nil {
 		return nil, err
 	}
+
+	go func() {
+		upOrd := &dto.ReqUpdateOrder{
+			Status: 1,
+			ID: respOrder.ID,
+		}
+		DelTime := time.Duration(order.DeliveryTime) * time.Minute
+		curTime :=  DelTime / 100 * 10
+		time.Sleep(curTime)
+		err := or.UpdateOrder(upOrd)
+		if err != nil {
+			fmt.Println("ПАЛУНДРА") 
+		}
+
+		upOrd.Status = 2
+		time.Sleep(DelTime - curTime)
+		err = or.UpdateOrder(upOrd)
+		if err != nil {
+			fmt.Println("СВИСТАТЬ ВСЕХ НАВЕРХ")
+		}
+	}()
 
 	return respOrder, nil
 }
