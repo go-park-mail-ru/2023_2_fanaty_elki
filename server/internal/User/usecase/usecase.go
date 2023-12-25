@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"fmt"
 	"mime/multipart"
 	"net/url"
 	"regexp"
@@ -209,19 +210,21 @@ func (us UserUsecase) checkUserFieldsUpdate(user *entity.User) error {
 func (us UserUsecase) UpdateAvatar(file multipart.File, filehandler *multipart.FileHeader, id uint) error {
 	endpoint := "bring-give.hb.ru-msk.vkcs.cloud"
 	location := "bring-give"
-	accessKeyID := "s7X63TovV3DHPNCcsuhM5H"
-	secretAccessKey := "fUxGkBzPBRdvfxuQWJ1urt1BFdfq85V9gfoE65drMLe"
+	accessKeyID := "k1EeoX4ejNogUZS2TcirVq"
+	secretAccessKey := "6Bo85qeL9A1bmrjdWH7a577wKwzbipc6ajVZGFoXTyaT"
 	useSSL := true
 
 	bucketName := "bring-give"
 	objectName := filehandler.Filename
 	minioClient, err := minio.New(endpoint, accessKeyID, secretAccessKey, useSSL)
 	if err != nil {
+		fmt.Println("New", err)
 		return entity.ErrInternalServerError
 	}
 
 	err = us.uploadFile(minioClient, bucketName, location, objectName, file, filehandler.Size)
 	if err != nil {
+		fmt.Println("upload", err)
 		return entity.ErrInternalServerError
 	}
 
@@ -230,11 +233,13 @@ func (us UserUsecase) UpdateAvatar(file multipart.File, filehandler *multipart.F
 
 	presignedURL, err := minioClient.PresignedGetObject(bucketName, objectName, time.Duration(168)*time.Hour, reqParams)
 	if err != nil {
+		fmt.Println("presigned", err)
 		return entity.ErrInternalServerError
 	}
 
 	user, err := us.GetUserByID(id)
 	if err != nil {
+		fmt.Println("getUserbyId", err)
 		return err
 	}
 
@@ -246,14 +251,17 @@ func (us UserUsecase) UpdateAvatar(file multipart.File, filehandler *multipart.F
 func (us UserUsecase) uploadFile(minioClient *minio.Client, bucketName string, location string, objectName string, file multipart.File, filesize int64) error {
 	err := minioClient.MakeBucket(bucketName, location)
 	if err != nil {
+		fmt.Println("make", err)
 		exists, errBucketExists := minioClient.BucketExists(bucketName)
 		if !(errBucketExists == nil && exists) {
+			fmt.Println("buck", err)
 			return err
 		}
 	}
 
 	_, err = minioClient.PutObject(bucketName, objectName, file, filesize, minio.PutObjectOptions{})
 	if err != nil {
+		fmt.Println("put", err)
 		return entity.ErrInternalServerError
 	}
 
