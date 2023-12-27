@@ -619,11 +619,6 @@ values('Крошка картошка с сыром','169', 10,'100 г', 'img/gr
 insert into product(name, price, cooking_time, portion, icon,  description)
 values('Крошка картошка со сливочным сыром','169', 10,'100 г', 'img/sliv.webp','');
 
-
-
-
-
-
 CREATE TABLE IF NOT EXISTS public.MENU_TYPE
 (
     ID serial NOT NULL,
@@ -1027,9 +1022,6 @@ insert into product_menu_type(menu_type_id,product_id)
 values(40,135);
 insert into product_menu_type(menu_type_id,product_id)
 values(40,136);
-
-
-
 
 CREATE TABLE IF NOT EXISTS public.ORDERS
 (
