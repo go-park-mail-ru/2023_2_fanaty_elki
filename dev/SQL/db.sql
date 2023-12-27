@@ -49,27 +49,6 @@ BEFORE UPDATE ON USERS
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
 
-CREATE TABLE IF NOT EXISTS public.RESTAURANT
-(
-    ID serial NOT NULL,
-    NAME varchar UNIQUE NOT NULL,
-	RATING numeric(2,1) default 0.0 NOT NULL,
-	COMMENTS_COUNT integer default 0 NOT NULL,
-	ICON varchar default 'deficon' NOT NULL,
-	CREATED_AT TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
-	UPDATED_AT TIMESTAMP WITH TIME ZONE default NOW(),
-    PRIMARY KEY (ID),
-    CONSTRAINT VALID_RESTAURANT CHECK ( LENGTH(NAME) > 0 ),
-    CONSTRAINT VALID_RATING CHECK ( RATING >= 0.0 AND RATING <= 5.0),
-    CONSTRAINT VALID_COMMENTS_COUNT CHECK (COMMENTS_COUNT >= 0)
-);
-
-CREATE TRIGGER set_timestamp
-BEFORE UPDATE ON RESTAURANT
-FOR EACH ROW
-EXECUTE PROCEDURE trigger_set_timestamp();
-
-
 insert into restaurant(name, icon)
 values('Burger King', 'img/burger_king.webp');
 insert into restaurant(name, icon)
@@ -86,6 +65,23 @@ insert into restaurant(name, icon)
 values('Subway', 'img/subway.webp');
 insert into restaurant(name, icon)
 values('Sushiwok', 'img/sushi_wok.webp');
+insert into restaurant(name, icon)
+values('Теремок', 'img/teremok.webp');
+insert into restaurant(name, icon)
+values('Кофемания', 'img/cofemania.webp');
+insert into restaurant(name, icon)
+values('Много лосося', 'img/mnogolososia.webp');
+insert into restaurant(name, icon)
+values('Джонджоли', 'img/jonjoli.webp');  
+insert into restaurant(name, icon)
+values('Чайхона', 'img/chaihona.webp');
+insert into restaurant(name, icon)
+values('УРЮК', 'img/uruk.webp');
+insert into restaurant(name, icon)
+values('Сыто Пьяно', 'img/sitopiano.webp');
+insert into restaurant(name, icon)
+values('Крошка Картошка', 'img/croshka.webp');
+
 
 CREATE TABLE IF NOT EXISTS public.category
 (
@@ -107,6 +103,11 @@ insert into category(name)
 values('Русская');
 insert into category(name)
 values('Кофе');
+insert into category(name)
+values('Грузинская'); 
+insert into category(name)
+values('Узбекская');  
+
 
 CREATE TABLE IF NOT EXISTS public.restaurant_category
 (
@@ -146,6 +147,24 @@ insert into restaurant_category(restaurant_id, category_id)
 values(7,4);
 insert into restaurant_category(restaurant_id, category_id)
 values(8,2);
+insert into restaurant_category(restaurant_id, category_id)
+values(9,3);
+insert into restaurant_category(restaurant_id, category_id)
+values(9,5);
+insert into restaurant_category(restaurant_id, category_id)
+values(10,6);
+insert into restaurant_category(restaurant_id, category_id)
+values(11,2);
+insert into restaurant_category(restaurant_id, category_id)
+values(12,7);
+insert into restaurant_category(restaurant_id, category_id)
+values(13,8);
+insert into restaurant_category(restaurant_id, category_id)
+values(14,8);
+insert into restaurant_category(restaurant_id, category_id)
+values(15,1);
+insert into restaurant_category(restaurant_id, category_id)
+values(16,5);
 
 
 
@@ -291,6 +310,294 @@ values('Мидии запеченные','696', 15,'150 г', 'img/midii_zap.webp
 insert into product(name, price, cooking_time, portion, icon,  description)
 values('Мидии спайси','696', 15,'150 г', 'img/midii_spicy.webp','Спайси соус, мидии, лимон');
 
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Пельмени двойная порция','316', 10,'300 г', 'img/pelmeni.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Блин двойной с ветчиной и сыром','259', 10,'196 г', 'img/blinvetchandcheese.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Лапша куриная с фрикадельками','244', 10,'246 г', 'img/lapsha.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Блин Морской Богатырь','409', 10,'263 г', 'img/blinsee.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Блин Жюльен','331', 10,'315 г', 'img/blinjul.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Блин с красной икрой','496', 15,'161 г', 'img/blinicra.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Блин Хачапури','358', 15,'242 г', 'img/blinhach.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Блин E-mail с грибами и сыром','296', 10,'226 г', 'img/bliemail.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Гречка с ветчиной и сыром','257', 10,'230 г', 'img/grechvatchandcheese.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Гречка с капустой и яйцом','202', 10,'100 г', 'img/grechcap.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Картофель по-фермерски с сёмгой','351', 10,'100 г', 'img/cartofel.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Картофель по-фермерски стандарт','118', 10,'100 г', 'img/cartofelferm.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Бора-Бора','1100', 20,'100 г', 'img/bora.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Гречка с луком','450', 10,'100 г', 'img/grechluk.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Домашние котлетки из индейки','970', 10,'100 г', 'img/cotleti.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Йогурт Кофемания','610', 1,'100 г', 'img/yougurt.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Апельсиновое какао','680', 10,'100 г', 'img/orangecacao.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Какао на грибах','680', 10,'100 г', 'img/gribcacao.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Белое какао','680', 10,'100 г', 'img/whitecacao.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Индийский латте','670', 10,'100 г', 'img/indlatte.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Оливье с перепёлкой','950', 15,'100 г', 'img/oliviesper.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Оливье с крабом','1100', 10,'100 г', 'img/oliviescrab.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Шведский тост с лососем','970', 10,'100 г', 'img/tostshved.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Большой зелёный салат','1100', 15,'100 г', 'img/biggreensalad.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Филадельфия с лососем','695', 10,'100 г', 'img/filadelfia.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Филадельфия лайт','620', 10,'100 г', 'img/filadelfialite.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Запечённый с лососем терияки','480', 10,'100 г', 'img/filadelfiatiriaki.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Том Ям с креветками','620', 10,'100 г', 'img/tomyam.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Кальмар с манго и терияки','450', 10,'100 г', 'img/calmartir.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Сливочная креветка и тобико','480', 10,'100 г', 'img/slivcrev.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Лосось с манго и сладким чили','495', 10,'100 г', 'img/lososmango.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Снежная калифорния','480', 10,'100 г', 'img/snegcal.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Темпура с тунцом','495', 10,'100 г', 'img/temstun.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Темпура с лососем терияки','505', 10,'100 г', 'img/temptir.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Темпура с лососем','535', 10,'100 г', 'img/templosos.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Темпура с креветками спайси','590', 10,'100 г', 'img/tempcrev.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Хинкали с говядиной и свининой (3 шт)','295', 10,'100 г', 'img/hink3.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Хачапури по-аджарски','520', 10,'100 г', 'img/hachpoadj.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Хинкали с бараниной (3 шт)','295', 10,'100 г', 'img/hink3.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Шашлык из свинины','606', 10,'100 г', 'img/shashtel.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Домашнее варенье инжир','220', 10,'100 г', 'img/souceing.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Салат с хурмой и сыром горгонзола','650', 10,'100 г', 'img/saladhurm.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Салат с хурмой и прошутто','650', 10,'100 г', 'img/saladhurmprosh.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Теплый салат с грушей и сливочным сыром','650', 10,'100 г', 'img/teplsalad.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Эларджи с Мацони','490', 10,'100 г', 'img/elargismats.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Айран','490', 10,'100 г', 'img/airan.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Салат Джонджоли','430', 10,'100 г', 'img/saladjonjoli.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Лобио Харкалия','330', 10,'100 г', 'img/lobio.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Суп Лагман','365', 10,'100 г', 'img/lagman.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Самса тандырная','138', 10,'100 г', 'img/samsa.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Суп Шурпа с говядиной','365', 10,'100 г', 'img/shurpa.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Казан-кебаб из баранины','505', 10,'100 г', 'img/cebab.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Салат Овощной','131', 10,'100 г', 'img/vegsalad.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Салат Оливье','131', 10,'100 г', 'img/olivie.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Салат Цезарь','277', 10,'100 г', 'img/tsezar.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Сузьма','131', 10,'100 г', 'img/suzma.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Пельмени в бульоне','365', 10,'100 г', 'img/pelmeniinbul.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Суп Мастава','350', 10,'100 г', 'img/mastava.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Борщ','350', 10,'100 г', 'img/borshcaihona.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Харчо','350', 10,'100 г', 'img/harcho.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Тандырная лепёшка','120', 10,'100 г', 'img/lepeshtan.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Шашлык из курицы','390', 10,'100 г', 'img/shahshur.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Хинкали с телятиной','150', 10,'100 г', 'img/hinkur.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Чайханский плов','570', 10,'100 г', 'img/plovur.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Буррата с печеным болгарским перцем','890', 10,'100 г', 'img/burspech.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Голень ягненка','1590', 10,'100 г', 'img/golen.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Голубцы с соусом из запеченого перца','590', 10,'100 г', 'img/glubtsy.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Казармиш с зеленью','410', 10,'100 г', 'img/cazarmish.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Аджапсандали с луковой лепешкой','550', 10,'100 г', 'img/adjapsandali.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Азизе с луковой лепешкой','590', 10,'100 г', 'img/azize.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Говяжьи щечки с кус-кусом','730', 10,'100 г', 'img/shecki.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Жареный цыпленок в сливочно-пряном соусе','790', 10,'100 г', 'img/friedtsip.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Картофель фри','239', 10,'100 г', 'img/free.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Бургер с котлетой из мраморной говядины','369', 10,'100 г', 'img/burgersito.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Стейк Мясника','769', 10,'100 г', 'img/steakmasn.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Классический бургер','329', 10,'100 г', 'img/burgerclass.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Рис Том ям','415', 10,'100 г', 'img/risetom.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Феттуччине Том ям','489', 10,'100 г', 'img/fettom.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Жареный рис с курицей','339', 10,'100 г', 'img/friedrise.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Жареный рис с Морепродуктами','379', 10,'100 г', 'img/friedrisesmor.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Свиные ребра в соусе демиглас','619', 10,'100 г', 'img/steaksito.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Пельмени ручной лепки','359', 10,'100 г', 'img/pelmenihand.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Люля-кебаб из курицы','495', 10,'100 г', 'img/lulaiscur.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Ассорти колбасок гриль','1149', 10,'100 г', 'img/asscolb.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Гренки Восемь злаков','75', 10,'100 г', 'img/grenki.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Хлеб с чесночным маслом','75', 10,'100 г', 'img/breadsmasl.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Закусочный с грибами','99', 10,'100 г', 'img/zaksgrib.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Крошка-Картошка с растительным маслом','165', 10,'100 г', 'img/croskacart.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Брынзовый с укропом','99', 10,'100 г', 'img/brinz.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Сосиски в Горчичном соусе','99', 10,'100 г', 'img/sosisgor.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Крабовое мясо с майонезом','99', 10,'100 г', 'img/crabsmis.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Красная рыбка','99', 10,'100 г', 'img/crasriba.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Гриль Чиз перечный жюльен','419', 10,'100 г', 'img/grib.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Гриль-чиз Креветки Том ям','475', 10,'100 г', 'img/grillcrev.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Крошка картошка с сыром','169', 10,'100 г', 'img/grillcheese.webp','');
+
+insert into product(name, price, cooking_time, portion, icon,  description)
+values('Крошка картошка со сливочным сыром','169', 10,'100 г', 'img/sliv.webp','');
+
 CREATE TABLE IF NOT EXISTS public.MENU_TYPE
 (
     ID serial NOT NULL,
@@ -339,6 +646,62 @@ insert into menu_type(name,restaurant_id)
 values('Популярные блюда',8);
 insert into menu_type(name,restaurant_id)
 values('Салаты и закуски',8);
+
+insert into menu_type(name,restaurant_id)
+values('Популярные блюда',9);
+insert into menu_type(name,restaurant_id)
+values('Блины сытные',9);
+insert into menu_type(name,restaurant_id)
+values('Вторые блюда',9);
+
+insert into menu_type(name,restaurant_id)
+values('Популярные блюда',10);
+insert into menu_type(name,restaurant_id)
+values('Зимние напитки',10);
+insert into menu_type(name,restaurant_id)
+values('Закуски и салаты',10);
+
+insert into menu_type(name,restaurant_id)
+values('Популярные блюда',11);
+insert into menu_type(name,restaurant_id)
+values('Роллы',11);
+insert into menu_type(name,restaurant_id)
+values('Темпура и запеченные роллы',11);
+
+insert into menu_type(name,restaurant_id)
+values('Популярные блюда',12);
+insert into menu_type(name,restaurant_id)
+values('Фруктовое меню',12);
+insert into menu_type(name,restaurant_id)
+values('Фирменные блюда',12);
+
+insert into menu_type(name,restaurant_id)
+values('Популярные блюда',13);
+insert into menu_type(name,restaurant_id)
+values('Салаты',13);
+insert into menu_type(name,restaurant_id)
+values('Супы',13);
+
+insert into menu_type(name,restaurant_id)
+values('Популярные блюда',14);
+insert into menu_type(name,restaurant_id)
+values('Зимнее меню',14);
+insert into menu_type(name,restaurant_id)
+values('Новинки',14);
+
+insert into menu_type(name,restaurant_id)
+values('Популярные блюда',15);
+insert into menu_type(name,restaurant_id)
+values('Паста и Рис',15);
+insert into menu_type(name,restaurant_id)
+values('Мясные горячие блюда',15);
+
+insert into menu_type(name,restaurant_id)
+values('Постное меню',16);
+insert into menu_type(name,restaurant_id)
+values('Наполнители',16);
+insert into menu_type(name,restaurant_id)
+values('Крошка Картошка',16);
 
 
 
@@ -439,8 +802,205 @@ values(16,39);
 insert into product_menu_type(menu_type_id,product_id)
 values(16,40);
 
+insert into product_menu_type(menu_type_id,product_id)
+values(17,41);
+insert into product_menu_type(menu_type_id,product_id)
+values(17,42);
+insert into product_menu_type(menu_type_id,product_id)
+values(17,43);
+insert into product_menu_type(menu_type_id,product_id)
+values(17,44);
+insert into product_menu_type(menu_type_id,product_id)
+values(18,45);
+insert into product_menu_type(menu_type_id,product_id)
+values(18,46);
+insert into product_menu_type(menu_type_id,product_id)
+values(18,47);
+insert into product_menu_type(menu_type_id,product_id)
+values(18,48);
+insert into product_menu_type(menu_type_id,product_id)
+values(19,49);
+insert into product_menu_type(menu_type_id,product_id)
+values(19,50);
+insert into product_menu_type(menu_type_id,product_id)
+values(19,51);
+insert into product_menu_type(menu_type_id,product_id)
+values(19,52);
 
+insert into product_menu_type(menu_type_id,product_id)
+values(20,53);
+insert into product_menu_type(menu_type_id,product_id)
+values(20,54);
+insert into product_menu_type(menu_type_id,product_id)
+values(20,55);
+insert into product_menu_type(menu_type_id,product_id)
+values(20,56);
+insert into product_menu_type(menu_type_id,product_id)
+values(21,57);
+insert into product_menu_type(menu_type_id,product_id)
+values(21,58);
+insert into product_menu_type(menu_type_id,product_id)
+values(21,59);
+insert into product_menu_type(menu_type_id,product_id)
+values(21,60);
+insert into product_menu_type(menu_type_id,product_id)
+values(22,61);
+insert into product_menu_type(menu_type_id,product_id)
+values(22,62);
+insert into product_menu_type(menu_type_id,product_id)
+values(22,63);
+insert into product_menu_type(menu_type_id,product_id)
+values(22,64);
 
+insert into product_menu_type(menu_type_id,product_id)
+values(23,65);
+insert into product_menu_type(menu_type_id,product_id)
+values(23,66);
+insert into product_menu_type(menu_type_id,product_id)
+values(23,67);
+insert into product_menu_type(menu_type_id,product_id)
+values(23,68);
+insert into product_menu_type(menu_type_id,product_id)
+values(24,69);
+insert into product_menu_type(menu_type_id,product_id)
+values(24,70);
+insert into product_menu_type(menu_type_id,product_id)
+values(24,71);
+insert into product_menu_type(menu_type_id,product_id)
+values(24,72);
+insert into product_menu_type(menu_type_id,product_id)
+values(25,73);
+insert into product_menu_type(menu_type_id,product_id)
+values(25,74);
+insert into product_menu_type(menu_type_id,product_id)
+values(25,75);
+insert into product_menu_type(menu_type_id,product_id)
+values(25,76);
+
+insert into product_menu_type(menu_type_id,product_id)
+values(26,77);
+insert into product_menu_type(menu_type_id,product_id)
+values(26,78);
+insert into product_menu_type(menu_type_id,product_id)
+values(26,79);
+insert into product_menu_type(menu_type_id,product_id)
+values(26,80);
+insert into product_menu_type(menu_type_id,product_id)
+values(27,81);
+insert into product_menu_type(menu_type_id,product_id)
+values(27,82);
+insert into product_menu_type(menu_type_id,product_id)
+values(27,83);
+insert into product_menu_type(menu_type_id,product_id)
+values(27,84);
+insert into product_menu_type(menu_type_id,product_id)
+values(28,85);
+insert into product_menu_type(menu_type_id,product_id)
+values(28,86);
+insert into product_menu_type(menu_type_id,product_id)
+values(28,87);
+insert into product_menu_type(menu_type_id,product_id)
+values(28,88);
+
+insert into product_menu_type(menu_type_id,product_id)
+values(29,89);
+insert into product_menu_type(menu_type_id,product_id)
+values(29,90);
+insert into product_menu_type(menu_type_id,product_id)
+values(29,91);
+insert into product_menu_type(menu_type_id,product_id)
+values(29,92);
+insert into product_menu_type(menu_type_id,product_id)
+values(30,93);
+insert into product_menu_type(menu_type_id,product_id)
+values(30,94);
+insert into product_menu_type(menu_type_id,product_id)
+values(30,95);
+insert into product_menu_type(menu_type_id,product_id)
+values(30,96);
+insert into product_menu_type(menu_type_id,product_id)
+values(31,97);
+insert into product_menu_type(menu_type_id,product_id)
+values(31,98);
+insert into product_menu_type(menu_type_id,product_id)
+values(31,99);
+insert into product_menu_type(menu_type_id,product_id)
+values(31,100);
+
+insert into product_menu_type(menu_type_id,product_id)
+values(32,101);
+insert into product_menu_type(menu_type_id,product_id)
+values(32,102);
+insert into product_menu_type(menu_type_id,product_id)
+values(32,103);
+insert into product_menu_type(menu_type_id,product_id)
+values(32,104);
+insert into product_menu_type(menu_type_id,product_id)
+values(33,105);
+insert into product_menu_type(menu_type_id,product_id)
+values(33,106);
+insert into product_menu_type(menu_type_id,product_id)
+values(33,107);
+insert into product_menu_type(menu_type_id,product_id)
+values(33,108);
+insert into product_menu_type(menu_type_id,product_id)
+values(34,109);
+insert into product_menu_type(menu_type_id,product_id)
+values(34,110);
+insert into product_menu_type(menu_type_id,product_id)
+values(34,111);
+insert into product_menu_type(menu_type_id,product_id)
+values(34,112);
+
+insert into product_menu_type(menu_type_id,product_id)
+values(35,113);
+insert into product_menu_type(menu_type_id,product_id)
+values(35,114);
+insert into product_menu_type(menu_type_id,product_id)
+values(35,115);
+insert into product_menu_type(menu_type_id,product_id)
+values(35,116);
+insert into product_menu_type(menu_type_id,product_id)
+values(36,117);
+insert into product_menu_type(menu_type_id,product_id)
+values(36,118);
+insert into product_menu_type(menu_type_id,product_id)
+values(36,119);
+insert into product_menu_type(menu_type_id,product_id)
+values(36,120);
+insert into product_menu_type(menu_type_id,product_id)
+values(37,121);
+insert into product_menu_type(menu_type_id,product_id)
+values(37,122);
+insert into product_menu_type(menu_type_id,product_id)
+values(37,123);
+insert into product_menu_type(menu_type_id,product_id)
+values(37,124);
+
+insert into product_menu_type(menu_type_id,product_id)
+values(38,125);
+insert into product_menu_type(menu_type_id,product_id)
+values(38,126);
+insert into product_menu_type(menu_type_id,product_id)
+values(38,127);
+insert into product_menu_type(menu_type_id,product_id)
+values(38,128);
+insert into product_menu_type(menu_type_id,product_id)
+values(39,129);
+insert into product_menu_type(menu_type_id,product_id)
+values(39,130);
+insert into product_menu_type(menu_type_id,product_id)
+values(39,131);
+insert into product_menu_type(menu_type_id,product_id)
+values(39,132);
+insert into product_menu_type(menu_type_id,product_id)
+values(40,133);
+insert into product_menu_type(menu_type_id,product_id)
+values(40,134);
+insert into product_menu_type(menu_type_id,product_id)
+values(40,135);
+insert into product_menu_type(menu_type_id,product_id)
+values(40,136);
 
 CREATE TABLE IF NOT EXISTS public.ORDERS
 (
@@ -572,19 +1132,19 @@ FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
 
 insert into promo(code, promo_type, sale, restaurant_id, active_from, active_to)
-values('KORCHMA15', 0, 15, 6, '2023-12-5', '2023-12-28');
+values('KORCHMA15', 0, 15, 6, '2023-12-5', '2023-12-30');
 insert into promo(code,  promo_type, sale, restaurant_id, active_from, active_to)
-values('SUBWAY35',0, 35, 7, '2023-12-5', '2023-12-28');
+values('SUBWAY35',0, 35, 7, '2023-12-5', '2023-12-30');
 insert into promo(code,  promo_type, sale, restaurant_id, active_from, active_to)
-values('YAKITORIA50',0, 50, 2, '2023-12-5', '2023-12-28');
+values('YAKITORIA50',0, 50, 2, '2023-12-5', '2023-12-30');
 insert into promo(code,  promo_type,  restaurant_id, active_from, active_to)
-values('BURGERKINGFREE', 1 , 1, '2023-12-5', '2023-12-28');
+values('BURGERKINGFREE', 1 , 1, '2023-12-5', '2023-12-30');
 insert into promo(code,  promo_type, sale, restaurant_id, active_from, active_to)
-values('VKUSNO20', 0 , 20, 3 , '2023-12-5', '2023-12-28');
+values('VKUSNO20', 0 , 20, 3 , '2023-12-5', '2023-12-30');
 insert into promo(code,  promo_type, active_from, active_to)
-values('PRINESYFREE', 1 , '2023-12-5', '2023-12-28');
+values('PRINESYFREE', 1 , '2023-12-5', '2023-12-30');
 insert into promo(code,  promo_type, sale, active_from, active_to)
-values('SHYSH30', 0, 30, '2023-12-5', '2023-12-28');
+values('SHYSH30', 0, 30, '2023-12-5', '2023-12-30');
 
 
 CREATE TABLE IF NOT EXISTS public.user_promo
