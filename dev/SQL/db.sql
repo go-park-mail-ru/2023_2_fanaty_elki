@@ -49,6 +49,28 @@ BEFORE UPDATE ON USERS
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
 
+CREATE TABLE IF NOT EXISTS public.RESTAURANT
+(
+    ID serial NOT NULL,
+    NAME varchar UNIQUE NOT NULL,
+	RATING numeric(2,1) default 0.0 NOT NULL,
+	COMMENTS_COUNT integer default 0 NOT NULL,
+	ICON varchar default 'deficon' NOT NULL,
+	CREATED_AT TIMESTAMP WITH TIME ZONE default NOW() NOT NULL,
+	UPDATED_AT TIMESTAMP WITH TIME ZONE default NOW(),
+    PRIMARY KEY (ID),
+    CONSTRAINT VALID_RESTAURANT CHECK ( LENGTH(NAME) > 0 ),
+    CONSTRAINT VALID_RATING CHECK ( RATING >= 0.0 AND RATING <= 5.0),
+    CONSTRAINT VALID_COMMENTS_COUNT CHECK (COMMENTS_COUNT >= 0)
+);
+
+CREATE TRIGGER set_timestamp
+BEFORE UPDATE ON RESTAURANT
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+
+
 insert into restaurant(name, icon)
 values('Burger King', 'img/burger_king.webp');
 insert into restaurant(name, icon)
