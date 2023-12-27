@@ -158,7 +158,7 @@ func (us UserUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
 }
 
 func (us UserUsecase) checkUserFieldsCreate(user *entity.User) error {
-	re := regexp.MustCompile(`^[А-Яа-я\s]{4,29}$`)
+	re := regexp.MustCompile(`^[А-Яа-я\s]{4,20}$`)
 	if !re.MatchString(user.Username) {
 		return entity.ErrInvalidUsername
 	}

@@ -64,6 +64,7 @@ func randStringRunes(n int) string {
 // Login creates session
 func (ss SessionUsecase) Login(user *entity.User) (*entity.Cookie, error) {
 
+	fmt.Println("login username", user.Username)
 	us, err := ss.userRepo.FindUserByPhone(user.Username)
 	fmt.Println("login err", err)
 	fmt.Println("login us", us, " ", us)
@@ -80,7 +81,7 @@ func (ss SessionUsecase) Login(user *entity.User) (*entity.Cookie, error) {
 		return nil, entity.ErrBadRequest
 	}
 
-	cookie := &entity.Cookie{
+	cookie := &entity.Cookie{	
 		UserID:       us.ID,
 		SessionToken: randStringRunes(sessKeyLen),
 		MaxAge:       150 * time.Hour,
