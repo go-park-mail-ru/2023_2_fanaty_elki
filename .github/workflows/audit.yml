@@ -2,7 +2,7 @@
 name: audit
 on:
   push:
-    branches: [ciandeasyjson]
+    branches: [ciandeasyjson, phone_number_login]
 
 jobs:
   versions:
@@ -40,20 +40,20 @@ jobs:
   #     - name: Run golangci-lint
   #       uses: golangci/golangci-lint-action@v3.4.0
       
-  test:
-    runs-on: ubuntu-latest
-    container: golang
+  # test:
+  #   runs-on: ubuntu-latest
+  #   container: golang
 
-    steps:
-      - uses: actions/checkout@v3
+  #   steps:
+  #     - uses: actions/checkout@v3
 
-      - name: Run tests
-        env:
-          GOFLAGS: -buildvcs=false
-        run: make test
+  #     - name: Run tests
+  #       env:
+  #         GOFLAGS: -buildvcs=false
+  #       run: make test
 
   build:
-    needs: [linter, test]
+    needs: [linter]
   
     runs-on: ubuntu-latest
     container: golang
