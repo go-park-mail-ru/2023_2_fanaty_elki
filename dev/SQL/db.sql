@@ -29,7 +29,7 @@ $$ LANGUAGE plpgsql;
 CREATE TABLE IF NOT EXISTS public.USERS
 (
     ID serial NOT NULL,
-    USERNAME varchar UNIQUE NOT NULL  ,
+    USERNAME varchar NOT NULL  ,
 	PASSWORD varchar NOT NULL,
 	BIRTHDAY date,
 	PHONE_NUMBER varchar UNIQUE NOT NULL,

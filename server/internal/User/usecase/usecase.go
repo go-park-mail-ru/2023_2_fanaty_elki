@@ -10,7 +10,7 @@ import (
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 	"time"
-	
+
 	"github.com/minio/minio-go/v6"
 )
 
@@ -120,16 +120,16 @@ func (us UserUsecase) UpdateUser(newUser *entity.User) error {
 func (us UserUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
 	var user *dto.DBGetUser
 
-	if checkUser.Username != "" {
-		user, err := us.userRepo.FindUserByUsername(checkUser.Username)
-		if err != nil {
-			return nil, entity.ErrInternalServerError
-		}
+	// if checkUser.Username != "" {
+	// 	user, err := us.userRepo.FindUserByUsername(checkUser.Username)
+	// 	if err != nil {
+	// 		return nil, entity.ErrInternalServerError
+	// 	}
 
-		if user != nil {
-			return nil, entity.ErrConflictUsername
-		}
-	}
+	// 	if user != nil {
+	// 		return nil, entity.ErrConflictUsername
+	// 	}
+	// }
 
 	if checkUser.Email != "" {
 

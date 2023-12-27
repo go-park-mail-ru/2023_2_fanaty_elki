@@ -22,7 +22,7 @@ var (
 	letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 )
 
-//SessionUsecaseI interface of session usecase
+// SessionUsecaseI interface of session usecase
 type SessionUsecaseI interface {
 	Login(user *entity.User) (*entity.Cookie, error)
 	Check(SessionToken string) (uint, error)
@@ -34,7 +34,7 @@ type SessionUsecaseI interface {
 	CreateCsrf(sessionToken string) (string, error)
 }
 
-//SessionUsecase manage sessions
+// SessionUsecase manage sessions
 type SessionUsecase struct {
 	sessionRepo sessionRep.SessionRepositoryI
 	userRepo    userRep.UserRepositoryI
@@ -42,7 +42,7 @@ type SessionUsecase struct {
 	sanitizer   *bluemonday.Policy
 }
 
-//NewSessionUsecase creates new session usecase object
+// NewSessionUsecase creates new session usecase object
 func NewSessionUsecase(sessionRep sessionRep.SessionRepositoryI, userRep userRep.UserRepositoryI, addressRep addressRep.AddressRepositoryI) *SessionUsecase {
 	sanitizer := bluemonday.UGCPolicy()
 	return &SessionUsecase{
@@ -61,10 +61,10 @@ func randStringRunes(n int) string {
 	return string(b)
 }
 
-//Login creates session 
+// Login creates session
 func (ss SessionUsecase) Login(user *entity.User) (*entity.Cookie, error) {
 
-	us, err := ss.userRepo.FindUserByUsername(user.Username)
+	us, err := ss.userRepo.FindUserByPhone(user.Username)
 	fmt.Println("login err", err)
 	fmt.Println("login us", us, " ", us)
 
@@ -95,7 +95,7 @@ func (ss SessionUsecase) Login(user *entity.User) (*entity.Cookie, error) {
 
 }
 
-//Check checks session of user
+// Check checks session of user
 func (ss SessionUsecase) Check(SessionToken string) (uint, error) {
 
 	cookie, err := ss.sessionRepo.Check(SessionToken)
@@ -116,12 +116,12 @@ func (ss SessionUsecase) Check(SessionToken string) (uint, error) {
 	return user.ID, nil
 }
 
-//Logout deletes cookie
+// Logout deletes cookie
 func (ss SessionUsecase) Logout(cookie *entity.Cookie) error {
 	return ss.sessionRepo.Delete(dto.ToDBDeleteCookie(cookie))
 }
 
-//GetUserProfile gets user's profile
+// GetUserProfile gets user's profile
 func (ss SessionUsecase) GetUserProfile(sessionToken string) (*dto.ReqGetUserProfile, error) {
 	cookie, err := ss.sessionRepo.Check(sessionToken)
 	if err != nil {
@@ -149,7 +149,7 @@ func (ss SessionUsecase) GetUserProfile(sessionToken string) (*dto.ReqGetUserPro
 	return reqUser, nil
 }
 
-//GetIDByCookie gets id of user by cookie
+// GetIDByCookie gets id of user by cookie
 func (ss SessionUsecase) GetIDByCookie(SessionToken string) (uint, error) {
 
 	cookie, err := ss.sessionRepo.Check(SessionToken)
@@ -161,7 +161,7 @@ func (ss SessionUsecase) GetIDByCookie(SessionToken string) (uint, error) {
 
 }
 
-//CreateCookieAuth updates cookie expire
+// CreateCookieAuth updates cookie expire
 func (ss SessionUsecase) CreateCookieAuth(cookie *entity.Cookie) (*dto.ReqGetUserProfile, error) {
 	err := ss.sessionRepo.Expire(cookie)
 	if err != nil {
@@ -170,7 +170,7 @@ func (ss SessionUsecase) CreateCookieAuth(cookie *entity.Cookie) (*dto.ReqGetUse
 	return ss.GetUserProfile(cookie.SessionToken)
 }
 
-//CreateCsrf creates csrf token
+// CreateCsrf creates csrf token
 func (ss SessionUsecase) CreateCsrf(sessionToken string) (string, error) {
 	csrfToken := randStringRunes(10)
 	redisCSRFToken := ss.getCSRFHash(csrfToken)
@@ -181,7 +181,7 @@ func (ss SessionUsecase) CreateCsrf(sessionToken string) (string, error) {
 	return csrfToken, nil
 }
 
-//CheckCsrf checks csrf token
+// CheckCsrf checks csrf token
 func (ss SessionUsecase) CheckCsrf(sessionToken string, csrfToken string) error {
 	redisCsrfToken, err := ss.sessionRepo.GetCsrf(sessionToken)
 	hash := ss.getCSRFHash(csrfToken)
