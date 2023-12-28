@@ -62,7 +62,7 @@ func (cu CartUsecase) GetUserCart(SessionToken string) (*dto.CartWithRestaurant,
 	for _, cartProduct := range cartWithRestaurant.Products {
 		product, err := cu.productRepo.GetProductByID(cartProduct.ProductID)
 		if err != nil {
-			return nil, entity.ErrInternalServerError
+			return nil, err
 		}
 		CartProduct := dto.CartProduct{
 			Product:   product,
@@ -251,7 +251,7 @@ func (cu CartUsecase) GetCartTips(SessionToken string) (*dto.ProductSlice, error
 	for _, menu := range menuTypes {
 		products, err := cu.productRepo.GetProductsByMenuTypeID(menu.ID)
 		if err != nil {
-			return nil, entity.ErrInternalServerError
+			return nil, err
 		}
 		restProducts = append(restProducts, products...)
 	}
