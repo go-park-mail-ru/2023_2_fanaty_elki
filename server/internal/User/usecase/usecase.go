@@ -10,7 +10,7 @@ import (
 	"server/internal/domain/dto"
 	"server/internal/domain/entity"
 	"time"
-	
+
 	"github.com/minio/minio-go/v6"
 )
 
@@ -158,16 +158,16 @@ func (us UserUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
 }
 
 func (us UserUsecase) checkUserFieldsCreate(user *entity.User) error {
-	re := regexp.MustCompile(`^[А-Яа-я\s]{4,29}$`)
-	if !re.MatchString(user.Username) {
-		return entity.ErrInvalidUsername
-	}
+	// re := regexp.MustCompile(`^[А-Яа-я\s]{4,29}$`)
+	// if !re.MatchString(user.Username) {
+	// 	return entity.ErrInvalidUsername
+	// }
 
 	if len(user.Password) < 8 {
 		return entity.ErrInvalidPassword
 	}
 
-	re = regexp.MustCompile(`\d{4}-\d{1,2}-\d{1,2}`)
+	re := regexp.MustCompile(`\d{4}-\d{1,2}-\d{1,2}`)
 	if !re.MatchString(user.Birthday) {
 		return entity.ErrInvalidBirthday
 	}
