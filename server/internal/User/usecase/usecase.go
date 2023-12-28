@@ -167,7 +167,7 @@ func (us UserUsecase) checkUserFieldsCreate(user *entity.User) error {
 		return entity.ErrInvalidPassword
 	}
 
-	re := regexp.MustCompile(`\d{4}-\d{1,2}-\d{1,2}`)
+	re = regexp.MustCompile(`\d{4}-\d{1,2}-\d{1,2}`)
 	if !re.MatchString(user.Birthday) {
 		return entity.ErrInvalidBirthday
 	}
