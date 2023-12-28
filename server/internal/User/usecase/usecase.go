@@ -158,10 +158,10 @@ func (us UserUsecase) checkUser(checkUser *entity.User) (*entity.User, error) {
 }
 
 func (us UserUsecase) checkUserFieldsCreate(user *entity.User) error {
-	// re := regexp.MustCompile(`^[А-Яа-я\s]{4,29}$`)
-	// if !re.MatchString(user.Username) {
-	// 	return entity.ErrInvalidUsername
-	// }
+	re := regexp.MustCompile(`^[a-zA-Z0-9_-]{4,19}$`)
+	if !re.MatchString(user.Username) {
+		return entity.ErrInvalidUsername
+	}
 
 	if len(user.Password) < 8 {
 		return entity.ErrInvalidPassword
@@ -185,7 +185,7 @@ func (us UserUsecase) checkUserFieldsCreate(user *entity.User) error {
 }
 
 func (us UserUsecase) checkUserFieldsUpdate(user *entity.User) error {
-	re := regexp.MustCompile(`^[А-Яа-я\s]{4,29}$`)
+	re := regexp.MustCompile(`^[a-zA-Z0-9_-]{4,19}$`)
 	if len(user.Username) != 0 && !re.MatchString(user.Username) {
 		return entity.ErrInvalidUsername
 	}
