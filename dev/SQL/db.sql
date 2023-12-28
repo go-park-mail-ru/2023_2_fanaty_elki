@@ -1166,6 +1166,8 @@ insert into promo(code,  promo_type, active_from, active_to)
 values('PRINESYFREE', 1 , '2023-12-5', '2023-12-30');
 insert into promo(code,  promo_type, sale, active_from, active_to)
 values('SHYSH30', 0, 30, '2023-12-5', '2023-12-30');
+insert into promo(code,  promo_type, sale, active_from, active_to)
+values('ZASHITA40', 0, 40, '2023-12-5', '2023-12-30');
 
 
 CREATE TABLE IF NOT EXISTS public.user_promo
