@@ -27,13 +27,13 @@ func TestGetRestaurantsSuccess(t *testing.T) {
 			Name:          "Burger King",
 			Rating:        3.7,
 			CommentsCount: 60,
-			Icon:          "img/burger_king.jpg",
+			Icon:          "img/burger_king.webp",
 		},
 		{ID: 2,
 			Name:          "MacBurger",
 			Rating:        3.8,
 			CommentsCount: 69,
-			Icon:          "img/mac_burger.jpg",
+			Icon:          "img/mac_burger.webp",
 		},
 	}
 	for _, restaurant := range expect {
@@ -113,7 +113,7 @@ func TestGetRestaurantByIdSuccess(t *testing.T) {
 		Name:          "Burger King",
 		Rating:        3.7,
 		CommentsCount: 60,
-		Icon:          "img/burger_king.jpg",
+		Icon:          "img/burger_king.webp",
 	}
 
 	row = row.AddRow(expect.ID, expect.Name, expect.Rating, expect.CommentsCount, expect.Icon)
@@ -385,13 +385,13 @@ func TestGetRestaurantsByCategorySuccess(t *testing.T) {
 			Name:          "Burger King",
 			Rating:        3.7,
 			CommentsCount: 60,
-			Icon:          "img/burger_king.jpg",
+			Icon:          "img/burger_king.webp",
 		},
 		{ID: 2,
 			Name:          "MacBurger",
 			Rating:        3.8,
 			CommentsCount: 69,
-			Icon:          "img/mac_burger.jpg",
+			Icon:          "img/mac_burger.webp",
 		},
 	}
 	for _, restaurant := range expect {
@@ -450,13 +450,13 @@ func TestGetRestaurantsByCategoryFail(t *testing.T) {
 			Name:          "Burger King",
 			Rating:        3.7,
 			CommentsCount: 60,
-			Icon:          "img/burger_king.jpg",
+			Icon:          "img/burger_king.webp",
 		},
 		{ID: 2,
 			Name:          "MacBurger",
 			Rating:        3.8,
 			CommentsCount: 69,
-			Icon:          "img/mac_burger.jpg",
+			Icon:          "img/mac_burger.webp",
 		},
 	}
 	for _, restaurant := range expect {
@@ -582,13 +582,13 @@ func TestSearchRestaurantsSuccess(t *testing.T) {
 			Name:          "Burger King",
 			Rating:        3.7,
 			CommentsCount: 60,
-			Icon:          "img/burger_king.jpg",
+			Icon:          "img/burger_king.webp",
 		},
 		{ID: 2,
 			Name:          "MacBurger",
 			Rating:        3.8,
 			CommentsCount: 69,
-			Icon:          "img/mac_burger.jpg",
+			Icon:          "img/mac_burger.webp",
 		},
 	}
 	for _, restaurant := range expect {
@@ -633,13 +633,13 @@ func TestSearchCategoriesSuccess(t *testing.T) {
 			Name:          "Burger King",
 			Rating:        3.7,
 			CommentsCount: 60,
-			Icon:          "img/burger_king.jpg",
+			Icon:          "img/burger_king.webp",
 		},
 		{ID: 2,
 			Name:          "MacBurger",
 			Rating:        3.8,
 			CommentsCount: 69,
-			Icon:          "img/mac_burger.jpg",
+			Icon:          "img/mac_burger.webp",
 		},
 	}
 	for _, restaurant := range expect {

@@ -4,10 +4,10 @@ import (
 	"net/http"
 )
 
-//const allowedOrigin = "*"
-const allowedOrigin = "http://prinesy-poday.ru"
+// const allowedOrigin = "*"
+const allowedOrigin = "http://localhost:4000"
 
-//CorsMiddleware provides answer to OPTIONS request and set CORS and CSRF headers. For GET method sets conent-type application/json
+// CorsMiddleware provides answer to OPTIONS request and set CORS and CSRF headers. For GET method sets conent-type application/json
 func CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Access-Control-Allow-Origin", allowedOrigin)
@@ -27,7 +27,7 @@ func CorsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-//CorsCredentionalsMiddleware provides header allow credentials
+// CorsCredentionalsMiddleware provides header allow credentials
 func CorsCredentionalsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Access-Control-Allow-Credentials", "true")
